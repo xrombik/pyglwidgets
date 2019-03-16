@@ -45,6 +45,21 @@ _dl_gltextparameterf = 0
 pi_2 = 2.0 * math.pi
 
 
+def aware_gtk_begin(gda):
+	gtk.gdkgl.ext(gda.window)
+	gda.gldrawable = gda.window.set_gl_capability(gda.glconfig)
+	gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
+	gda.gldrawable.wait_gdk()
+	gda.gldrawable.gl_begin(gda.glcontext)
+	opengl_init(gda)
+
+
+def aware_gtk_end(gda, s):
+	check_glerrors(s)
+	gda.gldrawable.wait_gl()
+	gda.gldrawable.gl_end()
+
+
 def check_rect(width, height, pos, x1, y1):
 	# type: (int, int, tuple[int, int], int, int) -> bool
 	"""
@@ -355,12 +370,8 @@ def draw_sector(pointsIn, pointsOut, color):
 		i += 1
 
 
-def create_drawning_area(width, height):
-	#display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE | gtk.gdkgl.MODE_MULTISAMPLE
-	#display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_MULTISAMPLE
-	#display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_DEPTH
-	#display_mode = gtk.gdkgl.MODE_RGBA
-	display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_DOUBLE
+def create_drawning_area(width, height, on_realize, on_draw, *args):
+	display_mode = gtk.gdkgl.MODE_RGBA # | gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE | gtk.gdkgl.MODE_MULTISAMPLE
 	events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
 	glconfig = gtk.gdkgl.Config(mode=display_mode)
 	gda = gtk.DrawingArea()
@@ -370,6 +381,14 @@ def create_drawning_area(width, height):
 	gda.glcontext = None
 	gda.set_size_request(width, height)
 	gda.add_events(events_mask)
+	gda.connect_after('realize', on_realize, *args)
+	gda.connect('expose-event', on_draw, *args)
+	window = gtk.Window()
+	window.set_reallocate_redraws(True)
+	window.connect('delete-event', gtk.main_quit)
+	window.set_title('pyglwidgets - Example')
+	window.add(gda)
+	window.show_all()
 	return gda
 
 
@@ -441,7 +460,7 @@ def texture_from_file(file_name):
 	assert type(file_name) is str
 	image = gtk.Image()
 	if not os.path.exists(file_name):
-		raise ValueError('Файл: \'%s\' - не найден.' % file_name)
+		raise ValueError('File: \'%s\' - not found.' % file_name)
 	image.set_from_file(file_name)
 	texture = texture_from_gtkimage(image)
 	return texture
