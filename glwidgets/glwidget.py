@@ -159,7 +159,6 @@ class GlWidget(object):
 
     @staticmethod
     def redraw_queue():
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         map(lambda item: item.redraw(), GlWidget.items_queue.values())
         GlWidget.items_queue.clear()
 
@@ -167,7 +166,7 @@ class GlWidget(object):
         cls.draw = cls.__draw_list__
         cls.z = 0
         """ Глубина на которой оторбражается элемент.
-		Чем больше, тем ближе к наблюдателю """
+        Чем больше, тем ближе к наблюдателю """
         # TODO: Разобраться, почему это не получается сделать тут
         # cls.dl = glGenLists(1)
         return super(GlWidget, cls).__new__(cls)

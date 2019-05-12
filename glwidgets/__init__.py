@@ -18,3 +18,5 @@ from .text import *
 from .glconst import *
 from .gltools import *
 from .tools import *
+from .scnmgr import *
+from .rcmgr import *

@@ -24,22 +24,19 @@ class Picture(glwidget.GlWidget):
 			assert type(col) is int
 			assert 0 <= col <= 255
 		
-		self.pos = pos
+		self.pos = list(pos)
 		self.dl = glGenLists(1)
 		assert glIsList(self.dl)
 		self.scale = scale
 		self.color = list(color)
-
-		#assert type(texture) is tuple #) or (type(texture) is str)
-		#assert len(texture) == 3  # Должны быть: ид-текстуры, ширина, высота
-		#assert glIsTexture(texture[0])  # Должен быть действительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))
-		#assert type(texture[1] is int)  # Должна быть ширина, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))
-		#assert type(texture[2] is int)  # Должна быть высота, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))
-
 		self.texture = texture
-
 		self.mirror = gltools.MIRROR_NONE  # Зеркалирование
 		self.user_data = user_data
+
+	def move(self, dx=0, dy=0):
+		self.pos[0] += dx
+		self.pos[1] += dy
+		self.put_to_redraw()
 
 	def get_textures(self):
 		return self.texture

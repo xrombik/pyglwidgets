@@ -17,8 +17,8 @@ class Button(glwidget.GlWidget):
 	pressed = False
 	
 	def __init__(self, gda, pos, text, textures,
-				 text_color = gltools.colors.BUTTON_TEXT, auto = 1, user_proc = None,
-				 user_data = None, check_part = ((1.0 / 6.0), 0.5)):
+				text_color = gltools.colors.BUTTON_TEXT, auto = 1, user_proc = None,
+				user_data = None, check_part = ((1.0 / 6.0), 0.5)):
 		assert type(text_color) is tuple, "Цвет должен состоять из четырёх компонент в кортеже"
 		assert len(text_color) == 4, "Цвет должен состоять из четырёх компонент в кортеже"
 		for c in text_color:
