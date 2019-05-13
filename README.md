@@ -1,6 +1,6 @@
 # pyglwidgets
 
-Simple GUI engine with OpenGL
+Simple GUI engine with OpenGL.
 Widgets that already implemented:
 - Push, check and radio buttons;
 - Customized tables;
