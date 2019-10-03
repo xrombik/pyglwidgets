@@ -11,7 +11,7 @@ from .glimports import *
 
 
 class SceneCtl(object):
-    def __init__(self):
+    def __init__(self, argv):
         self.dl = 0
         self.scene = list()
         self.mode = None
@@ -26,7 +26,7 @@ class SceneCtl(object):
         self._events = dict()
         self._event_ncall = 0
 
-    def on_realize(self):
+    def on_init(self):
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
 
@@ -49,7 +49,7 @@ class SceneCtl(object):
         self._events[event_name].append(ecb_id)
         return ecb_id
 
-    def on_draw(self):
+    def on_draw(self, *args):
         if glwidget.GlWidget.force_redraw:
             glNewList(self.dl, GL_COMPILE)
             map(lambda item: item.draw(), self.scene)
@@ -97,7 +97,6 @@ class SceneCtl(object):
         изменения отображения элементов в разных режимах программы.
         :param items: Список элементов для прятанья
         :param mode: Режим программы. Используется как ключ в словаре mode_items.
-        Принимает одно из значений p16gui.MODE_*
         :param mode_items: Словарь элементов для показа. Формат одной записи
         словаря {режим: (элемент0, элемент1, ...)}
         :return:

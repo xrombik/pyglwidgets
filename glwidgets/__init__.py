@@ -5,8 +5,6 @@
 # Чужие модули
 import pygtk
 
-pygtk.require('2.0')
-
 # Свои модули
 from .button import *
 from .fonts import *
@@ -21,3 +19,8 @@ from .gltools import *
 from .tools import *
 from .scnctl import *
 from .resctl import *
+from .evtctl import *
+from .program import *
+from .driver import *
+
+pygtk.require('2.0')

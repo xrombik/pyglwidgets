@@ -96,9 +96,9 @@ def private(method):
 
 def connect_key_handler(handler_proc, *args):
     """
-	:param handler_proc: процедура для обработки нажатия клавиши
-	:param args: аргументы передаваемые в процедуру handler_proc
-	"""
+    :param handler_proc: процедура для обработки нажатия клавиши
+    :param args: аргументы передаваемые в процедуру handler_proc
+    """
     global key_handler_proc, key_handler_args
     key_handler_proc = handler_proc
     key_handler_args = args
@@ -156,6 +156,7 @@ class GlWidget(object):
     cairo_context.set_font_size(DEFAULT_FONT_SIZE)
     force_redraw = True
     items_queue = dict()
+    on_timer = None
 
     @staticmethod
     def redraw_queue():
@@ -183,10 +184,11 @@ class GlWidget(object):
 
     def put_to_redraw(self):
         """
-        Заносит текущий экземпляр в очередь на перерисовку принудительно
+        Заносит текущий экземпляр в очередь на перерисовку
         :return: Ничего
         """
         self.items_queue[id(self)] = self
+        self.on_timer()
 
     def __draw_list__(self):
         glCallList(self.dl)
@@ -200,10 +202,10 @@ class GlWidget(object):
     # noinspection PyAttributeOutsideInit
     def show(self):
         """
-		Элемент для которого show() был вызван последним, находится в фокусе,
-		если использует key_handler_...
-		:return:
-		"""
+        Элемент для которого show() был вызван последним, находится в фокусе,
+        если использует key_handler_...
+        :return:
+        """
         if self.draw == self.__draw_none__:
             self.connect()
         self.draw = self.__draw_list__

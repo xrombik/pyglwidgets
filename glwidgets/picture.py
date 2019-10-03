@@ -59,8 +59,7 @@ class PictureRotate(Picture):
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
-        gltools.draw_texture_rotate(self.texture, self.pos, self.ang + self.ang_shift, self.color, self.mirror,
-                                    self.scale)
+        gltools.draw_texture_rotate(self.texture, self.pos, self.ang + self.ang_shift, self.color, self.mirror, self.scale)
         glEndList()
 
 

@@ -14,7 +14,7 @@ class ResourceCtl(object):
     DEFAULT_FREETYPE_FONT_FILE = 'LiberationSans-Regular.ttf'
     DEFAULT_FREETYPE_FONT_SIZE = 14
 
-    def __init__(self, dir_local='', dir_user='', dir_prog='', data_path='data'):
+    def __init__(self, argv, dir_local='', dir_user='', dir_prog='', data_path='data'):
         assert type(dir_local) in (str, unicode)
         assert type(dir_user) in (str, unicode)
         assert type(dir_prog) in (str, unicode)

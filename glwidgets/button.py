@@ -66,12 +66,9 @@ class Button(glwidget.GlWidget):
         else:
             self.textures = (textures,)
         for item in self.textures:
-            assert glwidget.glIsTexture(item[
-                                            0]), "Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
-            assert type(item[
-                            1]) is int, "Должна быть ширина, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
-            assert type(item[
-                            2]) is int, "Должна быть высота, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert glwidget.glIsTexture(item[0]), "Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert type(item[1]) is int, "Должна быть ширина, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert type(item[2]) is int, "Должна быть высота, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
 
         # Наведение мыши
         self.cover = 0
@@ -205,6 +202,7 @@ class Button(glwidget.GlWidget):
         if self.cover != cover:
             self.cover = cover
             self.on_mouse_over(self, *args)
+            self.put_to_redraw()
         # return True
         if cover:
             if self.ehid1 is None:
@@ -218,7 +216,7 @@ class Button(glwidget.GlWidget):
             if self.ehid2 is not None:
                 self.gda.disconnect(self.ehid2)
                 self.ehid2 = None
-        return False  # # Returns: True to stop other handlers from being invoked for the event. False to propagate the event further.
+        return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
         if len(self.textures) < self.state:
@@ -307,7 +305,7 @@ class ButtonRing(Button):
         # Чтобы лишний раз не добавилось в очередь перерисовки
         if self.cover != cover:
             self.cover = cover
-        return False  # False  # Returns: True to stop other handlers from being invoked for the event. False to propagate the event further.
+        return False  # False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
         assert len(self.textures) > self.state

@@ -66,20 +66,12 @@ class CairoFrame(GlWidget):
         clear_cairo_surface(self.cc)
 
         # Заливка
-        self.cc.rectangle(self.line_width, self.header_height, self.width - self.line_width * 2,
-                          self.height - self.header_height - self.line_width)
+        self.cc.rectangle(self.line_width, self.header_height, self.width - self.line_width * 2, self.height - self.header_height - self.line_width)
         self.cc.set_source_rgba(*self.color_frame_bk)
         self.cc.fill()
 
         # Заливка заголовка
-        # pat = cairo.LinearGradient(self.line_width, self.line_width, self.line_width, self.header_height)
-        # pat.add_color_stop_rgba(0.1, 0.2, 0.1, 0.1, 1.0)
-        # pat.add_color_stop_rgba(0.7, 0.7, 0.7, 0.7, 1.0)
-        # hatch = 0
-        # self.cc.rectangle(self.line_width + hatch, self.line_width + hatch, self.width - self.line_width * 2 - hatch, self.header_height - self.line_width * 2)
-        self.cc.rectangle(self.line_width, self.line_width, self.width - self.line_width * 2,
-                          self.header_height - self.line_width * 2 + 4)
-        # self.cc.set_source(pat)
+        self.cc.rectangle(self.line_width, self.line_width, self.width - self.line_width * 2, self.header_height - self.line_width * 2 + 4)
         self.cc.set_source_rgba(*self.color_head_bk)
         self.cc.fill()
 
@@ -119,7 +111,7 @@ class CairoFrame(GlWidget):
         if self._show_text:
             for pos, txt, col in self.texts:
                 txt = txt.split('\n')
-                x_pos = pos[0];
+                x_pos = pos[0]
                 y_pos = pos[1]
                 for t in txt:
                     self.cc.set_source_rgba(*col)

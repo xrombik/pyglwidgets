@@ -496,8 +496,6 @@ class Table(glwidget.GlWidget):
         if self.ehid1 is None:
             self.ehid1 = self.gda.connect('button-press-event', self._on_mbutton_press)
 
-    # connect_key_handler(self._on_key_press)
-
     def disconnect(self):
         if self.ehid1 is not None:
             self.focus = False

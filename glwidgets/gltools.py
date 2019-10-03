@@ -374,28 +374,6 @@ def draw_sector(pointsIn, pointsOut, color):
         i += 1
 
 
-def create_drawning_area(width, height, on_realize, on_draw, *args):
-    display_mode = gtk.gdkgl.MODE_RGBA  # | gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE | gtk.gdkgl.MODE_MULTISAMPLE
-    events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
-    glconfig = gtk.gdkgl.Config(mode=display_mode)
-    gda = gtk.DrawingArea()
-    gda.set_double_buffered(False)
-    gda.glconfig = glconfig
-    gda.gldrawable = None
-    gda.glcontext = None
-    gda.set_size_request(width, height)
-    gda.add_events(events_mask)
-    gda.connect_after('realize', on_realize, *args)
-    gda.connect('expose-event', on_draw, *args)
-    window = gtk.Window()
-    window.set_reallocate_redraws(True)
-    window.connect('delete-event', gtk.main_quit)
-    window.set_title('pyglwidgets - Example')
-    window.add(gda)
-    window.show_all()
-    return gda
-
-
 def draw_line(point1, point2, color=colors.WHITE, width=2):
     glLineWidth(width)
     glColor4ub(*color)
