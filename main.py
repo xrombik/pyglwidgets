@@ -6,13 +6,12 @@ import glwidgets
 
 
 def main(argv):
-    pgm = glwidgets.ProgramCtl(argv)
     scm = glwidgets.SceneCtl(argv)
     rcm = glwidgets.ResourceCtl(argv)
     ddrv = glwidgets.DrawDriver(argv, 'pyglwidgets', 640, 480)
     ddrv.set_init(on_init, scm, rcm)
     ddrv.set_scene(scm)
-    ddrv.start_anim(50)
+    pgm = glwidgets.ProgramCtl(argv)
     pgm.run()
 
 
@@ -28,10 +27,10 @@ def on_init(gda, scm, rcm):
 
     scm.on_init()
 
-    txrs = rcm.get_textures('btn%u.png', 2)
+    txr_btn = rcm.get_textures('btn%u.png', 2)
     txr_ship = rcm.get_texture('F5S4.png')
 
-    btn0 = glwidgets.Button(gda, (100, 100), 'Эй, вы!', txrs, user_proc=btn0_proc)
+    btn0 = glwidgets.Button(gda, (100, 100), 'Эй, вы!', txr_btn, user_proc=btn0_proc)
     img0 = glwidgets.Picture((100, 200), txr_ship)
     btn0.user_data = img0
 
@@ -43,4 +42,4 @@ def on_init(gda, scm, rcm):
 
 if __name__ == "__main__":
     import sys
-    main(argv=sys.argv)
+    main(sys.argv)
