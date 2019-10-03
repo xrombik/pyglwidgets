@@ -25,6 +25,7 @@ class SceneCtl(object):
         self.update_tick()
         self._events = dict()
         self._event_ncall = 0
+        self.scene_changed = True
 
     def on_init(self):
         self.dl = glGenLists(1)
@@ -32,35 +33,6 @@ class SceneCtl(object):
 
     def __del__(self):
         glDeleteLists(self.dl, 1)
-
-    def connect_event(self, event_name, proc, *args):
-        assert type(event_name) is str, 'Должна быть строка'
-        assert inspect.isfunction(proc), 'Должна быть функция'
-        if (len(args) != proc.func_code.co_argcount) and ((proc.func_code.co_flags & 0x04) == 0):
-            s = 'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u' % \
-                (proc.func_code.co_filename, proc.func_code.co_name, len(args), proc.func_code.co_argcount)
-            raise ValueError(s)
-        if event_name not in self._events.keys():
-            self._events[event_name] = list()
-        ecb_id = (proc, args)
-        if ecb_id in self._events[event_name]:
-            s = 'Обработчик %s:%s\nдля события \'%s\' уже подключен' % (proc, args, event_name)
-            raise ValueError(s)
-        self._events[event_name].append(ecb_id)
-        return ecb_id
-
-    def on_draw(self, *args):
-        if glwidget.GlWidget.force_redraw:
-            glNewList(self.dl, GL_COMPILE)
-            map(lambda item: item.draw(), self.scene)
-            glEndList()
-            glwidget.GlWidget.force_redraw = False
-
-        glwidget.GlWidget.redraw_queue()
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glCallList(self.dl)
-        self.process_draw_callbacks()
-        glFlush()
 
     def update_tick(self):
         """
@@ -119,36 +91,6 @@ class SceneCtl(object):
                 for item in mode_items[key]:
                     item.show()
 
-    def emmit_event(self, event_name):
-        """
-        Вызывает событие event_name
-        :param event_name:
-        :return:
-        """
-        assert type(event_name) is str
-        self._event_ncall += 1
-        if self._event_ncall > 1:
-            print('p16gui.py:event_ncall():внимание: длина цепочки сообщений: %u' % self._event_ncall)
-        if event_name not in self._events.keys():
-            return
-        for proc, args in self._events[event_name]:
-            if proc(*args):
-                break
-
-    def disconnect_event(self, event_name, ecb_id):
-        """
-        Удаляет обработчик события
-        :param event_name: Название события. Присваивается пользователем при вызове P16GuiData.connect_event()
-        :param ecb_id: Идентификатор обработчика собятия. Возвращается функцией P16GuiData.connect_event()
-        :return:
-        """
-        assert type(event_name) is str
-        assert event_name in self._events
-        assert ecb_id in self._events[event_name]
-        self._events[event_name].remove(ecb_id)
-        if len(self._events[event_name]) == 0:
-            del self._events[event_name]
-
     def add_scene_items(self, *items):
         """
         Добавляет элементы в сцену
@@ -158,6 +100,7 @@ class SceneCtl(object):
         len_scene = len(self.scene)
         items = filter(lambda item: item not in self.scene, items)
         map(lambda item: self.scene.append(item), items)
+        self.scene_changed = True
         return len(self.scene) > len_scene
 
     def del_scene_item(self, *items):
@@ -169,6 +112,7 @@ class SceneCtl(object):
         len_scene = len(self.scene)
         items = filter(lambda item: item in self.scene, items)
         map(lambda item: self.scene.remove(item), items)
+        self.scene_changed = True
         return len(self.scene) < len_scene
 
     def add_mode_change_callback(self, callback, *args):

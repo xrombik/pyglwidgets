@@ -41,9 +41,11 @@ class DrawDriver(gtk.Window):
     @staticmethod
     def draw(gda, event, scm, redraw_queue):
 
-        glNewList(scm.dl, GL_COMPILE)
-        map(lambda item: item.draw(), scm.scene)
-        glEndList()
+        if scm.scene_changed:
+            glNewList(scm.dl, GL_COMPILE)
+            map(lambda item: item.draw(), scm.scene)
+            glEndList()
+            scm.scene_changed = False
 
         redraw_queue()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
