@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# gtk + opengl driver
+
 import gtk
 import glib
 from glwidget import GlWidget
