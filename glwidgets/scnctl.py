@@ -5,14 +5,9 @@
 from datetime import datetime
 import inspect
 
-# Свои модули
-from . import glwidget
-from .glimports import *
-
 
 class SceneCtl(object):
     def __init__(self, argv):
-        self.dl = 0
         self.scene = list()
         self.mode = None
         self._prev_mode = None
@@ -27,18 +22,11 @@ class SceneCtl(object):
         self._event_ncall = 0
         self.scene_changed = True
 
-    def on_init(self):
-        self.dl = glGenLists(1)
-        assert glIsList(self.dl)
-
-    def __del__(self):
-        glDeleteLists(self.dl, 1)
-
     def update_tick(self):
         """
         Обновляет текущее значение тик-времени в мс
         """
-        self.tick = (self.time_now.second << 10) | (self.time_now.microsecond >> 10) % 65535
+        self.tick = (self.time_now.second << 10) | (self.time_now.microsecond // 1024) % 65535
 
     def check(self):
         """
@@ -58,7 +46,7 @@ class SceneCtl(object):
                     if k not in ('text', 'pos'):
                         continue
                     print k, item.__getattribute__(k)
-            raise ArgumentError('ошибка: обнаружено повторение элементов, всего %u\n' % (len_list - len_set))
+            raise ValueError('ошибка: обнаружено повторение элементов, всего %u\n' % (len_list - len_set))
         self.scene.sort(key=lambda item: item.z)
 
     def hide_show(self, mode, mode_items):
@@ -66,7 +54,7 @@ class SceneCtl(object):
         """
         Прячет все элементы из списка items. Показывает элементы из
         словаря mode_items ключ которых равен mode. Ипользуется для
-        изменения отображения элементов в разных режимах программы.
+        изменения отображения элементов в заданных режимах программы.
         :param items: Список элементов для прятанья
         :param mode: Режим программы. Используется как ключ в словаре mode_items.
         :param mode_items: Словарь элементов для показа. Формат одной записи
@@ -100,8 +88,8 @@ class SceneCtl(object):
         len_scene = len(self.scene)
         items = filter(lambda item: item not in self.scene, items)
         map(lambda item: self.scene.append(item), items)
-        self.scene_changed = True
-        return len(self.scene) > len_scene
+        self.scene_changed = len(self.scene) > len_scene
+        return self.scene_changed
 
     def del_scene_item(self, *items):
         """
@@ -112,8 +100,8 @@ class SceneCtl(object):
         len_scene = len(self.scene)
         items = filter(lambda item: item in self.scene, items)
         map(lambda item: self.scene.remove(item), items)
-        self.scene_changed = True
-        return len(self.scene) < len_scene
+        self.scene_changed = len(self.scene) < len_scene
+        return self.scene_changed
 
     def add_mode_change_callback(self, callback, *args):
         """
@@ -124,9 +112,8 @@ class SceneCtl(object):
         """
         assert inspect.isfunction(callback)
         if (len(args) != (callback.func_code.co_argcount - 2)) and ((callback.func_code.co_flags & 0x04) == 0):
-            print(
-            'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u (2 по умолчанию всегда есть)'
-            % (callback.func_code.co_filename, callback.func_code.co_name, len(args), callback.func_code.co_argcount))
+            print(u'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u (2 по умолчанию всегда есть)'
+                %(callback.func_code.co_filename, callback.func_code.co_name, len(args), callback.func_code.co_argcount))
             raise ValueError
         mcc_id = callback, args
         if mcc_id not in self.mode_change_callbacks:

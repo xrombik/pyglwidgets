@@ -3,7 +3,6 @@
 
 import gtk
 import glib
-# TODO: driver не должен знать о GlWidget
 from glwidget import GlWidget
 from .glimports import *
 
@@ -27,7 +26,15 @@ class DrawDriver(gtk.Window):
         self.add(self.gda)
         self.ehid0 = None
         self.ehid1 = None
+        self.dl = 0
         GlWidget.on_timer = self.on_timer
+
+    def on_init(self):
+        self.dl = glGenLists(1)
+        assert glIsList(self.dl)
+
+    def __del__(self):
+        glDeleteLists(self.dl, 1)
 
     def start_anim(self, rate):
         if self.ehid0 is None:
@@ -38,25 +45,23 @@ class DrawDriver(gtk.Window):
             glib.source_remove(self.ehid0)
             self.ehid0 = None
 
-    @staticmethod
-    def draw(gda, event, scm, redraw_queue):
-
+    def on_draw(self, gda, event, scm, redraw_queue):
         if scm.scene_changed:
-            glNewList(scm.dl, GL_COMPILE)
+            glNewList(self.dl, GL_COMPILE)
             map(lambda item: item.draw(), scm.scene)
             glEndList()
             scm.scene_changed = False
 
         redraw_queue()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glCallList(scm.dl)
+        glCallList(self.dl)
         scm.process_draw_callbacks()
         glFlush()
 
     def set_scene(self, scm):
         if self.ehid1 is not None:
             self.gda.disconnect(self.ehid1)
-        self.ehid1 = self.gda.connect('expose-event', self.draw, scm, GlWidget.redraw_queue)
+        self.ehid1 = self.gda.connect('expose-event', self.on_draw, scm, GlWidget.redraw_queue)
         self.show_all()
 
     def set_init(self, on_init, *args):
