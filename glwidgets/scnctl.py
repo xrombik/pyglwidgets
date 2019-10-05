@@ -6,9 +6,9 @@ from datetime import datetime
 import inspect
 
 
-class SceneCtl(object):
+class SceneCtl(list):
     def __init__(self, argv):
-        self.scene = list()
+        super(SceneCtl, self).__init__()
         self.mode = None
         self._prev_mode = None
         self.fps = 25
@@ -33,12 +33,12 @@ class SceneCtl(object):
         Выпоняет санитарную проверку списка элемнтов сцены
         :return:
         """
-        len_set = len(set(self.scene))
-        len_list = len(self.scene)
+        len_set = len(set(self))
+        len_list = len(self)
         if len_set != len_list:
-            self.scene.sort()
-            for item in self.scene:
-                if self.scene.count(item) == 1:
+            self.sort()
+            for item in self:
+                if self.count(item) == 1:
                     continue
                 print type(item),
                 keys = dir(item)
@@ -47,7 +47,7 @@ class SceneCtl(object):
                         continue
                     print k, item.__getattribute__(k)
             raise ValueError('ошибка: обнаружено повторение элементов, всего %u\n' % (len_list - len_set))
-        self.scene.sort(key=lambda item: item.z)
+        self.sort(key=lambda item: item.z)
 
     def hide_show(self, mode, mode_items):
         # type (SceneManager, str, dict) -> None
@@ -62,7 +62,7 @@ class SceneCtl(object):
         :return:
         """
         # Спрятать все
-        map(lambda item: item.hide(), self.scene)
+        map(lambda item: item.hide(), self)
 
         # Показать только те, что нужны в режиме mode
         for key in mode_items:
@@ -85,10 +85,10 @@ class SceneCtl(object):
         :param item:
         :return:
         """
-        len_scene = len(self.scene)
-        items = filter(lambda item: item not in self.scene, items)
-        map(lambda item: self.scene.append(item), items)
-        self.scene_changed = len(self.scene) > len_scene
+        len_scene = len(self)
+        items = filter(lambda item: item not in self, items)
+        map(lambda item: self.append(item), items)
+        self.scene_changed = len(self) > len_scene
         return self.scene_changed
 
     def del_scene_item(self, *items):
@@ -97,10 +97,10 @@ class SceneCtl(object):
         :param item:
         :return:
         """
-        len_scene = len(self.scene)
-        items = filter(lambda item: item in self.scene, items)
-        map(lambda item: self.scene.remove(item), items)
-        self.scene_changed = len(self.scene) < len_scene
+        len_scene = len(self)
+        items = filter(lambda item: item in self, items)
+        map(lambda item: self.remove(item), items)
+        self.scene_changed = len(self) < len_scene
         return self.scene_changed
 
     def add_mode_change_callback(self, callback, *args):

@@ -23,7 +23,6 @@ class DrawDriver(gtk.Window):
         self.gda.set_size_request(w, h)
         self.gda.add_events(events_mask)
         self.set_reallocate_redraws(True)
-        self.connect('delete-event', gtk.main_quit)
         self.set_title(title)
         self.add(self.gda)
         self.ehid0 = None
@@ -31,26 +30,35 @@ class DrawDriver(gtk.Window):
         self.dl = 0
         GlWidget.on_timer = self.on_timer
 
-    def on_init(self):
+    def set_uninit(self, on_uninit, *args):
+        self.connect('unrealize', lambda gda: on_uninit(self, *args))
+
+    def uninit(self):
+        self.stop_anim()
+        glDeleteLists(self.dl, 1)
+
+    def init(self):
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
 
     def __del__(self):
-        glDeleteLists(self.dl, 1)
+        self.uninit()
 
     def start_anim(self, rate):
         if self.ehid0 is None:
             self.ehid0 = glib.timeout_add(rate, self.on_timer)
 
     def stop_anim(self):
+        # type: () -> None
         if self.ehid0 is not None:
             glib.source_remove(self.ehid0)
             self.ehid0 = None
 
     def on_draw(self, gda, event, scm, redraw_queue):
+        # type: (DrawDriver, ...) -> None
         if scm.scene_changed:
             glNewList(self.dl, GL_COMPILE)
-            map(lambda item: item.draw(), scm.scene)
+            map(lambda item: item.draw(), scm)
             glEndList()
             scm.scene_changed = False
 
@@ -68,9 +76,6 @@ class DrawDriver(gtk.Window):
 
     def set_init(self, on_init, *args):
         self.gda.connect_after('realize', on_init, *args)
-
-    def __del__(self):
-        self.stop_anim()
 
     def on_timer(self):
         # type: (DrawDriver) -> bool
