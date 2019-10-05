@@ -40,8 +40,12 @@ class ResourceCtl(object):
         self.ft_fonts = dict()
         self.perm = 0  # Разрешения для оператора
 
-    def get_ft_font(self, font_file=DEFAULT_FREETYPE_FONT_FILE,
-                    font_size=DEFAULT_FREETYPE_FONT_SIZE):
+    def uninit(self):
+        self.ft_fonts.clear()
+        glDeleteTextures(self.textures.values())
+
+
+    def get_ft_font(self, font_file=DEFAULT_FREETYPE_FONT_FILE, font_size=DEFAULT_FREETYPE_FONT_SIZE):
         """
         Возвращает шрифт растеризованный в FreeType.
         :param font_file: Имя файла шрифта

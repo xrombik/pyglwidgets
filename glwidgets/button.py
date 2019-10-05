@@ -134,10 +134,8 @@ class Button(glwidget.GlWidget):
             glib.source_remove(self.idts)
 
     def __del__(self):
-        super(Button, self).__del__()
         glDeleteLists(self.dl, 1)
         glDeleteTextures(self.texture_id)
-        self.cis.finish()
 
     def __on_timeout_state__(self):
         self.state = 0
@@ -203,20 +201,19 @@ class Button(glwidget.GlWidget):
             self.cover = cover
             self.on_mouse_over(self, *args)
             self.put_to_redraw()
-        # return True
-        if cover:
-            if self.ehid1 is None:
-                self.ehid1 = self.gda.connect('button-release-event', self.button_release)
-            if self.ehid2 is None:
-                self.ehid2 = self.gda.connect('button-press-event', self.button_press)
-        else:
-            if self.ehid1 is not None:
-                self.gda.disconnect(self.ehid1)
-                self.ehid1 = None
-            if self.ehid2 is not None:
-                self.gda.disconnect(self.ehid2)
-                self.ehid2 = None
-        return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
+            if cover:
+                if self.ehid1 is None:
+                    self.ehid1 = self.gda.connect('button-release-event', self.button_release)
+                if self.ehid2 is None:
+                    self.ehid2 = self.gda.connect('button-press-event', self.button_press)
+            else:
+                if self.ehid1 is not None:
+                    self.gda.disconnect(self.ehid1)
+                    self.ehid1 = None
+                if self.ehid2 is not None:
+                    self.gda.disconnect(self.ehid2)
+                    self.ehid2 = None
+        return False   # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
         if len(self.textures) < self.state:

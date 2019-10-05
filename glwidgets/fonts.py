@@ -90,7 +90,7 @@ class FreeTypeFont(object):
         :return:
         """
         assert type(text) is unicode
-        if self.text_widths.has_key(text):
+        if text in self.text_widths:
             return self.text_widths[text]
         text_width = 0
         text_width_line = 0
@@ -153,8 +153,10 @@ class FreeTypeFont(object):
         glCallList(self.dl_pop_projection_matrix)
 
     def __del__(self):
+        glDeleteLists(self.dl_pushScreenCoordinateMatrix, 1)
+        glDeleteLists(self.dl_pop_projection_matrix, 1)
         glDeleteLists(self.list_base, self.range_dl)
-        glDeleteTextures(self.range_dl, self.textures)
+        glDeleteTextures(self.textures)
 
     @staticmethod
     def _next_p2(a):
@@ -187,8 +189,7 @@ class FreeTypeFont(object):
         glBindTexture(GL_TEXTURE_2D, self.textures[ord(ch)])
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
-                     str(expanded_data))
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, str(expanded_data))
         del expanded_data
 
         sy = float(glyph.bitmap_top) - float(bitmap.rows)
