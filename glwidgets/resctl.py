@@ -88,5 +88,5 @@ class ResourceCtl(object):
         assert type(fmt) in (str, unicode), 'Дожна быть строка'
         assert type(count) is int, 'Должен быть целым'
         assert (type(begin) is int) and (begin >= 0), 'Должен быть положительным целым: \'%s\'' % begin
-        assert count >= 1, 'Нужо загрузить хотя бы одну текстуру'
+        assert count > 0, 'Нужо загрузить хотя бы одну текстуру'
         return [self.get_texture(fmt % i) for i in range(begin, count)]

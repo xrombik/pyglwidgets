@@ -8,24 +8,24 @@ def main(argv):
     pgm = ProgramCtl(argv)
     scm = SceneCtl(argv)
     rcm = ResourceCtl(argv)
-    ddrv = DrawDriver(argv, 'pyglwidgets', 640, 480)
-    ddrv.set_init(on_init, scm, rcm, ddrv)
-    ddrv.set_uninit(on_uninit, pgm)
-    ddrv.set_scene(scm)
+    drd = DrawDriver(argv, 'pyglwidgets', 640, 480)
+    drd.set_init(on_init, scm, rcm, drd)
+    drd.set_uninit(on_uninit, pgm)
+    drd.set_scene(scm)
     pgm.run()
 
 
-def on_uninit(ddrv, pgm):
+def on_uninit(drd, pgm):
     # type: (DrawDriver, ProgramCtl) -> None
-    ddrv.uninit()
+    drd.uninit()
     pgm.uninit()
 
 
-def on_init(gda, scm, rcm, ddrv):
+def on_init(gda, scm, rcm, drd):
     # type: (gtk.DrawingArea, SceneCtl, ResourceCtl) -> None
     aware_gtk_begin(gda)
 
-    ddrv.init()
+    drd.init()
 
     txr_btn = rcm.get_textures('btn%u.png', 2)
     txr_ship = rcm.get_texture('F5S4.png')
