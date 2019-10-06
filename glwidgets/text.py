@@ -99,18 +99,13 @@ class StaticText(glwidget.GlWidget):
         self.text = text
         self.color = list(color)
         self.user_data = user_data
-        self.rdc = [GL_COMPILE_AND_EXECUTE]
         if font is None:
             self.font = fonts.CairoFont()
         else:
             self.font = font
 
     def redraw(self):
-        glNewList(self.dl, self.rdc[0])
+        glNewList(self.dl, GL_COMPILE)
         self.font.draw_text(self.pos, self.text, self.color)
         glEndList()
-        self.rdc[0] = GL_COMPILE
 
-    def __del__(self):
-        super(StaticText, self).__del__()
-        glDeleteLists(self.dl, 1)

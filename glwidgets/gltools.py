@@ -388,7 +388,7 @@ def check_glerrors(title):
     while True:
         err0 = glGetError()
         if err0 != GL_NO_ERROR:
-            print ('%s:%s' % (title, _glerros[err0]))
+            print('%s:%s' % (title, _glerros[err0]))
             err_cnt += 1
             continue
         break
@@ -409,10 +409,6 @@ def data_to_texture(texture_id, data, width, height, _db=''):
     # assert glIsTexture(texture_id)  # You cannot include calls to glIsTexture in display lists.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, str(data))
     glCallList(_dl_gltextparameterf)
-    # glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    # glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-    # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     glDisable(GL_TEXTURE_2D)
     return texture_id, width, height
 
@@ -427,10 +423,6 @@ def texture_from_gtkimage(image):
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pb.get_width(), pb.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  pb.get_pixels())
     glCallList(_dl_gltextparameterf)
-    # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-    # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     glDisable(GL_TEXTURE_2D)
     return texture_id, pb.get_width(), pb.get_height()
 
@@ -465,13 +457,13 @@ def draw_texture(texture, pos, col=(255, 255, 255, 255), mirror=MIRROR_NONE):
     glBindTexture(GL_TEXTURE_2D, texture[0])
 
     glBegin(GL_QUADS)
-    glTexCoord2f(mirror[0], mirror[1]);
+    glTexCoord2f(mirror[0], mirror[1])
     glVertex2f(0, 0)
-    glTexCoord2f(mirror[2], mirror[3]);
+    glTexCoord2f(mirror[2], mirror[3])
     glVertex2f(texture[1], 0)
-    glTexCoord2f(mirror[4], mirror[5]);
+    glTexCoord2f(mirror[4], mirror[5])
     glVertex2f(texture[1], texture[2])
-    glTexCoord2f(mirror[6], mirror[7]);
+    glTexCoord2f(mirror[6], mirror[7])
     glVertex2f(0, texture[2])
     glEnd()
 
@@ -489,7 +481,8 @@ def draw_texture_rotate(texture, pos, a=0.0, col=(255, 255, 255, 255), mirror=MI
     glBindTexture(GL_TEXTURE_2D, texture[0])
     glScalef(*scale)
     glBegin(GL_QUADS)
-    sx, sy = texture[1] >> 1, texture[2] >> 1
+    sx = texture[1] // 2
+    sy = texture[2] // 2
     glTexCoord2f(mirror[0], mirror[1])
     glVertex2f(-sx, -sy)
     glTexCoord2f(mirror[2], mirror[3])

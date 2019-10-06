@@ -81,11 +81,11 @@ class TextRegulator(StaticText):
                       (self.pos[0], self.pos[1] - self.size[1] - self.fdescent)
 
     def redraw(self):
-        glNewList(self.dl, self.rdc[0])
+        glNewList(self.dl, GL_COMPILE)
         draw_polygon(self.points, self.rect_col)
         self.font.draw_text(self.pos, self.get_text(), self.color)
         glEndList()
-        self.rdc[0] = GL_COMPILE
+
 
     def key_callback(self, window, event):
         """

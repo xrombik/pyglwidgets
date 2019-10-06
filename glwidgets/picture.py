@@ -3,8 +3,11 @@
 
 
 from . import colors
-from . import gltools
 from . import glwidget
+from gltools import draw_texture_rotate
+from gltools import MIRROR_NONE
+from gltools import draw_texture
+from gltools import draw_texture_scale
 from .glimports import *
 
 
@@ -28,7 +31,7 @@ class Picture(glwidget.GlWidget):
         self.scale = scale
         self.color = list(color)
         self.texture = texture
-        self.mirror = gltools.MIRROR_NONE  # Зеркалирование
+        self.mirror = MIRROR_NONE  # Зеркалирование
         self.user_data = user_data
 
     def move(self, dx=0, dy=0):
@@ -41,7 +44,7 @@ class Picture(glwidget.GlWidget):
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
-        gltools.draw_texture_scale(self.texture, self.pos, self.scale, self.color, self.mirror)
+        draw_texture_scale(self.texture, self.pos, self.scale, self.color, self.mirror)
         glEndList()
 
 
@@ -53,7 +56,7 @@ class PictureRotate(Picture):
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
-        gltools.draw_texture_rotate(self.texture, self.pos, self.ang + self.ang_shift, self.color, self.mirror, self.scale)
+        draw_texture_rotate(self.texture, self.pos, self.ang + self.ang_shift, self.color, self.mirror, self.scale)
         glEndList()
 
 
@@ -66,5 +69,5 @@ class PictureState(Picture):
     def redraw(self):
         assert len(self.texture) > self.state
         glNewList(self.dl, GL_COMPILE)
-        gltools.draw_texture(self.texture[self.state], self.pos, self.color)
+        draw_texture(self.texture[self.state], self.pos, self.color)
         glEndList()

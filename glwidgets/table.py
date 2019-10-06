@@ -180,8 +180,6 @@ class Table(GlWidget):
         self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows)
         """	Флаги рядов таблицы """
         self.put_to_redraw()
-        self.__rdc__ = [
-            GL_COMPILE_AND_EXECUTE]  # Что бы можно было в redraw() поменять флаг, не попадая на рекурсию перерисовки
         self.focus = False
         self.color_proc = Table.color_proc_horiz  # Процедура определяющая цвет текста для ячейки
         self.bg_color_proc = self.default_bg_color_proc  # Процедура определяющая цвет фона для ячейки
@@ -457,7 +455,7 @@ class Table(GlWidget):
         return False
 
     def redraw(self):
-        glNewList(self.dl, self.__rdc__[0])
+        glNewList(self.dl, GL_COMPILE)
         # Таблица
         i_cur_row = None
         if self.i_cur_row is not None:
