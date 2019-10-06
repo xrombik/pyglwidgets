@@ -55,7 +55,6 @@ class Button(glwidget.GlWidget):
         self.text_color = text_color
 
         # Display list
-        self.dl = glGenLists(1)
         self.texture_id = glGenTextures(1)
 
         # Состояние кнопки и текстура
@@ -134,7 +133,7 @@ class Button(glwidget.GlWidget):
             glib.source_remove(self.idts)
 
     def __del__(self):
-        glDeleteLists(self.dl, 1)
+        super(Button, self).__del__()
         glDeleteTextures(self.texture_id)
 
     def __on_timeout_state__(self):

@@ -25,8 +25,6 @@ class Picture(glwidget.GlWidget):
             assert 0 <= col <= 255
 
         self.pos = list(pos)
-        self.dl = glGenLists(1)
-        assert glIsList(self.dl)
         self.scale = scale
         self.color = list(color)
         self.texture = texture
@@ -40,10 +38,6 @@ class Picture(glwidget.GlWidget):
 
     def get_textures(self):
         return self.texture
-
-    def __del__(self):
-        super(Picture, self).__del__()
-        glDeleteLists(self.dl, 1)
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)

@@ -153,7 +153,6 @@ class Table(GlWidget):
         self.pos = pos
         self.line_width = 2
 
-        self.dl = glGenLists(1)
         self.i_cur_row = None  # Индекс текущей выбранной строки
         self.view_max = view_max  # Максимальное количество отображаемых строк
         self.view_begin = 0

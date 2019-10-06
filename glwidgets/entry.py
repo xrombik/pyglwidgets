@@ -38,7 +38,6 @@ class Entry(glwidget.GlWidget):
         self.pos = pos
         self.size = rect_size
         self.text = text.encode('utf-8')
-        self.dl = glGenLists(1)
         self.ehid0 = None
         self.ehid2 = self.gda.connect('button_press_event', self.on_button_press)
         self.timer_id = None
@@ -50,10 +49,6 @@ class Entry(glwidget.GlWidget):
         self.cur_colors = ((255, 255, 255, 0), (255, 255, 255, 255))
         self.cur_col = self.cur_colors[self.cur_tick]
         self.on_edit_done = None
-
-    def __del__(self):
-        super(Entry, self).__del__()
-        glDeleteLists(self.dl)
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)

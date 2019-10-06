@@ -167,10 +167,10 @@ class GlWidget(object):
     def __new__(cls, *args, **kwargs):
         cls.draw = cls.__draw_list__
         cls.z = 0
-        """ Глубина на которой оторбражается элемент.
-        Чем больше, тем ближе к наблюдателю """
+        """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
         # TODO: Разобраться, почему это не получается сделать тут
-        # cls.dl = glGenLists(1)
+        cls.dl = glGenLists(1)
+        assert glIsList(cls.dl)
         return super(GlWidget, cls).__new__(cls)
 
     def __setattr__(self, key, value):
@@ -221,5 +221,6 @@ class GlWidget(object):
     def __del__(self):
         self.disconnect()
         self_id = id(self)
-        if self_id in self.items_queue.keys():
-            del self.items_queue[self_id]
+        if self_id in GlWidget.items_queue:
+            del GlWidget.items_queue[self_id]
+        glDeleteLists(self.dl, 1)

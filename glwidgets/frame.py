@@ -21,7 +21,6 @@ class CairoFrame(GlWidget):
         self.pos = pos
         self.txtr_id = glGenTextures(1)
         self.width, self.height = width, height
-        self.dl = glGenLists(1)
         self.color_line = colors.GRIDF[0] / 4, colors.GRIDF[1] / 4, colors.GRIDF[2] / 4, 1.0
         self.color_frame_bk = 0.0, 0.0, 0.0, 0.0
         b, g, r, a = 0.11, 0.1, 0.09, 1.0
@@ -128,5 +127,4 @@ class CairoFrame(GlWidget):
         glEndList()
 
     def __del__(self):
-        glDeleteLists(self.dl, 1)
         glDeleteTextures([self.txtr_id])

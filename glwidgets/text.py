@@ -32,7 +32,6 @@ class DynamicText(glwidget.GlWidget):
 
         self.pos = pos
         self.parent_height = viewport[3]
-        self.dl = glGenLists(1)
         self.lines = list()
         self.font = font
         self.color = color
@@ -97,7 +96,6 @@ class StaticText(glwidget.GlWidget):
         self.pos = pos
         viewport = glGetIntegerv(GL_VIEWPORT)
         self.parent_height = viewport[3]
-        self.dl = glGenLists(1)
         self.text = text
         self.color = list(color)
         self.user_data = user_data
