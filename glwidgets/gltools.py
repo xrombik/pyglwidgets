@@ -41,7 +41,6 @@ _glerros = \
 MIRROR_NONE = (0, 1, 1, 1, 1, 0, 0, 0)  # Матрица без отражения
 MIRROR_HORIZ = (1, 1, 0, 1, 0, 0, 1, 0)  # Матрица горизонтального отражения
 
-_dl_gltextparameterf = 0
 
 # TODO: Переделать на использование "Vertex array" вместо "Display list"
 
@@ -54,7 +53,6 @@ def aware_gtk_begin(gda):
     gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
     gda.gldrawable.wait_gdk()
     gda.gldrawable.gl_begin(gda.glcontext)
-    opengl_init(gda)
 
 
 def aware_gtk_end(gda, s):
@@ -134,7 +132,7 @@ def draw_circle(cx, cy, r, color=(255, 255, 255, 255), width=2, num_segments=100
     glDisable(GL_LINE_STIPPLE)
 
 
-def draw_line(point1, point2, color, width=2):
+def draw_line(point1, point2, color=colors.WHITE, width=2):
     """
     Рисует линию между двумя точками
     :return: Ничего
@@ -151,7 +149,7 @@ def draw_line(point1, point2, color, width=2):
     glEnd()
 
 
-def draw_lines(points, color, width=2):
+def draw_lines(points, color=colors.WHITE, width=2):
     glLineWidth(width)
     glColor4ub(*color)
     glBegin(GL_LINE_STRIP)
@@ -159,7 +157,7 @@ def draw_lines(points, color, width=2):
     glEnd()
 
 
-def draw_lines_rotated(rotor_point, points, color, width=2, tetha=0):
+def draw_lines_rotated(rotor_point, points, color=colors.WHITE, width=2, tetha=0):
     glPushMatrix()
     glLineWidth(width)
     glColor4ub(*color)
@@ -171,8 +169,7 @@ def draw_lines_rotated(rotor_point, points, color, width=2, tetha=0):
     glPopMatrix()
 
 
-def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, cws, i_cur=None, line_width=2,
-                focus=True):
+def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, cws, i_cur=None, line_width=2, focus=True):
     """
     Рисует таблицу с горизонтальным заголовком
     :param cws: Ширины колонок
@@ -316,10 +313,10 @@ def opengl_init(gda):
 
     _dl_gltextparameterf = glGenLists(1)
     glNewList(_dl_gltextparameterf, GL_COMPILE)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
     glEndList()
 
     val = GL_NICEST  # =GL_FASTEST
@@ -333,11 +330,6 @@ def opengl_init(gda):
     print('Версия OpenGL: %s' % glGetString(GL_VERSION))
     print('Версия GLSL: %s' % glGetString(GL_SHADING_LANGUAGE_VERSION))
     print('Отрисовка: %s' % glGetString(GL_RENDERER))
-
-
-def opengl_uninit():
-    # glDeleteTextures(_textures)
-    pass
 
 
 def draw_sector(pointsIn, pointsOut, color):
@@ -374,15 +366,6 @@ def draw_sector(pointsIn, pointsOut, color):
         i += 1
 
 
-def draw_line(point1, point2, color=colors.WHITE, width=2):
-    glLineWidth(width)
-    glColor4ub(*color)
-    glBegin(GL_LINE_STRIP)
-    glVertex2f(point1[0], _parent_height - point1[1])
-    glVertex2f(point2[0], _parent_height - point2[1])
-    glEnd()
-
-
 def check_glerrors(title):
     err_cnt = 0
     while True:
@@ -397,10 +380,9 @@ def check_glerrors(title):
     return err_cnt
 
 
-def generate_dls(_size):
-    first_dl = glGenLists(_size)
-    dls = range(first_dl, first_dl + _size)
-    return dls
+def generate_dls(count):
+    first_dl = glGenLists(count)
+    return range(first_dl, first_dl + count)
 
 
 def data_to_texture(texture_id, data, width, height, _db=''):
@@ -420,8 +402,7 @@ def texture_from_gtkimage(image):
     glEnable(GL_TEXTURE_2D)
     texture_id = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texture_id)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pb.get_width(), pb.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 pb.get_pixels())
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pb.get_width(), pb.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, pb.get_pixels())
     glCallList(_dl_gltextparameterf)
     glDisable(GL_TEXTURE_2D)
     return texture_id, pb.get_width(), pb.get_height()

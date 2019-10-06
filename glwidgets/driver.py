@@ -7,7 +7,7 @@ import gtk
 import glib
 from glwidget import GlWidget
 from .glimports import *
-
+from gltools import opengl_init
 
 class DrawDriver(gtk.Window):
     def __init__(self, argv, title, w, h):
@@ -38,8 +38,10 @@ class DrawDriver(gtk.Window):
         glDeleteLists(self.dl, 1)
 
     def init(self):
+        opengl_init(self.gda)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
+
 
     def __del__(self):
         self.uninit()

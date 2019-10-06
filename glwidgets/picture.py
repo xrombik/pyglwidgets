@@ -12,12 +12,12 @@ from .glimports import *
 
 
 class Picture(glwidget.GlWidget):
-    def __init__(self, pos, texture, scale=[1.0, 1.0, 1.0], color=colors.WHITE, user_data=None):
+    def __init__(self, pos, texture, scale=(1.0, 1.0, 1.0), color=colors.WHITE, user_data=None):
         assert (type(pos) is tuple) or (type(pos) is list)
         assert len(pos) == 2
         assert type(pos[0]) is int
         assert type(pos[1]) is int
-        assert type(scale) is list
+        assert type(scale) in (list, tuple)
         assert len(scale) == 3
         assert (type(scale[0]) is float) and (scale[0] >= 0)
         assert (type(scale[1]) is float) and (scale[1] >= 0)
@@ -28,7 +28,7 @@ class Picture(glwidget.GlWidget):
             assert 0 <= col <= 255
 
         self.pos = list(pos)
-        self.scale = scale
+        self.scale = list(scale)
         self.color = list(color)
         self.texture = texture
         self.mirror = MIRROR_NONE  # Зеркалирование
