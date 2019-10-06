@@ -164,6 +164,14 @@ class GlWidget(object):
         map(lambda item: item.redraw(), GlWidget.items_queue.values())
         GlWidget.items_queue.clear()
 
+    @staticmethod
+    def safe_disconnect(obj, ehid):
+        assert type(obj) is DrawingArea
+        if ehid is not None:
+            if obj.handler_is_connected(ehid):
+                obj.disconnect(ehid)
+        return None
+
     def __new__(cls, *args, **kwargs):
         cls.draw = cls.__draw_list__
         cls.z = 0

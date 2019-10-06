@@ -485,23 +485,14 @@ class Table(GlWidget):
         # :нижних строк
         if (self.view_begin + 1 + self.view_max) < len(self._rows):
             gltools.draw_line((x0, y1), (x1, y1), colors.GREEN, self.line_width)
-
         glEndList()
-        self.__rdc__[0] = GL_COMPILE
-
-    def __del__(self):
-        glDeleteLists(self.dl, 1)
-        self.disconnect()
 
     def connect(self):
         if self.ehid1 is None:
             self.ehid1 = self.gda.connect('button-press-event', self._on_mbutton_press)
 
     def disconnect(self):
-        if self.ehid1 is not None:
-            self.focus = False
-            self.gda.disconnect(self.ehid1)
-            self.ehid1 = None
-        if self.ehid2:
-            self.ehid2 = None
+        self.ehid1 = GlWidget.safe_disconnect(self.gda, self.ehid1)
+        self.focus = False
+        self.ehid2 = GlWidget.safe_disconnect(self.gda, self.ehid2)
         self.entry.hide()

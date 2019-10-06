@@ -220,7 +220,6 @@ class FreeTypeFont(object):
 
 class CairoFont(object):
     font_items = dict()
-
     def __init__(self, face=glwidget.DEFAULT_FONT_FACE, font_hight=glwidget.DEFAULT_FONT_SIZE, predraw=None):
         assert type(face) is str
         assert type(font_hight) is int
@@ -234,6 +233,9 @@ class CairoFont(object):
         if predraw is not None:
             assert inspect.isfunction(predraw)
             self.predraw = predraw
+
+    def __del__(self):
+        glDeleteTextures([self.texture_id])
 
     def __new__(cls, face=glwidget.DEFAULT_FONT_FACE, face_size=glwidget.DEFAULT_FONT_SIZE, predraw=None):
         assert type(face) is str

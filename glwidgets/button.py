@@ -120,17 +120,12 @@ class Button(glwidget.GlWidget):
         Button.pressed = True
 
     def disconnect(self):
-        if self.ehid0 is not None:
-            self.gda.disconnect(self.ehid0)
-            self.ehid0 = None
-        if self.ehid1 is not None:
-            self.gda.disconnect(self.ehid1)
-            self.ehid1 = None
-        if self.ehid2 is not None:
-            self.gda.disconnect(self.ehid2)
-            self.ehid2 = None
+        self.ehid0 = self.safe_disconnect(self.gda, self.ehid0)
+        self.ehid1 = self.safe_disconnect(self.gda, self.ehid1)
+        self.ehid2 = self.safe_disconnect(self.gda, self.ehid2)
         if self.idts is not None:
             glib.source_remove(self.idts)
+            self.idts = None
 
     def __del__(self):
         super(Button, self).__del__()
@@ -312,9 +307,6 @@ class ButtonRing(Button):
         gltools.draw_texture(self.textures[0], self.pos, color)
         glEndList()
 
-    def __del__(self):
-        super(ButtonRing, self).__del__()
-
 
 class ButtonAnimated(Button):
     def __init__(self, gda, pos, textures, outline_colors, user_proc=None, user_data=None):
@@ -349,8 +341,6 @@ class ButtonAnimated(Button):
             , self.pos
         return self._is_playing
 
-    def __del__(self):
-        super(ButtonAnimated, self).__del__()
 
     def connect(self):
         super(ButtonAnimated, self).connect()
