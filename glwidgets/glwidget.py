@@ -4,6 +4,7 @@
 # Чужие модули
 import cairo
 import inspect
+from gtk import DrawingArea
 
 from .glimports import *
 
@@ -17,12 +18,12 @@ _ehid = None
 
 def _empty_key_handler_proc(_window, _event, *_key_handler_args):
     """
-	Пустая процедура ввода с клавиатуры
-	:param window:
-	:param event:
-	:param key_handler_args:
-	:return:
-	"""
+    Пустая процедура ввода с клавиатуры
+    :param window:
+    :param event:
+    :param key_handler_args:
+    :return:
+    """
     pass
 
 
@@ -173,22 +174,22 @@ class GlWidget(object):
         return super(GlWidget, cls).__new__(cls)
 
     def __setattr__(self, key, value):
-        if self.__dict__.has_key(key):
+        if key in self.__dict__:
             value0 = self.__dict__[key]
             if value0 != value:
                 self.__dict__[key] = value
-                self.items_queue[id(self)] = self
+                GlWidget.items_queue[id(self)] = self
         else:
             self.__dict__[key] = value
-            self.items_queue[id(self)] = self
+            GlWidget.items_queue[id(self)] = self
 
     def put_to_redraw(self):
         """
         Заносит текущий экземпляр в очередь на перерисовку
         :return: Ничего
         """
-        self.items_queue[id(self)] = self
-        self.on_timer()
+        GlWidget.items_queue[id(self)] = self
+        GlWidget.on_timer()
 
     def __draw_list__(self):
         glCallList(self.dl)
@@ -196,8 +197,8 @@ class GlWidget(object):
     def hide(self):
         if self.draw == self.__draw_list__:
             self.disconnect()
-        self.draw = self.__draw_none__
-        GlWidget.force_redraw = True
+            self.draw = self.__draw_none__
+            GlWidget.force_redraw = True
 
     # noinspection PyAttributeOutsideInit
     def show(self):
@@ -208,17 +209,14 @@ class GlWidget(object):
         """
         if self.draw == self.__draw_none__:
             self.connect()
-        self.draw = self.__draw_list__
-        GlWidget.force_redraw = True
+            self.draw = self.__draw_list__
+            GlWidget.force_redraw = True
 
-    def __draw_none__(self):
-        pass
+    def __draw_none__(self): pass
 
-    def disconnect(self):
-        pass
+    def disconnect(self): pass
 
-    def connect(self):
-        pass
+    def connect(self): pass
 
     def __del__(self):
         self.disconnect()

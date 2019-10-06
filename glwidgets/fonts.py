@@ -238,9 +238,9 @@ class CairoFont(object):
     def __new__(cls, face=glwidget.DEFAULT_FONT_FACE, face_size=glwidget.DEFAULT_FONT_SIZE, predraw=None):
         assert type(face) is str
         assert type(face_size) is int
-        font_item = CairoFont.font_items.get((face, face_size))
-        if font_item is not None:
-            return font_item
+        font_key = (face, face_size)
+        if font_key in CairoFont.font_items:
+            return CairoFont.font_items[font_key]
         else:
             font_item = super(CairoFont, cls).__new__(cls)
             CairoFont.font_items[(face, face_size)] = font_item

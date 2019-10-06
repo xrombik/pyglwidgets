@@ -58,7 +58,7 @@ def ibytes_to_word(b, i):
     return b[i] | (b[i + 1] << 8)
 
 
-def delta_tick(tick0, tick1, tick_max=65535):
+def delta_tick(tick0, tick1, tick_max=0xffff):
     if tick1 > tick0:
         dtick = tick1 - tick0
     elif tick1 < tick0:

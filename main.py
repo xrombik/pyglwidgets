@@ -17,9 +17,9 @@ def main(argv):
 
 def on_uninit(drd, pgm, rcm):
     # type: (DrawDriver, ProgramCtl, SceneCtl) -> None
+    rcm.uninit()
     drd.uninit()
     pgm.uninit()
-    rcm.uninit()
     check_glerrors('on_uninit():')
 
 

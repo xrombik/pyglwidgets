@@ -4,17 +4,20 @@
 import copy
 import gtk
 
-from . import glwidget
 from . import gltools
 from . import colors
 from . import fonts
 from . import entry
 from . import tools
+from glwidgets.glwidget import GlWidget
 from .glimports import *
 from .glconst import *
+from glwidget import DEFAULT_FONT_FACE
+from glwidget import DEFAULT_FONT_SIZE
+from glwidget import connect_key_handler
 
 
-class Table(glwidget.GlWidget):
+class Table(GlWidget):
     ROW_FLAG_NONE = 0
     ROW_FLAG_SELECTED = 1
     """ Флаг ряда таблицы. Если установлен, то ряд помечен как выбранный """
@@ -131,8 +134,8 @@ class Table(glwidget.GlWidget):
                 break
             self.i_cur_row += 1
 
-    def __init__(self, drawning_area, pos, rows, view_max=5, font_name=glwidget.DEFAULT_FONT_FACE,
-                 font_size=glwidget.DEFAULT_FONT_SIZE, column_width_proc=None):
+    def __init__(self, drawning_area, pos, rows, view_max=5, font_name=DEFAULT_FONT_FACE,
+                 font_size=DEFAULT_FONT_SIZE, column_width_proc=None):
         assert type(drawning_area) is gtk.DrawingArea
         assert type(rows) is list
         assert len(rows) > 0
@@ -162,8 +165,7 @@ class Table(glwidget.GlWidget):
         self.set_rows(rows)
         self.i_cur_column = 0
         self.edit_proc = Table.edit_proc_default  # Процедура проверяющая резрешение редактирования ячейки
-        self.entry = entry.Entry(drawning_area, self.pos, '',
-                                 (100, 20))  # Поле ввода. Используется для редактирования ячеек
+        self.entry = entry.Entry(drawning_area, self.pos, '', (100, 20))  # Поле ввода. Используется для редактирования ячеек
         self.entry.hide()
         self.entry.font = self.font
         self.entry.on_edit_done = self._on_edit_done
@@ -328,7 +330,7 @@ class Table(glwidget.GlWidget):
         self._rows[i][j] = copy.deepcopy(self.entry.text)
         self.entry.hide()
         self.put_to_redraw()
-        glwidget.connect_key_handler(self._on_key_press)
+        connect_key_handler(self._on_key_press)
         if self.on_edit_done is not None:
             self.on_edit_done(self, prev_val)
 
@@ -401,7 +403,7 @@ class Table(glwidget.GlWidget):
             if not self.focus:
                 focus_changed = True
                 self.focus = True
-            glwidget.connect_key_handler(self._on_key_press)
+            connect_key_handler(self._on_key_press)
             dy = event.y - self.pos[1]
             i_cur_row = int(dy // (self.font.get_text_hight() + self.line_width))
             self.i_cur_row = i_cur_row - 1 + self.view_begin

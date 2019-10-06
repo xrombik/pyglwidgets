@@ -9,8 +9,8 @@ import inspect
 import cairo
 
 # Свои модули
-from . import gltools
 from . import glwidget
+from . import gltools
 from .glimports import *
 
 
@@ -302,7 +302,7 @@ class ButtonRing(Button):
         # Чтобы лишний раз не добавилось в очередь перерисовки
         if self.cover != cover:
             self.cover = cover
-        return False  # False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
+        return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
         assert len(self.textures) > self.state
@@ -340,7 +340,7 @@ class ButtonAnimated(Button):
             self._is_playing = False
 
     def _on_timer(self):
-        self.state = (self.state + 1) % gltools.l_len(self.textures)
+        self.state = (self.state + 1) % len(self.textures)
         width = self.textures[self.state][1]
         height = self.textures[self.state][2]
         self.outlines = self.pos \
