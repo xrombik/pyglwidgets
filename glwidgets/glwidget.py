@@ -176,10 +176,10 @@ class GlWidget(object):
         cls.draw = cls.__draw_list__
         cls.z = 0
         """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
-        # TODO: Разобраться, почему это не получается сделать тут
-        cls.dl = glGenLists(1)
-        assert glIsList(cls.dl)
-        return super(GlWidget, cls).__new__(cls)
+        obj = super(GlWidget, cls).__new__(cls)
+        obj.dl = glGenLists(1)
+        assert glIsList(obj.dl)
+        return obj
 
     def __setattr__(self, key, value):
         if key in self.__dict__:
