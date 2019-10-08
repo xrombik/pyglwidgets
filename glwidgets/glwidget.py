@@ -4,6 +4,7 @@
 # Чужие модули
 import cairo
 import inspect
+from gtk import DrawingArea
 
 from .glimports import *
 
@@ -17,12 +18,12 @@ _ehid = None
 
 def _empty_key_handler_proc(_window, _event, *_key_handler_args):
     """
-	Пустая процедура ввода с клавиатуры
-	:param window:
-	:param event:
-	:param key_handler_args:
-	:return:
-	"""
+    Пустая процедура ввода с клавиатуры
+    :param window:
+    :param event:
+    :param key_handler_args:
+    :return:
+    """
     pass
 
 
@@ -96,9 +97,9 @@ def private(method):
 
 def connect_key_handler(handler_proc, *args):
     """
-	:param handler_proc: процедура для обработки нажатия клавиши
-	:param args: аргументы передаваемые в процедуру handler_proc
-	"""
+    :param handler_proc: процедура для обработки нажатия клавиши
+    :param args: аргументы передаваемые в процедуру handler_proc
+    """
     global key_handler_proc, key_handler_args
     key_handler_proc = handler_proc
     key_handler_args = args
@@ -156,37 +157,47 @@ class GlWidget(object):
     cairo_context.set_font_size(DEFAULT_FONT_SIZE)
     force_redraw = True
     items_queue = dict()
+    on_timer = None
 
     @staticmethod
     def redraw_queue():
         map(lambda item: item.redraw(), GlWidget.items_queue.values())
         GlWidget.items_queue.clear()
 
+    @staticmethod
+    def safe_disconnect(obj, ehid):
+        assert type(obj) is DrawingArea
+        if ehid is not None:
+            if obj.handler_is_connected(ehid):
+                obj.disconnect(ehid)
+        return None
+
     def __new__(cls, *args, **kwargs):
         cls.draw = cls.__draw_list__
         cls.z = 0
-        """ Глубина на которой оторбражается элемент.
-        Чем больше, тем ближе к наблюдателю """
+        """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
         # TODO: Разобраться, почему это не получается сделать тут
-        # cls.dl = glGenLists(1)
+        cls.dl = glGenLists(1)
+        assert glIsList(cls.dl)
         return super(GlWidget, cls).__new__(cls)
 
     def __setattr__(self, key, value):
-        if self.__dict__.has_key(key):
+        if key in self.__dict__:
             value0 = self.__dict__[key]
             if value0 != value:
                 self.__dict__[key] = value
-                self.items_queue[id(self)] = self
+                GlWidget.items_queue[id(self)] = self
         else:
             self.__dict__[key] = value
-            self.items_queue[id(self)] = self
+            GlWidget.items_queue[id(self)] = self
 
     def put_to_redraw(self):
         """
-        Заносит текущий экземпляр в очередь на перерисовку принудительно
+        Заносит текущий экземпляр в очередь на перерисовку
         :return: Ничего
         """
-        self.items_queue[id(self)] = self
+        GlWidget.items_queue[id(self)] = self
+        GlWidget.on_timer()
 
     def __draw_list__(self):
         glCallList(self.dl)
@@ -194,32 +205,30 @@ class GlWidget(object):
     def hide(self):
         if self.draw == self.__draw_list__:
             self.disconnect()
-        self.draw = self.__draw_none__
-        GlWidget.force_redraw = True
+            self.draw = self.__draw_none__
+            GlWidget.force_redraw = True
 
     # noinspection PyAttributeOutsideInit
     def show(self):
         """
-		Элемент для которого show() был вызван последним, находится в фокусе,
-		если использует key_handler_...
-		:return:
-		"""
+        Элемент для которого show() был вызван последним, находится в фокусе,
+        если использует key_handler_...
+        :return:
+        """
         if self.draw == self.__draw_none__:
             self.connect()
-        self.draw = self.__draw_list__
-        GlWidget.force_redraw = True
+            self.draw = self.__draw_list__
+            GlWidget.force_redraw = True
 
-    def __draw_none__(self):
-        pass
+    def __draw_none__(self): pass
 
-    def disconnect(self):
-        pass
+    def disconnect(self): pass
 
-    def connect(self):
-        pass
+    def connect(self): pass
 
     def __del__(self):
         self.disconnect()
         self_id = id(self)
-        if self_id in self.items_queue.keys():
-            del self.items_queue[self_id]
+        if self_id in GlWidget.items_queue:
+            del GlWidget.items_queue[self_id]
+        glDeleteLists(self.dl, 1)
