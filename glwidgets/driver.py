@@ -9,10 +9,11 @@ from glwidget import GlWidget
 from .glimports import *
 from gltools import opengl_init
 
+
 class DrawDriver(gtk.Window):
     def __init__(self, argv, title, w, h):
         super(DrawDriver, self).__init__()
-        display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  #gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
+        display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  # gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
         events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
         glconfig = gtk.gdkgl.Config(mode=display_mode)
         self.gda = gtk.DrawingArea()
@@ -41,7 +42,6 @@ class DrawDriver(gtk.Window):
         opengl_init(self.gda)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
-
 
     def __del__(self):
         self.uninit()

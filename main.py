@@ -8,26 +8,26 @@ def main(argv):
     pgm = ProgramCtl(argv)
     scm = SceneCtl(argv)
     rcm = ResourceCtl(argv)
-    drd = DrawDriver(argv, 'pyglwidgets', 640, 480)
-    drd.set_init(on_init, scm, rcm, drd)
-    drd.set_uninit(on_uninit, pgm, rcm)
-    drd.set_scene(scm)
+    ddr = DrawDriver(argv, 'pyglwidgets', 640, 480)
+    ddr.set_init(on_init, scm, rcm, ddr)
+    ddr.set_uninit(on_uninit, pgm, rcm)
+    ddr.set_scene(scm)
     pgm.run()
 
 
-def on_uninit(drd, pgm, rcm):
+def on_uninit(ddr, pgm, rcm):
     # type: (DrawDriver, ProgramCtl, SceneCtl) -> None
     rcm.uninit()
-    drd.uninit()
+    ddr.uninit()
     pgm.uninit()
     check_glerrors('on_uninit():')
 
 
-def on_init(gda, scm, rcm, drd):
+def on_init(gda, scm, rcm, ddr):
     # type: (gtk.DrawingArea, SceneCtl, ResourceCtl) -> None
     aware_gtk_begin(gda)
 
-    drd.init()
+    ddr.init()
 
     font = rcm.get_ft_font()
     txt0 = DynamicText(font, (10, 20), u'Кнопки, картинки и текст')
@@ -52,6 +52,6 @@ def btn0_proc(btn0):
     img0.move(step, 0)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import sys
     main(sys.argv)

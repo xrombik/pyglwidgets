@@ -294,10 +294,10 @@ def opengl_init(gda):
     __cairo_texts__ = dict()
     __cairo_texts_len_max__ = 2048
 
-    glEnable(GL_MULTISAMPLE)
     glViewport(0, 0, gda.allocation.width, gda.allocation.height)
     glOrtho(0, gda.allocation.width, 0, gda.allocation.height, -1, 1)
     glMatrixMode(GL_MODELVIEW)
+    glEnable(GL_MULTISAMPLE)
     glEnable(GL_CULL_FACE)
     glEnable(GL_LINE_SMOOTH)
     glEnable(GL_BLEND)
