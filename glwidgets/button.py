@@ -152,8 +152,7 @@ class Button(glwidget.GlWidget):
                     self.state = 1
             if self.user_proc is not None:
                 self.user_proc(self)
-                assert 0 <= self.state < len(
-                    self.textures)  # Количество состояний должно быть не больше количества текстур
+                assert 0 <= self.state < len(self.textures)  # Количество состояний должно быть не больше количества текстур
                 return self.cover
         else:
             assert len(self.textures) == 2  # Количество текстур радиокнопки должно быть равно двум
@@ -164,8 +163,7 @@ class Button(glwidget.GlWidget):
                     if btn.state != state:
                         if btn.user_proc is not None:
                             btn.user_proc(btn)
-                            assert 0 <= btn.state < len(
-                                self.textures)  # Количество состояний должно быть не больше количества текстур
+                            assert 0 <= btn.state < len(self.textures)  # Количество состояний должно быть не больше количества текстур
             else:
                 if self.auto != 0:
                     for btn in self.group:
@@ -178,8 +176,7 @@ class Button(glwidget.GlWidget):
                         if btn.state != state:
                             if btn.user_proc is not None:
                                 btn.user_proc(btn)
-                                assert 0 <= btn.state < len(
-                                    self.textures)  # Количество состояний должно быть не больше количества текстур
+                                assert 0 <= btn.state < len(self.textures)  # Количество состояний должно быть не больше количества текстур
 
     @staticmethod
     def on_mouse_over_def(btn, *args):
@@ -207,7 +204,7 @@ class Button(glwidget.GlWidget):
                 if self.ehid2 is not None:
                     self.gda.disconnect(self.ehid2)
                     self.ehid2 = None
-        return False   # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
+        return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
         if len(self.textures) < self.state:
@@ -340,7 +337,6 @@ class ButtonAnimated(Button):
             , (self.pos[0], self.pos[1] + height) \
             , self.pos
         return self._is_playing
-
 
     def connect(self):
         super(ButtonAnimated, self).connect()
