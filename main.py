@@ -6,7 +6,6 @@ import glib
 import gtk
 import glwidgets
 
-saved_exception_hook = function()
 
 
 def main(argv):
@@ -22,8 +21,9 @@ def main(argv):
 
 def btn0_proc(btn0):
     print('button state is: %u' % btn0.state)
-    img0 = btn0.user_data
-    img0.move(10, 0)
+    img0 = btn0.user_data[0]
+    step = btn0.user_data[1]
+    img0.move(step, 0)
 
 
 def on_realize(gda, scm, rcm):
@@ -34,12 +34,13 @@ def on_realize(gda, scm, rcm):
 
     txrs = rcm.get_textures('btn%u.png', 2)
     btn0 = glwidgets.Button(gda, (100, 100), 'Hi, there!', txrs, user_proc=btn0_proc)
-
+    btn1 = glwidgets.Button(gda, (400, 100), 'OPDWge', txrs, user_proc=btn0_proc)
     txr_ship = rcm.get_texture('F5S4.png')
     img0 = glwidgets.Picture((100, 200), txr_ship)
-    btn0.user_data = img0
+    btn0.user_data = img0, 10
+    btn1.user_data = img0, -10
 
-    scm.add_scene_items(btn0, img0)
+    scm.add_scene_items(btn0, img0, btn1)
 
     # GTK aware end
     glwidgets.aware_gtk_end(gda, 'on_realize()')
@@ -66,3 +67,4 @@ def exception_hook(etype, evalue, etb):
 
 if __name__ == "__main__":
     main(argv=sys.argv)
+
