@@ -8,6 +8,9 @@ import glib
 from glwidget import GlWidget
 from .glimports import *
 from gltools import opengl_init
+from gltools import aware_gtk_begin1
+from gltools import aware_gtk_begin2
+from gltools import aware_gtk_end
 
 
 class DrawDriver(gtk.Window):
@@ -57,7 +60,8 @@ class DrawDriver(gtk.Window):
             self.ehid0 = None
 
     def on_draw(self, gda, event, scm, redraw_queue):
-        # type: (DrawDriver, ...) -> None
+        # type: (...) -> None
+        aware_gtk_begin2(gda)
         if scm.scene_changed:
             glNewList(self.dl, GL_COMPILE)
             map(lambda item: item.draw(), scm)
@@ -69,6 +73,7 @@ class DrawDriver(gtk.Window):
         glCallList(self.dl)
         scm.process_draw_callbacks()
         glFlush()
+        aware_gtk_end(gda, 'on_draw()')
 
     def set_scene(self, scm):
         if self.ehid1 is not None:
@@ -77,7 +82,14 @@ class DrawDriver(gtk.Window):
         self.show_all()
 
     def set_init(self, on_init, *args):
-        self.gda.connect_after('realize', on_init, *args)
+        self.gda.connect_after('realize', self.on_init, on_init, *args)
+
+    def on_init(self, gda, on_init, *args):
+        aware_gtk_begin1(gda)
+        aware_gtk_begin2(gda)
+        self.init()
+        on_init(gda, *args)
+        aware_gtk_end(gda, 'on_init()')
 
     def on_timer(self):
         # type: (DrawDriver) -> bool

@@ -38,7 +38,7 @@ def init(wdgt):
     _ehid = wdgt.connect('key-press-event', key_dispatcher)
 
 
-def ALIGN_H_CENTER(pos, width, xadvance, cpx):
+def align_h_center(pos, width, xadvance, cpx):
     """
     Возвращает смещение по оси X, для выравнивания горизонтального
     по центру внутри заданной области
@@ -54,7 +54,7 @@ def ALIGN_H_CENTER(pos, width, xadvance, cpx):
     return width0, x
 
 
-def ALIGN_H_LEFT(pos, width, _xadvance, cpx):
+def align_h_left(pos, width, _xadvance, cpx):
     """
     Возвращает смещение по оси X, для выравнивания горизонтального
     по левому краю внутри заданной области

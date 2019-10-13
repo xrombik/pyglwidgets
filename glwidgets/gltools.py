@@ -55,6 +55,17 @@ def aware_gtk_begin(gda):
     gda.gldrawable.gl_begin(gda.glcontext)
 
 
+def aware_gtk_begin1(gda):
+    gtk.gdkgl.ext(gda.window)
+    gda.gldrawable = gda.window.set_gl_capability(gda.glconfig)
+    gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
+
+
+def aware_gtk_begin2(gda):
+    gda.gldrawable.wait_gdk()
+    gda.gldrawable.gl_begin(gda.glcontext)
+
+
 def aware_gtk_end(gda, s):
     check_glerrors(s)
     gda.gldrawable.wait_gl()
@@ -326,10 +337,10 @@ def opengl_init(gda):
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, val)
 
     print(u'Версия привязки python OpenGL: %s' % str(OpenGL.__version__))
-    print('Производитель: %s' % glGetString(GL_VENDOR))
-    print('Версия OpenGL: %s' % glGetString(GL_VERSION))
-    print('Версия GLSL: %s' % glGetString(GL_SHADING_LANGUAGE_VERSION))
-    print('Отрисовка: %s' % glGetString(GL_RENDERER))
+    print(u'Производитель: %s' % glGetString(GL_VENDOR))
+    print(u'Версия OpenGL: %s' % glGetString(GL_VERSION))
+    print(u'Версия GLSL: %s' % glGetString(GL_SHADING_LANGUAGE_VERSION))
+    print(u'Отрисовка: %s' % glGetString(GL_RENDERER))
 
 
 def draw_sector(pointsIn, pointsOut, color):
