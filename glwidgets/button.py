@@ -9,12 +9,12 @@ import inspect
 import cairo
 
 # Свои модули
-from . import glwidget
 from . import gltools
+from .glwidget import *
 from .glimports import *
 
 
-class Button(glwidget.GlWidget):
+class Button(GlWidget):
     pressed = False
 
     def __init__(self, gda, pos, text, textures,
@@ -49,23 +49,23 @@ class Button(glwidget.GlWidget):
 
         # Надпись
         if text is not None:
-            self.text = text.encode('utf-8')
+            self._text = text.encode('utf-8')
         else:
-            self.text = None
+            self._text = None
         self.text_color = text_color
 
         # Display list
         self.texture_id = glGenTextures(1)
 
         # Состояние кнопки и текстура
-        self.state = 0
+        self._state = 0
         self.pressed = False
         if type(textures[0]) is tuple:
             self.textures = textures
         else:
             self.textures = (textures,)
         for item in self.textures:
-            assert glwidget.glIsTexture(item[0]), "Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert glIsTexture(item[0]), "Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
             assert type(item[1]) is int, "Должна быть ширина, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
             assert type(item[2]) is int, "Должна быть высота, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
 
@@ -96,22 +96,40 @@ class Button(glwidget.GlWidget):
 
         self.click_count = 0
         self.outlines = None
-        self.align = glwidget.align_h_left  # Процедура выравнивания текста
+        self.align = align_h_left  # Процедура выравнивания текста
 
         self.mirror = gltools.MIRROR_NONE
 
         self.texture2 = None
-        self.text_height = glwidget.DEFAULT_FONT_SIZE
+        self.text_height = DEFAULT_FONT_SIZE
 
         self.on_mouse_over = self.on_mouse_over_def  # Обработка наведения мыши
+        self.put_to_redraw()
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, val):
+        if self._state == val: return
+        self._state = val
+        self.put_to_redraw()
+
+    @property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, val):
+        if self._text == val: return
+        self._text = val
+        self.put_to_redraw()
 
     def connect(self):
-        if self.ehid0 is None:
-            self.ehid0 = self.gda.connect('motion-notify-event', self._motion_notify)
-        if self.ehid1 is None:
-            self.ehid1 = self.gda.connect('button-release-event', self.button_release)
-        if self.ehid2 is None:
-            self.ehid2 = self.gda.connect('button-press-event', self.button_press)
+        self.ehid0 = safe_connect(self.gda, self.ehid0, 'motion-notify-event', self._motion_notify)
+        self.ehid1 = safe_connect(self.gda, self.ehid1, 'button-release-event', self.button_release)
+        self.ehid2 = safe_connect(self.gda, self.ehid2, 'button-press-event', self.button_press)
 
     def button_press(self, widget, event):
         if event.button != 1:  # 1 - левая кнопка мыши, 2 - средняя, 3 - правая.
@@ -120,9 +138,9 @@ class Button(glwidget.GlWidget):
         Button.pressed = True
 
     def disconnect(self):
-        self.ehid0 = self.safe_disconnect(self.gda, self.ehid0)
-        self.ehid1 = self.safe_disconnect(self.gda, self.ehid1)
-        self.ehid2 = self.safe_disconnect(self.gda, self.ehid2)
+        self.ehid0 = safe_disconnect(self.gda, self.ehid0)
+        self.ehid1 = safe_disconnect(self.gda, self.ehid1)
+        self.ehid2 = safe_disconnect(self.gda, self.ehid2)
         if self.idts is not None:
             glib.source_remove(self.idts)
             self.idts = None
@@ -193,52 +211,45 @@ class Button(glwidget.GlWidget):
             self.on_mouse_over(self, *args)
             self.put_to_redraw()
             if cover:
-                if self.ehid1 is None:
-                    self.ehid1 = self.gda.connect('button-release-event', self.button_release)
-                if self.ehid2 is None:
-                    self.ehid2 = self.gda.connect('button-press-event', self.button_press)
+                self.ehid1 = safe_connect(self.gda, self.ehid1, 'button-release-event', self.button_release)
+                self.ehid2 = safe_connect(self.gda, self.ehid2, 'button-press-event', self.button_press)
             else:
-                if self.ehid1 is not None:
-                    self.gda.disconnect(self.ehid1)
-                    self.ehid1 = None
-                if self.ehid2 is not None:
-                    self.gda.disconnect(self.ehid2)
-                    self.ehid2 = None
+                self.ehid1 = safe_disconnect(self.gda, self.ehid1)
+                self.ehid2 = safe_disconnect(self.gda, self.ehid2)
         return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
-        if len(self.textures) < self.state:
+        if len(self.textures) < self._state:
             raise ValueError('%s:%s, state:%u, len(textures):%u' % (self, self.text, self.state, len(self.textures)))
-        texture1 = self.textures[self.state][0]
-        width = self.textures[self.state][1]
-        height = self.textures[self.state][2]
+        texture1 = self.textures[self._state][0]
+        width = self.textures[self._state][1]
+        height = self.textures[self._state][2]
         # изображение кнопки
         alpha = self.alphas[self.cover and (not Button.pressed)]
         color = self.color[0], self.color[1], self.color[2], alpha
 
         if self.text and (self.texture2 is None):
             # Вычислить размер в пикселях который будет занимать текст
-            xbearing, ybearing, text_width, text_height, xadvance, yadvance = glwidget.GlWidget.cairo_context.text_extents(
-                self.text)
-            fascent, fdescent, fheight, fxadvance, fyadvance = glwidget.GlWidget.cairo_context.font_extents()
+            xbearing, ybearing, text_width, text_height, xadvance, yadvance = GlWidget.cairo_context.text_extents(self._text)
+            fascent, fdescent, fheight, fxadvance, fyadvance = GlWidget.cairo_context.font_extents()
 
             # Выравнивание
             width_a, x_a = self.align(self.pos, width, xadvance, self.check_part[0])
 
             # Нарисовать текcт в текстуру:
             # 1) создать изображение текста в буфере
-            cis = cairo.ImageSurface(glwidget.cairo.FORMAT_ARGB32, width_a, height)
+            cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_a, height)
             cc = cairo.Context(cis)
-            cc.select_font_face(glwidget.DEFAULT_FONT_FACE)
+            cc.select_font_face(DEFAULT_FONT_FACE)
             cc.set_font_size(self.text_height)
 
             # тень
-            glwidget.cc_draw_text_shadow(cc, self.text, ybearing)
+            cc_draw_text_shadow(cc, self._text, ybearing)
 
             # центр
             cc.set_source_rgba(1.0, 1.0, 1.0, 0.8)
             cc.move_to(1, - ybearing + 1)
-            cc.show_text(self.text)
+            cc.show_text(self._text)
 
             # 2) Назначить буфер с текстом в текстуру
             texture2 = gltools.data_to_texture(self.texture_id, cis.get_data(), width_a, height)
@@ -251,7 +262,7 @@ class Button(glwidget.GlWidget):
         # 3) Нарисовать фон кнопки
         gltools.draw_texture((texture1, width, height), self.pos, color, self.mirror)
         # 4) Нарисовать текстуру с текстом
-        if self.text:
+        if self._text:
             gltools.draw_texture(texture2, (x_a, y), self.text_color)
         if self.outlines:
             gltools.draw_lines(self.outlines, self.outline_colors[self.outline_colori])
@@ -296,9 +307,9 @@ class ButtonRing(Button):
         return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):
-        assert len(self.textures) > self.state
+        assert len(self.textures) > self._state
         alpha = self.alphas[self.cover and (not Button.pressed)]
-        r, g, b, a = self.state_colors[self.state]
+        r, g, b, a = self.state_colors[self._state]
         color = r, g, b, alpha
         glNewList(self.dl, GL_COMPILE)
         gltools.draw_texture(self.textures[0], self.pos, color)
@@ -309,14 +320,13 @@ class ButtonAnimated(Button):
     def __init__(self, gda, pos, textures, outline_colors, user_proc=None, user_data=None):
         self._is_playing = False
         self._timer_id = None
-        super(ButtonAnimated, self).__init__(gda, pos, None, textures, (255, 255, 255, 255), False, user_proc,
-                                             user_data)
+        super(ButtonAnimated, self).__init__(gda, pos, None, textures, (255, 255, 255, 255), False, user_proc, user_data)
         self._on_timer()
         self.outline_colors = outline_colors
         self.outline_colori = 0
-        self._rate_ms = glwidget.DEFAULT_RATE_MS
+        self._rate_ms = DEFAULT_RATE_MS
 
-    def play(self, rate_ms=glwidget.DEFAULT_RATE_MS):
+    def play(self, rate_ms=DEFAULT_RATE_MS):
         if self._timer_id is None:
             self._timer_id = glib.timeout_add(rate_ms, self._on_timer)
             self._is_playing = True

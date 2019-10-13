@@ -9,6 +9,7 @@ from glwidget import GlWidget
 from .glimports import *
 from gltools import opengl_init
 from gltools import check_glerrors
+from glwidget import safe_disconnect
 
 
 def aware_gtk_begin1(gda):
@@ -55,6 +56,7 @@ class DrawDriver(gtk.Window):
 
     def uninit(self):
         self.stop_anim()
+        self.ehid1 = safe_disconnect(self.gda, self.ehid1)
         glDeleteLists(self.dl, 1)
 
     def init(self):
@@ -91,8 +93,7 @@ class DrawDriver(gtk.Window):
         draw_end(gda, 'on_draw()')
 
     def set_scene(self, scm):
-        if self.ehid1 is not None:
-            self.gda.disconnect(self.ehid1)
+        self.ehid1 = safe_disconnect(self.gda, self.ehid1)
         self.ehid1 = self.gda.connect('expose-event', self.on_draw, scm, GlWidget.redraw_queue)
         self.show_all()
 

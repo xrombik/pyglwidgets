@@ -490,7 +490,7 @@ class Table(GlWidget):
             self.ehid1 = self.gda.connect('button-press-event', self._on_mbutton_press)
 
     def disconnect(self):
-        self.ehid1 = GlWidget.safe_disconnect(self.gda, self.ehid1)
+        self.ehid1 = safe_disconnect(self.gda, self.ehid1)
         self.focus = False
-        self.ehid2 = GlWidget.safe_disconnect(self.gda, self.ehid2)
+        self.ehid2 = safe_disconnect(self.gda, self.ehid2)
         self.entry.hide()

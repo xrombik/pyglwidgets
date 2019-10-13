@@ -32,18 +32,23 @@ def on_init(gda, scm, rcm):
     txr_btn = rcm.get_textures('btn%u.png', 2)
     txr_ship = rcm.get_texture('merhn2.png')
 
-    img0 = Picture((100, 200), txr_ship)
-    btn0 = Button(gda, (50, 100), 'ВЛЕВО', txr_btn, user_proc=btn0_proc, user_data=(img0, -10))
-    btn1 = Button(gda, (450, 100), 'ВПРАВО', txr_btn, user_proc=btn0_proc, user_data=(img0, 10))
+    img0 = Picture((50, 200), txr_ship)
+    col0 = (255, 0, 0, 255)
+    col1 = (255, 255, 255, 255)
+    btn0 = Button(gda, (50, 100), 'КРАСНЫЙ', txr_btn, user_proc=btn0_proc, user_data=(img0, col0, col1))
 
-    scm.add_scene_items(btn0, img0, txt0, btn1)
+    scm.add_scene_items(btn0, img0, txt0)
 
 
 def btn0_proc(btn0):
     # type: (Button) -> None
     img0 = btn0.user_data[0]
-    step = btn0.user_data[1]
-    img0.move(step, 0)
+    col0 = btn0.user_data[1]
+    col1 = btn0.user_data[2]
+    if btn0.state:
+        img0.color = col0
+    else:
+        img0.color = col1
 
 
 if __name__ == '__main__':

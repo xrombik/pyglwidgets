@@ -29,7 +29,6 @@ def _empty_key_handler_proc(_window, _event, *_key_handler_args):
 
 key_handler_proc = _empty_key_handler_proc
 key_handler_args = list()
-items_queue = dict()
 TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\(){}-+=.,:;?!'
 
 
@@ -147,10 +146,6 @@ def clear_cairo_surface(cc):
 
 # noinspection PyAttributeOutsideInit
 class GlWidget(object):
-    # TODO: Добавить использование свойств python, чтобы добавлять в очередь рисования
-    # более изберательным способом, не опасаясь попасть на рекурсию, и тогда
-    # можно будет менять атрибуты даже в redraw(), а пока так:
-    # В методе GlWidget:redraw атрибуты экземпляра можно только читать, но изменять нельзя
     image_surface0 = cairo.ImageSurface(cairo.FORMAT_ARGB32, 0, 0)
     cairo_context = cairo.Context(image_surface0)
     cairo_context.select_font_face(DEFAULT_FONT_FACE)
@@ -158,37 +153,44 @@ class GlWidget(object):
     items_queue = dict()
     on_timer = None
 
-    @staticmethod
-    def redraw_queue():
-        map(lambda item: item.redraw(), GlWidget.items_queue.values())
-        GlWidget.items_queue.clear()
+    __slots__ = ('pos', 'color', 'z', 'dl', 'draw', '_pos', '_color')
 
     @staticmethod
-    def safe_disconnect(obj, ehid):
-        assert type(obj) is DrawingArea
-        if ehid is not None:
-            if obj.handler_is_connected(ehid):
-                obj.disconnect(ehid)
-        return None
+    def redraw_queue():
+        items = GlWidget.items_queue.values()
+        map(lambda item: item.redraw(), items)
+        GlWidget.items_queue.clear()
 
     def __new__(cls, *args, **kwargs):
         cls.draw = cls.__draw_list__
         cls.z = 0
+        cls._color = [255, 255, 255, 255]
+        cls._pos = [0, 0]
         """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
         obj = super(GlWidget, cls).__new__(cls)
         obj.dl = glGenLists(1)
         assert glIsList(obj.dl)
         return obj
 
-    def __setattr__(self, key, value):
-        if key in self.__dict__:
-            value0 = self.__dict__[key]
-            if value0 != value:
-                self.__dict__[key] = value
-                GlWidget.items_queue[id(self)] = self
-        else:
-            self.__dict__[key] = value
-            GlWidget.items_queue[id(self)] = self
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, val):
+        if self._pos == val: return
+        self._pos = val
+        self.put_to_redraw()
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, val):
+        if self._color == val: return
+        self._color = val
+        self.put_to_redraw()
 
     def put_to_redraw(self):
         """
@@ -229,3 +231,20 @@ class GlWidget(object):
         if self_id in GlWidget.items_queue:
             del GlWidget.items_queue[self_id]
         glDeleteLists(self.dl, 1)
+
+
+def safe_disconnect(obj, ehid):
+    assert isinstance(obj, DrawingArea)
+    assert isinstance(ehid, (long, int)) or (ehid is None)
+    if ehid is not None:
+        if obj.handler_is_connected(ehid):
+            obj.disconnect(ehid)
+    return None
+
+
+def safe_connect(obj, ehid, name, proc, *args):
+    assert isinstance(obj, DrawingArea)
+    assert isinstance(ehid, (long, int)) or (ehid is None)
+    if ehid is None:
+        ehid = obj.connect(name, proc, *args)
+    return ehid
