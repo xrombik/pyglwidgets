@@ -8,6 +8,25 @@ import glib
 from glwidget import GlWidget
 from .glimports import *
 from gltools import opengl_init
+from gltools import check_glerrors
+
+
+def aware_gtk_begin1(gda):
+    gtk.gdkgl.ext(gda.window)
+    gda.gldrawable = gda.window.set_gl_capability(gda.glconfig)
+    gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
+
+
+def draw_begin(gda):
+    gda.gldrawable.wait_gdk()
+    gda.gldrawable.gl_begin(gda.glcontext)
+
+
+def draw_end(gda, s):
+    glFlush()
+    check_glerrors(s)
+    gda.gldrawable.wait_gl()
+    gda.gldrawable.gl_end()
 
 
 class DrawDriver(gtk.Window):
@@ -57,7 +76,8 @@ class DrawDriver(gtk.Window):
             self.ehid0 = None
 
     def on_draw(self, gda, event, scm, redraw_queue):
-        # type: (DrawDriver, ...) -> None
+        # type: (...) -> None
+        draw_begin(gda)
         if scm.scene_changed:
             glNewList(self.dl, GL_COMPILE)
             map(lambda item: item.draw(), scm)
@@ -68,7 +88,7 @@ class DrawDriver(gtk.Window):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glCallList(self.dl)
         scm.process_draw_callbacks()
-        glFlush()
+        draw_end(gda, 'on_draw()')
 
     def set_scene(self, scm):
         if self.ehid1 is not None:
@@ -77,7 +97,16 @@ class DrawDriver(gtk.Window):
         self.show_all()
 
     def set_init(self, on_init, *args):
-        self.gda.connect_after('realize', on_init, *args)
+        self.gda.connect_after('realize', self.on_init, on_init, *args)
+
+    def on_init(self, gda, on_init, *args):
+        gtk.gdkgl.ext(gda.window)
+        gda.gldrawable = gda.window.set_gl_capability(gda.glconfig)
+        gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
+        draw_begin(gda)
+        self.init()
+        on_init(gda, *args)
+        draw_end(gda, 'on_init()')
 
     def on_timer(self):
         # type: (DrawDriver) -> bool

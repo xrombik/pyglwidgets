@@ -38,7 +38,7 @@ def init(wdgt):
     _ehid = wdgt.connect('key-press-event', key_dispatcher)
 
 
-def ALIGN_H_CENTER(pos, width, xadvance, cpx):
+def align_h_center(pos, width, xadvance, cpx):
     """
     Возвращает смещение по оси X, для выравнивания горизонтального
     по центру внутри заданной области
@@ -54,7 +54,7 @@ def ALIGN_H_CENTER(pos, width, xadvance, cpx):
     return width0, x
 
 
-def ALIGN_H_LEFT(pos, width, _xadvance, cpx):
+def align_h_left(pos, width, _xadvance, cpx):
     """
     Возвращает смещение по оси X, для выравнивания горизонтального
     по левому краю внутри заданной области
@@ -155,7 +155,6 @@ class GlWidget(object):
     cairo_context = cairo.Context(image_surface0)
     cairo_context.select_font_face(DEFAULT_FONT_FACE)
     cairo_context.set_font_size(DEFAULT_FONT_SIZE)
-    force_redraw = True
     items_queue = dict()
     on_timer = None
 
@@ -206,7 +205,6 @@ class GlWidget(object):
         if self.draw == self.__draw_list__:
             self.disconnect()
             self.draw = self.__draw_none__
-            GlWidget.force_redraw = True
 
     # noinspection PyAttributeOutsideInit
     def show(self):
@@ -218,7 +216,6 @@ class GlWidget(object):
         if self.draw == self.__draw_none__:
             self.connect()
             self.draw = self.__draw_list__
-            GlWidget.force_redraw = True
 
     def __draw_none__(self): pass
 

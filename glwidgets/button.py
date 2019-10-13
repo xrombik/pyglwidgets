@@ -96,7 +96,7 @@ class Button(glwidget.GlWidget):
 
         self.click_count = 0
         self.outlines = None
-        self.align = glwidget.ALIGN_H_LEFT  # Процедура выравнивания текста
+        self.align = glwidget.align_h_left  # Процедура выравнивания текста
 
         self.mirror = gltools.MIRROR_NONE
 
