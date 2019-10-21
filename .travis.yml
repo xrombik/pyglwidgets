@@ -2,7 +2,7 @@ language: python
 python:
   - "2.7"
 install:
-  - install-deps.sh
+  - ./install-deps.sh
 script:
   python -B test.py
   
