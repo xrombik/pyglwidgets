@@ -5,12 +5,14 @@ before_install:
 # Environment setup
   #- sudo apt-get update -qq
   #- sudo apt-get install libcairo2-dev python-gtk2-dev libgtk2.0-dev libglib2.0-dev libtool libpango1.0-dev python-gtk2 libgtkglext1 python-opengl python-gtkglext1 libatk1.0-dev libffi-dev libpq-dev python-cairo python-gobject
+  - sudo apt-get install python-gobject
 install:
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   #- pip install setuptools
   #- pip install freetype-py
   #- pip install typing
+  - pip install pygobject
 ## PyCairo
 #  - wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
 #  - tar xf py2cairo-1.10.0.tar.bz2
