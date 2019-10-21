@@ -2,15 +2,15 @@ language: python
 python:
   - "2.7"
 before_install:
+# Environment setup
+  - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
+  - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - sudo apt-get update -qq
-  - sudo apt-get install libcairo2-dev libgtk2.0-dev libglib2.0-dev libtool libpango1.0-dev python-gtk2 libgtkglext1 python-opengl python-gtkglext1
+  - sudo apt-get install libcairo2-dev libgtk2.0-dev libglib2.0-dev libtool libpango1.0-dev python-gtk2 libgtkglext1 python-opengl python-gtkglext1 libatk1.0-dev libffi-dev libpq-dev
 install:
   - pip install setuptools
   - pip install freetype-py
   - pip install typing
-# Environment setup
-  - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
-  - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
 # PyCairo
   - wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
   - tar xf py2cairo-1.10.0.tar.bz2
