@@ -2,9 +2,6 @@ language: python
 python:
   - "2.7"
 before_install:
-  - sudo apt-get autoremove -f -y
-  - sudo apt-get update -y
-  - sudo apt-get upgrade -y
   - sudo apt-get install python-gtk2
   - sudo apt-get install libgtkglext1
   - sudo apt-get install python-opengl
