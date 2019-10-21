@@ -2,11 +2,18 @@ language: python
 python:
   - "2.7"
 before_install:
-  - ./install-deps.sh
+  - sudo apt-get autoremove -f -y
+  - sudo apt-get update -y
+  - sudo apt-get upgrade -y
+  - sudo apt-get install python-gtk2
+  - sudo apt-get install libgtkglext1
+  - sudo apt-get install python-opengl
+  - sudo apt-get install python-gtkglext1
+  - sudo apt-get install python-pip
 install:
   - pip install --upgrade pip
   - pip install setuptools
   - pip install freetype-py
   - pip install typing
 script:
-  python -B test.py
+  - python -B test.py
