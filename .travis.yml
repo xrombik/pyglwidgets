@@ -2,47 +2,39 @@ language: python
 python:
   - "2.7"
 before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install git libcairo2-dev libgtk2.0-dev libglib2.0-dev libtool libpango1.0-dev libatk1.0-dev libffi-dev libpq-dev libmysqlclient-dev
+# commands to install dependencies
+install: 
+  - pip install mysql-python psycopg2
+  - pip install pep8
+  - pip install coveralls
 # Environment setup
-  #- sudo apt-get update -qq
-  #- sudo apt-get install libcairo2-dev python-gtk2-dev libgtk2.0-dev libglib2.0-dev libtool libpango1.0-dev python-gtk2 libgtkglext1 python-opengl python-gtkglext1 libatk1.0-dev libffi-dev libpq-dev python-cairo python-gobject
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
-  - sudo apt-get install python-gobject
-  - sudo apt-get install python-gobject-dev
-  - sudo apt-get install libgirepository1.0-dev
-install:
-  - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
-  - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
-  #- pip install setuptools
-  #- pip install freetype-py
-  #- pip install typing
-  - pip install pygobject
-## PyCairo
-#  - wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
-#  - tar xf py2cairo-1.10.0.tar.bz2
-#  - cd py2cairo-1.10.0
-#  - ./waf configure --prefix=$VIRT_ROOT
-#  - ./waf build
-#  - ./waf install
-#  - cd ..
+# PyCairo
+  - wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
+  - tar xf py2cairo-1.10.0.tar.bz2
+  - cd py2cairo-1.10.0
+  - ./waf configure --prefix=$VIRT_ROOT > /dev/null
+  - ./waf build > /dev/null
+  - ./waf install > /dev/null
+  - cd ..
 # PyGobject
-#  - wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
-#  - tar xf pygobject-2.28.6.tar.bz2
-#  - cd pygobject-2.28.6
-#  - ./configure --prefix=$VIRT_ROOT --disable-introspection
-#  - make
-#  - make install
-#  - cd ..
+  - wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
+  - tar xf pygobject-2.28.6.tar.bz2
+  - cd pygobject-2.28.6
+  - ./configure --prefix=$VIRT_ROOT --disable-introspection > /dev/null
+  - make > /dev/null
+  - make install > /dev/null
+  - cd ..
 # PyGtk
   - wget http://ftp.gnome.org/pub/GNOME/sources/pygtk/2.24/pygtk-2.24.0.tar.bz2
   - tar xf pygtk-2.24.0.tar.bz2
   - cd pygtk-2.24.0
-  - echo "VIRT_ROOT:"
-  - echo $VIRT_ROOT
-  - ./configure --prefix=$VIRT_ROOT
-  - make
-  - make install
+  - ./configure --prefix=$VIRT_ROOT > /dev/null
+  - make > /dev/null
+  - make install > /dev/null
   - cd ..
-script:
+script: 
   python -B test.py
-  
