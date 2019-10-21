@@ -8,7 +8,7 @@ before_install:
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - sudo apt-get install python-gobject
-  - sudo install python-gobject-dev
+  - sudo apt-get install python-gobject-dev
   - sudo apt-get install libgirepository1.0-dev
 install:
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
