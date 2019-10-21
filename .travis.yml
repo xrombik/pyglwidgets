@@ -2,7 +2,9 @@ language: python
 python:
   - "2.7"
 install:
-  - apt-get autoremove -f -y
+  - pip install setuptools
+  - pip install freetype-py
+  - pip install typing
 script:
   python -B test.py
   
