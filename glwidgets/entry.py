@@ -84,7 +84,6 @@ class Entry(glwidget.GlWidget):
         if self.cover:
             glwidget.connect_key_handler(self._on_key_press)
         else:
-            # disconnect_key_handler()
             self.cur_tick = 0
             if self.timer_id:
                 glib.source_remove(self.timer_id)
