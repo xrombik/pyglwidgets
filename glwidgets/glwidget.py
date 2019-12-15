@@ -4,7 +4,6 @@
 # Чужие модули
 import cairo
 import inspect
-from gtk import DrawingArea
 
 from .glimports import *
 
@@ -153,22 +152,25 @@ class GlWidget(object):
     items_queue = dict()
     on_timer = None
 
-    __slots__ = ('pos', 'color', 'z', 'dl', 'draw', '_pos', '_color')
+    __slots__ = ('pos', 'color', 'z', 'dl', 'draw', '_pos', '_color', 'pc')
 
     @staticmethod
     def redraw_queue():
         items = GlWidget.items_queue.values()
-        map(lambda item: item.redraw(), items)
+        for item in items:
+            item.redraw()
         GlWidget.items_queue.clear()
 
     def __new__(cls, *args, **kwargs):
-        cls.draw = cls.__draw_list__
+        cls.draw = cls._draw_list
         cls.z = 0
+        """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
         cls._color = [255, 255, 255, 255]
         cls._pos = [0, 0]
-        """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
         obj = super(GlWidget, cls).__new__(cls)
         obj.dl = glGenLists(1)
+        obj.pc = list()
+        """ Отложенные вызовы подключения/отключения """
         assert glIsList(obj.dl)
         return obj
 
@@ -200,13 +202,13 @@ class GlWidget(object):
         GlWidget.items_queue[id(self)] = self
         GlWidget.on_timer()
 
-    def __draw_list__(self):
+    def _draw_list(self):
         glCallList(self.dl)
 
     def hide(self):
-        if self.draw == self.__draw_list__:
+        if self.draw == self._draw_list:
             self.disconnect()
-            self.draw = self.__draw_none__
+            self.draw = self._draw_none
 
     # noinspection PyAttributeOutsideInit
     def show(self):
@@ -215,15 +217,19 @@ class GlWidget(object):
         если использует key_handler_...
         :return:
         """
-        if self.draw == self.__draw_none__:
+        if self.draw == self._draw_none:
             self.connect()
-            self.draw = self.__draw_list__
+            self.draw = self._draw_list
 
-    def __draw_none__(self): pass
-
-    def disconnect(self): pass
-
-    def connect(self): pass
+    def dopc(self, gda):
+        for val in self.pc:
+            key = val[0]
+            dct = self.__dict__
+            if len(val) > 2:
+                dct[key] = val[1](gda, dct[key], *(val[2:]))
+            else:
+                dct[key] = val[1](gda, dct[key])
+        del self.pc[:]
 
     def __del__(self):
         self.disconnect()
@@ -232,19 +238,9 @@ class GlWidget(object):
             del GlWidget.items_queue[self_id]
         glDeleteLists(self.dl, 1)
 
+    def _draw_none(self): pass
 
-def safe_disconnect(obj, ehid):
-    assert isinstance(obj, DrawingArea)
-    assert isinstance(ehid, (long, int)) or (ehid is None)
-    if ehid is not None:
-        if obj.handler_is_connected(ehid):
-            obj.disconnect(ehid)
-    return None
+    def disconnect(self): pass
 
+    def connect(self): pass
 
-def safe_connect(obj, ehid, name, proc, *args):
-    assert isinstance(obj, DrawingArea)
-    assert isinstance(ehid, (long, int)) or (ehid is None)
-    if ehid is None:
-        ehid = obj.connect(name, proc, *args)
-    return ehid

@@ -10,6 +10,8 @@ from . import gltools
 from . import glwidget
 from .glimports import *
 
+__all__ = ('FreeTypeFont', 'CairoFont')
+
 
 class FreeTypeFont(object):
     """
@@ -136,7 +138,6 @@ class FreeTypeFont(object):
         :param color:
         :return:
         """
-        # print '-> glwidgets.py:%s:draw_text():%s %s' % (self, s, type(s))
         assert type(s) is unicode
         glCallList(self.dl_pushScreenCoordinateMatrix)
         glListBase(self.list_base)

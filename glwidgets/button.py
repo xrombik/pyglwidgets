@@ -12,13 +12,16 @@ import cairo
 from . import gltools
 from .glwidget import *
 from .glimports import *
+from .driver import safe_connect
+from .driver import safe_disconnect
+
+__all__ = ('Button', 'ButtonRing', 'ButtonAnimated')
 
 
 class Button(GlWidget):
     pressed = False
 
-    def __init__(self, gda, pos, text, textures,
-                 text_color=gltools.colors.BUTTON_TEXT, auto=1, user_proc=None,
+    def __init__(self, pos, text, textures, text_color=gltools.colors.BUTTON_TEXT, auto=1, user_proc=None,
                  user_data=None, check_part=((1.0 / 6.0), 0.5)):
         assert type(text_color) is tuple, "Цвет должен состоять из четырёх компонент в кортеже"
         assert len(text_color) == 4, "Цвет должен состоять из четырёх компонент в кортеже"
@@ -32,14 +35,12 @@ class Button(GlWidget):
             assert inspect.isfunction(user_proc), "Должна быть функция"
         if text is not None:
             assert type(text) is str, "Должна быть строка"
-        assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert len(pos) == 2
         assert type(pos[0]) is int
         assert type(pos[1]) is int
         assert type(auto) is int
 
-        self.gda = gda
         self.pos = pos
 
         # Относительное положение надписи.
@@ -127,9 +128,9 @@ class Button(GlWidget):
         self.put_to_redraw()
 
     def connect(self):
-        self.ehid0 = safe_connect(self.gda, self.ehid0, 'motion-notify-event', self._motion_notify)
-        self.ehid1 = safe_connect(self.gda, self.ehid1, 'button-release-event', self.button_release)
-        self.ehid2 = safe_connect(self.gda, self.ehid2, 'button-press-event', self.button_press)
+        self.pc.append(('ehid0', safe_connect, 'motion-notify-event', self._motion_notify))
+        self.pc.append(('ehid1', safe_connect, 'button-release-event', self.button_release))
+        self.pc.append(('ehid2', safe_connect, 'button-press-event', self.button_press))
 
     def button_press(self, widget, event):
         if event.button != 1:  # 1 - левая кнопка мыши, 2 - средняя, 3 - правая.
@@ -138,9 +139,10 @@ class Button(GlWidget):
         Button.pressed = True
 
     def disconnect(self):
-        self.ehid0 = safe_disconnect(self.gda, self.ehid0)
-        self.ehid1 = safe_disconnect(self.gda, self.ehid1)
-        self.ehid2 = safe_disconnect(self.gda, self.ehid2)
+        self.pc.append(('ehid0', safe_disconnect))
+        self.pc.append(('ehid1', safe_disconnect))
+        self.pc.append(('ehid2', safe_disconnect))
+
         if self.idts is not None:
             glib.source_remove(self.idts)
             self.idts = None
@@ -149,7 +151,7 @@ class Button(GlWidget):
         super(Button, self).__del__()
         glDeleteTextures(self.texture_id)
 
-    def __on_timeout_state__(self):
+    def _on_timeout_state(self):
         self.state = 0
         self.idts = None
         return False
@@ -166,7 +168,7 @@ class Button(GlWidget):
                 self.state = (self.state + 1) % len(self.textures)
             elif self.auto == 2:
                 if self.idts is None:
-                    self.idts = glib.timeout_add(100, self.__on_timeout_state__)
+                    self.idts = glib.timeout_add(100, self._on_timeout_state)
                     self.state = 1
             if self.user_proc is not None:
                 self.user_proc(self)
@@ -211,11 +213,11 @@ class Button(GlWidget):
             self.on_mouse_over(self, *args)
             self.put_to_redraw()
             if cover:
-                self.ehid1 = safe_connect(self.gda, self.ehid1, 'button-release-event', self.button_release)
-                self.ehid2 = safe_connect(self.gda, self.ehid2, 'button-press-event', self.button_press)
+                self.pc.append(('ehid1', safe_connect, 'button-release-event', self.button_release))
+                self.pc.append(('ehid2', safe_connect, 'button-press-event', self.button_press))
             else:
-                self.ehid1 = safe_disconnect(self.gda, self.ehid1)
-                self.ehid2 = safe_disconnect(self.gda, self.ehid2)
+                self.pc.append(('ehid1', safe_disconnect))
+                self.pc.append(('ehid2', safe_disconnect))
         return False  # Returns: True to stop other handlers from being invoked for the connect. False to propagate the connect further.
 
     def redraw(self):

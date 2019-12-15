@@ -23,8 +23,8 @@ def on_uninit(ddr, pgm, rcm):
     check_glerrors('on_uninit():')
 
 
-def on_init(gda, scm, rcm):
-    # type: (gtk.DrawingArea, SceneCtl, ResourceCtl) -> None
+def on_init(scm, rcm):
+    # type: (SceneCtl, ResourceCtl) -> None
 
     font = rcm.get_ft_font()
     txt0 = DynamicText(font, (10, 20), u'Кнопки, картинки и текст')
@@ -35,7 +35,7 @@ def on_init(gda, scm, rcm):
     img0 = Picture((50, 200), txr_ship)
     col0 = (255, 0, 0, 255)
     col1 = (255, 255, 255, 255)
-    btn0 = Button(gda, (50, 100), 'КРАСНЫЙ', txr_btn, user_proc=btn0_proc, user_data=(img0, col0, col1))
+    btn0 = Button((50, 100), 'КРАСНЫЙ', txr_btn, user_proc=btn0_proc, user_data=(img0, col0, col1))
 
     scm.add_scene_items(btn0, img0, txt0)
 
