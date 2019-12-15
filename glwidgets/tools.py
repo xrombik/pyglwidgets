@@ -51,11 +51,11 @@ def set_bytes(b, i, w):
 
 
 def chrs_to_word(s, i):
-    return ord(s[i]) | (ord(s[i + 1]) << 8)
+    return ord(s[i]) | (ord(s[i + 1]) * 256)
 
 
 def ibytes_to_word(b, i):
-    return b[i] | (b[i + 1] << 8)
+    return b[i] | (b[i + 1] * 256)
 
 
 def delta_tick(tick0, tick1, tick_max=0xffff):
@@ -70,7 +70,7 @@ def delta_tick(tick0, tick1, tick_max=0xffff):
 
 def pos_to_ang(x0, y0, x, y):
     """
-    return angl(degree's) and radius form coordinats
+    return angel(degree's) and radius from x,y
     """
     x_ = x - x0
     y_ = y - y0
@@ -124,10 +124,7 @@ def assert_byte(byte):
 
 
 def bytes_to_chrs(bytes_buf):
-    s = ''
-    for b in bytes_buf:
-        s += chr(b)
-    return s
+    return ''.join(map(chr, bytes_buf))
 
 
 def set_bits(v, a, m):
@@ -141,21 +138,6 @@ def set_bits(v, a, m):
     """
     # TODO: Упростить выражение
     return v & a & (~m) | (~v) & a & m | v & a & m | v & (~a) & (~m)
-
-
-"""
-def accepts(*types):
-	def check_accepts(f):
-		assert len(types) == f.func_code.co_argcount
-		def new_f(*args, **kwds):
-			for (a, t) in zip(args, types):
-				assert isinstance(a, t), "arg %r does not match %s" % (a, t)
-			return f(*args, **kwds)
-		new_f.func_name = f.func_name
-		return new_f
-	return check_accepts
-@accepts(int, int, int)
-"""
 
 
 def print_buffer(data, data_len):
@@ -180,12 +162,9 @@ def get_bin_str(val, slen=16, rc='0'):
 
 def str_cut(s, i):
     """
-    Отсекает строку по заданному индексу символа
+    Возвращает новую строку полученную отсечением входной строки по заданному индексу символа
     :param s: Отсекаемая строка
     :param i: Индекс символа с которого отсекается строка включительно
     :return: Отсечённая строка
     """
-    sl = str()
-    for c in list(s.decode('utf-8'))[:i]:
-        sl += c
-    return sl
+    return ''.join(list(s.decode('utf-8'))[:i])
