@@ -11,13 +11,16 @@ from . import gltools
 from . import colors
 from . import tools
 from .glimports import *
+from .driver import safe_connect
+from .driver import safe_disconnect
+
+__all__ = ('Entry', )
 
 
 class Entry(glwidget.GlWidget):
-    def __init__(self, gda, pos, text=' ', rect_size=(150, 17), font_name=glwidget.DEFAULT_FONT_FACE,
+    def __init__(self, pos, text=' ', rect_size=(150, 17), font_name=glwidget.DEFAULT_FONT_FACE,
                  font_size=glwidget.DEFAULT_FONT_SIZE,
                  text_color=colors.ENTRY_TEXT, bg_color=(255, 127, 127, 255)):
-        assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert len(pos) == 2
         assert type(rect_size) is tuple
@@ -28,7 +31,6 @@ class Entry(glwidget.GlWidget):
         assert type(bg_color) is tuple
         assert len(bg_color) == 4
 
-        self.gda = gda
         self.font_name = font_name
         self.font_size = font_size
         self.text_color = list(text_color)
@@ -38,7 +40,10 @@ class Entry(glwidget.GlWidget):
         self.size = rect_size
         self.text = text.encode('utf-8')
         self.ehid0 = None
-        self.ehid2 = self.gda.connect('button_press_event', self.on_button_press)
+        self.ehid1 = None
+        self.ehid2 = None
+        self.pc.append(('ehid2', safe_connect, 'button_press_event', self.on_button_press))
+
         self.timer_id = None
         self.connect()
         self.cover = False
@@ -148,11 +153,12 @@ class Entry(glwidget.GlWidget):
             self.text = save_text
             self.cur_index = save_cur_index
             self.cur_pos = save_cur_pos
+        self.put_to_redraw()
         return True
 
     def connect(self):
-        if self.ehid0 is None:
-            self.ehid0 = self.gda.connect('motion_notify_event', self._motion_notify)
+        self.pc.append(('ehid0', safe_connect, 'motion_notify_event', self._motion_notify))
+
         glwidget.connect_key_handler(self._on_key_press)
         if self.timer_id is None:
             self.timer_id = glib.timeout_add(150, self.on_timer)
@@ -160,11 +166,9 @@ class Entry(glwidget.GlWidget):
         self.cur_index = 0
 
     def disconnect(self):
-        # disconnect_key_handler()
-        if self.ehid0 is not None:
-            self.cover = False
-            self.gda.disconnect(self.ehid0)
-            self.ehid0 = None
+        self.cover = False
+        self.pc.append(('ehid0', safe_disconnect))
+
         if self.timer_id is not None:
             glib.source_remove(self.timer_id)
             self.timer_id = None

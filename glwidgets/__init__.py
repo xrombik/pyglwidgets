@@ -7,6 +7,7 @@ import pygtk
 
 # Свои модули
 from .button import *
+from .entry import *
 from .fonts import *
 from .frame import *
 from .glwidget import *

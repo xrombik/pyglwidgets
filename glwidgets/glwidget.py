@@ -28,7 +28,7 @@ def _empty_key_handler_proc(_window, _event, *_key_handler_args):
 
 key_handler_proc = _empty_key_handler_proc
 key_handler_args = list()
-TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\(){}-+=.,:;?!'
+TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\\(){}-+=.,:;?!'
 
 
 def init(wdgt):
@@ -38,8 +38,8 @@ def init(wdgt):
 
 def align_h_center(pos, width, xadvance, cpx):
     """
-    Возвращает смещение по оси X, для выравнивания горизонтального
-    по центру внутри заданной области
+    Возвращает смещение по оси X, для выравнивания
+    горизонтального по центру внутри заданной области
     :param pos: Точка верхнего левого угла области
     :param width: Ширина области
     :param xadvance: Ширина текста

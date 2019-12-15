@@ -37,7 +37,10 @@ def on_init(scm, rcm):
     col1 = (255, 255, 255, 255)
     btn0 = Button((50, 100), 'КРАСНЫЙ', txr_btn, user_proc=btn0_proc, user_data=(img0, col0, col1))
 
-    scm.add_scene_items(btn0, img0, txt0)
+    entry0 = Entry((200, 100), 'type here')
+    entry0.show()
+
+    scm.add_scene_items(btn0, img0, txt0, entry0)
 
 
 def btn0_proc(btn0):

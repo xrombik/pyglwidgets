@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# gtk + opengl driver
-
 import gtk
 import glib
 from glwidget import GlWidget
+from glwidgets import glwidget
 from .glimports import *
 from gltools import opengl_init
 from gltools import check_glerrors
 
 
+__name__ = 'gtkgl driver'
 __all__ = ('DrawDriver', 'safe_connect', 'safe_disconnect')
 
 
@@ -20,7 +20,8 @@ def safe_disconnect(obj, ehid):
     if ehid is not None:
         if obj.handler_is_connected(ehid):
             obj.disconnect(ehid)
-    return None
+            ehid = None
+    return ehid
 
 
 def safe_connect(obj, ehid, name, proc, *args):
@@ -78,6 +79,7 @@ class DrawDriver(gtk.Window):
 
     def init(self):
         gda = self.get_child()
+        glwidget.init(self)
         opengl_init(gda)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
