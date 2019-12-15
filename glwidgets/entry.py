@@ -29,7 +29,6 @@ class Entry(glwidget.GlWidget):
         assert len(bg_color) == 4
 
         self.gda = gda
-        self.ancestor = self.gda.get_ancestor(gtk.Window)
         self.font_name = font_name
         self.font_size = font_size
         self.text_color = list(text_color)
