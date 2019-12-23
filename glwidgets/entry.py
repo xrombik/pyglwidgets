@@ -71,9 +71,9 @@ class Entry(glwidget.GlWidget):
         # Введённый текст
         self.font.draw_text((self.pos[0], self.pos[1] + self.size[1] + 2), self.text)
         # Курсор
-        gltools.draw_line((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
+        if self.timer_id:
+            gltools.draw_line((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
         glEndList()
-
 
     def on_timer(self, *_args):
         # Смена фаз курсора
