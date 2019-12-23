@@ -9,12 +9,14 @@ from . import colors
 from . import fonts
 from . import entry
 from . import tools
-from glwidgets.glwidget import GlWidget
+from . import GlWidget
 from .glimports import *
 from .glconst import *
-from glwidget import DEFAULT_FONT_FACE
-from glwidget import DEFAULT_FONT_SIZE
-from glwidget import connect_key_handler
+from .glwidget import DEFAULT_FONT_FACE
+from .glwidget import DEFAULT_FONT_SIZE
+from .glwidget import connect_key_handler
+from .driver import safe_connect
+from .driver import safe_disconnect
 
 
 class Table(GlWidget):
@@ -134,9 +136,8 @@ class Table(GlWidget):
                 break
             self.i_cur_row += 1
 
-    def __init__(self, drawning_area, pos, rows, view_max=5, font_name=DEFAULT_FONT_FACE,
+    def __init__(self, pos, rows, view_max=5, font_name=DEFAULT_FONT_FACE,
                  font_size=DEFAULT_FONT_SIZE, column_width_proc=None):
-        assert type(drawning_area) is gtk.DrawingArea
         assert type(rows) is list
         assert len(rows) > 0
         assert len(rows[0]) > 0
@@ -149,7 +150,6 @@ class Table(GlWidget):
         self.rows_multi_sel = False
         """ Разрешить множественный выбор рядов """
 
-        self.gda = drawning_area
         self.pos = pos
         self.line_width = 2
 
@@ -164,7 +164,7 @@ class Table(GlWidget):
         self.set_rows(rows)
         self.i_cur_column = 0
         self.edit_proc = Table.edit_proc_default  # Процедура проверяющая резрешение редактирования ячейки
-        self.entry = entry.Entry(drawning_area, self.pos, '', (100, 20))  # Поле ввода. Используется для редактирования ячеек
+        self.entry = entry.Entry(self.pos, '', (100, 20))  # Поле ввода. Используется для редактирования ячеек
         self.entry.hide()
         self.entry.font = self.font
         self.entry.on_edit_done = self._on_edit_done
@@ -175,14 +175,13 @@ class Table(GlWidget):
         self.user_data = None
         self.on_sel_change = None
         """ Обработчик события изменения выбора текущей строки """
-        self.__entry_text__ = self._rows[0][0]
         self.on_2button_press = self._on_2button_press_default
         self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows)
         """	Флаги рядов таблицы """
-        self.put_to_redraw()
         self.focus = False
         self.color_proc = Table.color_proc_horiz  # Процедура определяющая цвет текста для ячейки
         self.bg_color_proc = self.default_bg_color_proc  # Процедура определяющая цвет фона для ячейки
+        self.put_to_redraw()
 
     def _check_rows(self):
         """
@@ -210,8 +209,7 @@ class Table(GlWidget):
 
         width += self.line_width
         row_height = self.font.get_text_hight()
-        height = (row_height + self.line_width) * (
-            len(self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max]) + 1)
+        height = (row_height + self.line_width) * (len(self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max]) + 1)
         return self.pos[0], self.pos[1], width, height, ws, row_height
 
     def show_selected(self):
@@ -487,10 +485,10 @@ class Table(GlWidget):
 
     def connect(self):
         if self.ehid1 is None:
-            self.ehid1 = self.gda.connect('button-press-event', self._on_mbutton_press)
+            self.pc.append(('ehid1', safe_connect, 'button-press-event', self._on_mbutton_press))
 
     def disconnect(self):
-        self.ehid1 = safe_disconnect(self.gda, self.ehid1)
+        self.pc.append(('ehid1', safe_disconnect))
         self.focus = False
-        self.ehid2 = safe_disconnect(self.gda, self.ehid2)
+        self.pc.append(('ehid2', safe_disconnect))
         self.entry.hide()

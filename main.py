@@ -27,7 +27,7 @@ def on_init(scm, rcm):
     # type: (SceneCtl, ResourceCtl) -> None
 
     font = rcm.get_ft_font()
-    txt0 = DynamicText(font, (10, 20), u'Кнопки, картинки и текст')
+    txt0 = DynamicText(font, (10, 20), u'Кнопки, картинки, текст и таблица')
 
     txr_btn = rcm.get_textures('btn%u.png', 2)
     txr_ship = rcm.get_texture('merhn2.png')
@@ -39,8 +39,14 @@ def on_init(scm, rcm):
 
     entry0 = Entry((200, 100), 'type here')
     entry0.show()
-
-    scm.add_scene_items(btn0, img0, txt0, entry0)
+    
+    rows = [['Номер ', '       Цвет        ',         'Длина ', 'Ширина '],
+            ['1',     'Красный',      '30',    '180'],
+            ['2',     'Синий',        '50',    '100'],
+            ['3',     'Фиолетовый',   '60',    '200']]
+    tbl0 = Table((200, 150), rows)
+    
+    scm.add_scene_items(btn0, img0, txt0, entry0, tbl0)
 
 
 def btn0_proc(btn0):
