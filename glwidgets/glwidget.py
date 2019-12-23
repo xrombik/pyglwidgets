@@ -222,6 +222,11 @@ class GlWidget(object):
             self.draw = self._draw_list
 
     def dopc(self, gda):
+        """
+        Отработка отложенных вызовов в момент когда есть gda (gtk.DrawingArea)
+        :param gda:
+        :return:
+        """
         for val in self.pc:
             key = val[0]
             dct = self.__dict__
