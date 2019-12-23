@@ -18,9 +18,13 @@ __all__ = ('Entry', )
 
 
 class Entry(glwidget.GlWidget):
-    def __init__(self, pos, text=' ', rect_size=(150, 17), font_name=glwidget.DEFAULT_FONT_FACE,
+    TICK_RATE = 150
+    
+    def __init__(self, pos, text=' ', rect_size=(150, 17),
+                 font_name=glwidget.DEFAULT_FONT_FACE,
                  font_size=glwidget.DEFAULT_FONT_SIZE,
-                 text_color=colors.ENTRY_TEXT, bg_color=(255, 127, 127, 255)):
+                 text_color=colors.ENTRY_TEXT,
+                 bg_color=(255, 127, 127, 255)):
         assert type(pos) is tuple
         assert len(pos) == 2
         assert type(rect_size) is tuple
@@ -41,9 +45,6 @@ class Entry(glwidget.GlWidget):
         self.text = text.encode('utf-8')
         self.ehid0 = None
         self.ehid1 = None
-        self.ehid2 = None
-        self.pc.append(('ehid2', safe_connect, 'button_press_event', self.on_button_press))
-
         self.timer_id = None
         self.connect()
         self.cover = False
@@ -53,6 +54,7 @@ class Entry(glwidget.GlWidget):
         self.cur_colors = ((255, 255, 255, 0), (255, 255, 255, 255))
         self.cur_col = self.cur_colors[self.cur_tick]
         self.on_edit_done = None
+
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
@@ -70,24 +72,24 @@ class Entry(glwidget.GlWidget):
         self.font.draw_text((self.pos[0], self.pos[1] + self.size[1] + 2), self.text)
         # Курсор
         gltools.draw_line((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
-
         glEndList()
+
 
     def on_timer(self, *_args):
         # Смена фаз курсора
         self.cur_tick += 1
         self.cur_tick %= len(self.cur_colors)
         self.cur_col = self.cur_colors[self.cur_tick]
+        self.put_to_redraw()
         return True
 
     def on_button_press(self, _event, *_args):
         if self.cover:
             glwidget.connect_key_handler(self._on_key_press)
+            self.start_tick()
         else:
-            self.cur_tick = 0
-            if self.timer_id:
-                glib.source_remove(self.timer_id)
-                self.timer_id = None
+            glwidget.disconnect_key_handler()
+            self.stop_tick()
         self.cur_pos = self.pos[0] + gltools.get_str_width(self.text[:self.cur_index], self.font_name, self.font_size)
 
     def _motion_notify(self, *args):
@@ -156,18 +158,26 @@ class Entry(glwidget.GlWidget):
         return True
 
     def connect(self):
-        self.pc.append(('ehid0', safe_connect, 'motion_notify_event', self._motion_notify))
-
-        glwidget.connect_key_handler(self._on_key_press)
-        if self.timer_id is None:
-            self.timer_id = glib.timeout_add(150, self.on_timer)
+        self.pc.append(('ehid0', safe_connect, 'motion-notify-event', self._motion_notify))
+        self.pc.append(('ehid1', safe_connect, 'button-press-event', self.on_button_press))
         self.cur_pos = self.pos[0]
         self.cur_index = 0
 
     def disconnect(self):
         self.cover = False
         self.pc.append(('ehid0', safe_disconnect))
+        self.pc.append(('ehid1', safe_disconnect))
 
+    def stop_tick(self):
         if self.timer_id is not None:
             glib.source_remove(self.timer_id)
             self.timer_id = None
+            self.cur_tick = 0
+            self.put_to_redraw()
+
+    def start_tick(self):
+        if self.timer_id is None:
+            self.cur_tick = 1
+            self.timer_id = glib.timeout_add(Entry.TICK_RATE, self.on_timer)
+            self.put_to_redraw()
+        
