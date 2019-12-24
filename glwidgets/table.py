@@ -24,6 +24,16 @@ class Table(GlWidget):
     ROW_FLAG_SELECTED = 1
     """ Флаг ряда таблицы. Если установлен, то ряд помечен как выбранный """
 
+    @property
+    def auto_widths(self):
+        return self.get_widths == self.get_widths_auto
+
+    @auto_widths.setter
+    def auto_widths(self, val):
+        self.get_widths = (self.get_widths_const, self.get_widths_auto)[val]
+        self.size = self._update_rect()[2:5]
+        self.put_to_redraw()
+        
     @staticmethod
     def _on_2button_press_default(tbl, event):
         assert type(tbl) is Table
@@ -161,6 +171,8 @@ class Table(GlWidget):
             self.column_width_proc = Table.column_auto_width_proc  # Процедура определяющая ширину колонки
         else:
             self.column_width_proc = column_width_proc
+        self.get_widths = self.get_widths_const
+        self.widths = [100] * len(rows[0])
         self.set_rows(rows)
         self.i_cur_column = 0
         self.edit_proc = Table.edit_proc_default  # Процедура проверяющая резрешение редактирования ячейки
@@ -199,18 +211,29 @@ class Table(GlWidget):
         :return:
         """
         width, height = 0, 0
-        ws = list()
-        cx = 0
-        for s in self._rows[0]:
-            xw = self.column_width_proc(self.font, s, cx) + self.line_width
-            ws.append(xw)
-            width += xw
-            cx += 1
-
+        ws = self.get_widths()
         width += self.line_width
         row_height = self.font.get_text_hight()
         height = (row_height + self.line_width) * (len(self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max]) + 1)
         return self.pos[0], self.pos[1], width, height, ws, row_height
+
+    def get_widths_auto(self):
+        cx = len(self._rows[0])
+        cy = len(self._rows)
+        widths = list()
+        for j in range(cx):
+            w = 0
+            for i in range(cy):
+                s = self._rows[i][j]
+                w0 = self.font.get_text_width(s)
+                if w0 > w:
+                    w = w0
+            widths.append(w + self.line_width * 2)
+        return widths
+    
+    def get_widths_const(self):
+        return self.widths
+ 
 
     def show_selected(self):
         """
