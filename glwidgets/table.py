@@ -231,7 +231,7 @@ class Table(GlWidget):
         :param rows_flags: Флаги рядов таблицы
         :return: Ничего
         """
-        assert (type(rows) is list) or (type(rows) is tuple)
+        assert isinstance(rows, (list, tuple))
         self._rows = rows
         if rows_flags is None:
             self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows)
