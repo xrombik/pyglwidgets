@@ -54,6 +54,7 @@ class Entry(glwidget.GlWidget):
         self.cur_colors = ((255, 255, 255, 0), (255, 255, 255, 255))
         self.cur_col = self.cur_colors[self.cur_tick]
         self.on_edit_done = None
+        self.user_data = None
 
 
     def redraw(self):
