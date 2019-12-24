@@ -13,3 +13,5 @@
 - Edit/entry boxes;
 - Static and dynamic Unicode text;
 - Pictures with scale and rotation.
+
+![](https://github.com/xrombik/pyglwidgets/blob/alpha0/main.png)
