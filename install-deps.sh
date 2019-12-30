@@ -4,7 +4,7 @@ set -e
 # Sets the missing dependencies if necessary
 # PACKS - contains a list of all dependencies used.
 # Only for *.deb operating systems (Debian, Ubuntu, Mint, etc.).
-PACKS=("python-gtk2" "libgtkglext1" "python-opengl" "python-gtkglext1" "python-pip")
+PACKS=("python-gtk2" "libgtkglext1" "python-opengl" "python-gtkglext1" "python-pip" "imagemagick")
 
 sudo apt-get autoremove -f -y
 sudo apt-get update -y
