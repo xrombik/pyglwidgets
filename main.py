@@ -31,7 +31,7 @@ def on_init(scm, rcm):
     txt0 = DynamicText(font, (10, 20), u'Жми кнопку!')
 
     txr_btn = rcm.get_textures('btn%u.png', 2)
-    txr_ship = rcm.get_texture('merhn2.png')
+    txr_ship = rcm.get_texture('star.png')
 
     rows = [['Номер', 'Цвет',         'Длина', 'Ширина'],
             ['1',     'Красный',      '30',    '180'],
