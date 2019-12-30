@@ -55,7 +55,7 @@ class Entry(glwidget.GlWidget):
         self.cur_col = self.cur_colors[self.cur_tick]
         self.on_edit_done = None
         self.user_data = None
-
+        self.line_width = 2
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
@@ -65,7 +65,7 @@ class Entry(glwidget.GlWidget):
         p1 = pos[0] + self.size[0], pos[1]
         p2 = pos[0] + self.size[0], pos[1] + self.size[1]
         p3 = pos[0], pos[1] + self.size[1]
-        gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, 1)
+        gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, self.line_width)
         pts = p1, p0, p3, p2
         # Подкладка
         gltools.draw_polygon(pts, (0, 0, 0, 240))
