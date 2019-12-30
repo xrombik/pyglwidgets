@@ -71,6 +71,7 @@ def btn0_proc(btn0):
     img0.color = (col1, col0)[btn0.state]
     txt0.set_text(u'Кнопка нажата в:\n%s' % datetime.now())
 
+
 if __name__ == '__main__':
     import sys
     main(sys.argv)

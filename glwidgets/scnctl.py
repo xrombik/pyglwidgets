@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from datetime import datetime
 import inspect
 
@@ -16,17 +15,13 @@ class SceneCtl(list):
         self.mode_change_callbacks = list()
         self.draw_callbacks = list()
         self.time_now = datetime.now()
-        self.tick = 0
-        self.update_tick()
         self._events = dict()
         self._event_ncall = 0
         self.scene_changed = True
 
-    def update_tick(self):
-        """
-        Обновляет текущее значение тик-времени в мс
-        """
-        self.tick = (self.time_now.second << 10) | (self.time_now.microsecond // 1024) % 65535
+    @property
+    def tick(self):
+        return (self.time_now.second << 10) | (self.time_now.microsecond // 1024) % 65535
 
     def check(self):
         """
@@ -62,7 +57,8 @@ class SceneCtl(list):
         :return:
         """
         # Спрятать все
-        map(lambda item: item.hide(), self)
+        for item in self:
+            item.hide()
 
         # Показать только те, что нужны в режиме mode
         for key in mode_items:
@@ -71,18 +67,13 @@ class SceneCtl(list):
                     continue
             elif key != mode:
                 continue
-            # TODO: Избавиться от использования этого поля
-            if 'enable' in item.__dict__:
-                for item in mode_items[key] and item.enable:
-                    item.show()
-            else:
-                for item in mode_items[key]:
-                    item.show()
+            for item in mode_items[key]:
+                item.show()
 
     def add_scene_items(self, *items):
         """
         Добавляет элементы в сцену
-        :param item:
+        :param items: Список добавляемых элементов
         :return:
         """
         len_scene = len(self)
@@ -94,12 +85,13 @@ class SceneCtl(list):
     def del_scene_item(self, *items):
         """
         Удаляет элементы из сцены
-        :param item:
+        :param items: Список удаляемых элементов
         :return:
         """
         len_scene = len(self)
-        items = filter(lambda item: item in self, items)
-        map(lambda item: self.remove(item), items)
+        for item in self:
+            if item in items:
+                self.remove(item)
         self.scene_changed = len(self) < len_scene
         return self.scene_changed
 
@@ -112,8 +104,8 @@ class SceneCtl(list):
         """
         assert inspect.isfunction(callback)
         if (len(args) != (callback.func_code.co_argcount - 2)) and ((callback.func_code.co_flags & 0x04) == 0):
-            print(u'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u (2 по умолчанию всегда есть)'
-                %(callback.func_code.co_filename, callback.func_code.co_name, len(args), callback.func_code.co_argcount))
+            print(u'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u (два всегда есть)'
+                % (callback.func_code.co_filename, callback.func_code.co_name, len(args), callback.func_code.co_argcount))
             raise ValueError
         mcc_id = callback, args
         if mcc_id not in self.mode_change_callbacks:

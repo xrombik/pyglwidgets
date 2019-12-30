@@ -12,12 +12,12 @@ sudo apt-get upgrade -y
 
 for PACK in "${PACKS[@]}"
 do
-	echo -n "Check for package availability \"$PACK\" ... "
-	dpkg -s ${PACK} > /dev/null
-	if [[ $? -ne 0 ]] ; then
-		echo "\"$PACK\" hasn't been found, and will be installed."
-		sudo apt-get install ${PACK} -y
-	else
-		echo " found."
-	fi
+  echo -n "Check for package availability \"$PACK\" ... "
+  dpkg -s "${PACK}" > /dev/null
+  if [[ $? -ne 0 ]] ; then
+    echo "\"$PACK\" hasn't been found, and will be installed."
+    sudo apt-get install "${PACK}" -y
+  else
+    echo " found."
+  fi
 done
