@@ -6,10 +6,10 @@ from datetime import datetime
 
 
 def main(argv):
-    pgm = ProgramCtl(argv)
-    scm = SceneCtl(argv)
-    rcm = ResourceCtl(argv)
-    ddr = DrawDriver(argv, 'pyglwidgets', 640, 480)
+    pgm = ProgramCtl()
+    scm = SceneCtl()
+    rcm = ResourceCtl()
+    ddr = DrawDriver('pyglwidgets', 640, 480)
     ddr.set_init(on_init, scm, rcm)
     ddr.set_uninit(on_uninit, pgm, rcm)
     ddr.set_scene(scm)

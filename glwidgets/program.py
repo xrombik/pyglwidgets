@@ -8,7 +8,7 @@ from glib import MainLoop
 
 class ProgramCtl(object):
 
-    def __init__(self, argv):
+    def __init__(self, argv=None):
         self.saved_exception_hook = sys.excepthook
         sys.excepthook = self.exception_hook
         self._main_loop = MainLoop()

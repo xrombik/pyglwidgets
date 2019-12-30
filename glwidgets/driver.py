@@ -51,7 +51,7 @@ def draw_end(gda, s):
 
 
 class DrawDriver(gtk.Window):
-    def __init__(self, argv, title, w, h):
+    def __init__(self, title, w, h, argv=None):
         super(DrawDriver, self).__init__()
         display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  # gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
         events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK

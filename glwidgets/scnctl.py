@@ -7,7 +7,7 @@ import inspect
 
 
 class SceneCtl(list):
-    def __init__(self, argv):
+    def __init__(self, argv=None):
         super(SceneCtl, self).__init__()
         self.mode = None
         self._prev_mode = None
