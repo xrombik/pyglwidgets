@@ -7,14 +7,20 @@ import freetype
 
 from . import colors
 from . import gltools
-from . import glwidget
 from .glimports import *
 
-__all__ = ('FreeTypeFont', 'CairoFont')
+__all__ = ('FreeTypeFont', 'CairoFont', 'DEFAULT_FONT_FACE', 'DEFAULT_FONT_SIZE', 'DEFAULT_DPI')
 
 DEFAULT_FONT_FACE = 'Liberation Sans'
 DEFAULT_FONT_SIZE = 18
 DEFAULT_DPI = 96
+
+
+def next_p2(a):
+    rval = 1
+    while rval < a:
+        rval *= 2
+    return rval
 
 
 class FreeTypeFont(object):
@@ -163,13 +169,6 @@ class FreeTypeFont(object):
         glDeleteLists(self.list_base, self.range_dl)
         glDeleteTextures(self.textures)
 
-    @staticmethod
-    def _next_p2(a):
-        rval = 1
-        while rval < a:
-            rval <<= 1
-        return rval
-
     def _make_dlist(self, ch):
         """
         Создаёт display list одного символа
@@ -181,8 +180,8 @@ class FreeTypeFont(object):
         glyph = self.face.glyph
         bitmap = self.face.glyph.bitmap
 
-        width = self._next_p2(bitmap.width)
-        height = self._next_p2(bitmap.rows)
+        width = next_p2(bitmap.width)
+        height = next_p2(bitmap.rows)
         expanded_data = bytearray(2 * width * height)
         for j in range(height):
             for i in range(width):

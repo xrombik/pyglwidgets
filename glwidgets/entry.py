@@ -35,8 +35,6 @@ class Entry(glwidget.GlWidget):
         assert type(bg_color) is tuple
         assert len(bg_color) == 4
 
-        self.font_name = font_name
-        self.font_size = font_size
         self.text_color = list(text_color)
         self.bg_color = bg_color
         self.font = fonts.CairoFont(font_name, font_size)
@@ -91,7 +89,7 @@ class Entry(glwidget.GlWidget):
         else:
             glwidget.disconnect_key_handler()
             self.stop_tick()
-        self.cur_pos = self.pos[0] + gltools.get_str_width(self.text[:self.cur_index], self.font_name, self.font_size)
+        self.cur_pos = self.pos[0] + self.font.get_text_width(self.text[:self.cur_index])
 
     def _motion_notify(self, *args):
         event = args[1]
@@ -181,4 +179,3 @@ class Entry(glwidget.GlWidget):
             self.cur_tick = 1
             self.timer_id = glib.timeout_add(Entry.TICK_RATE, self.on_timer)
             self.put_to_redraw()
-        

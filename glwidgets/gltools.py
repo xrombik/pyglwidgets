@@ -9,10 +9,10 @@ import cairo
 import gtk
 import gtk.gdkgl
 import math
-from .glimports import *
 
 # Свои модули
 import colors
+from .glimports import *
 from .glconst import *
 
 _flash_phase = 0
@@ -76,22 +76,7 @@ def check_ring(r1, r2, x, y, ex, ey):
     return r1 < math.hypot(x - ex, y - ey) < r2
 
 
-def get_str_width(s, font_name, font_size):
-    # type: (str, glwidgets.GlFont, font_size) -> int
-    """
-    :param s: Строка
-    :param font_name: Название шрифта
-    :param font_size: Размер шрифта
-    :return: Ширина строки в пикселях на экране
-    """
-    cc = cairo.Context(__cis0__)
-    cc.select_font_face(font_name)
-    cc.set_font_size(font_size)
-    xbearing, ybearing, width, height, xadvance, yadvance = cc.text_extents(s)
-    return int(xadvance + 0.5)
-
-
-def draw_circle(cx, cy, r, color=(255, 255, 255, 255), width=2, num_segments=100):
+def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
     """
     Рисует окружность
     :param cx: Центр по оси X
@@ -197,10 +182,7 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
             , (x0 + line_width, y) \
             , (x0 + line_width, y + row_height + line_width) \
             , (x_right - line_width, y + row_height + line_width)
-        if j < len(rows_flags):
-            col = bg_color_proc(i_cur, j, rows_flags, focus)
-        else:
-            print('->gltools.py():ошибка: j:%u len(rows_flags):%u' % (j, len(rows_flags)))
+        col = bg_color_proc(i_cur, j, rows_flags, focus)
         draw_polygon(pts, col)
         j += 1
         cx = 0
@@ -271,27 +253,29 @@ def draw_table_borders(pos, cws, rh, rn, lw):
     draw_line((pos[0], y), (x, y), colors.TABLE_LINES, lw)
 
 
-def opengl_init(gda, quality=GL_NICEST):
+def opengl_init(width, height, quality=GL_NICEST):
     assert quality in (GL_FASTEST, GL_NICEST)
     global __cis0__, _parent_height, __cairo_texts__, __cairo_texts_len_max__, _dl_gltextparameterf
-    __cis0__ = cairo.ImageSurface(cairo.FORMAT_ARGB32, gda.allocation.width, gda.allocation.height)
-    _parent_height = gda.allocation.height
+    __cis0__ = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+    _parent_height = height
     __cairo_texts__ = dict()
     __cairo_texts_len_max__ = 2048
 
-    glViewport(0, 0, gda.allocation.width, gda.allocation.height)
-    glOrtho(0, gda.allocation.width, 0, gda.allocation.height, -1, 1)
+    glViewport(0, 0, width, height)
+    glOrtho(0, width, 0, height, -1, 1)
     glMatrixMode(GL_MODELVIEW)
-    glEnable(GL_MULTISAMPLE)
     glEnable(GL_CULL_FACE)
-    glEnable(GL_LINE_SMOOTH)
     glEnable(GL_BLEND)
+    glCullFace(GL_BACK)
+    glDepthFunc(GL_LESS)
+
+    glEnable(GL_MULTISAMPLE)
+    glEnable(GL_LINE_SMOOTH)
     glEnable(GL_DITHER)
     glEnable(GL_POLYGON_SMOOTH)
     glEnable(GL_POINT_SMOOTH)
-    glCullFace(GL_BACK)
     glShadeModel(GL_SMOOTH)
-    glDepthFunc(GL_LESS)
+
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glClearDepth(1.0)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

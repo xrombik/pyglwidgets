@@ -4,13 +4,13 @@
 
 # Чужие модули
 import glib
-import gtk
 import inspect
 import cairo
 
 # Свои модули
-from . import gltools
-from . import fonts
+from . import colors
+from .gltools import *
+from .fonts import *
 from .glwidget import *
 from .glimports import *
 from .driver import safe_connect
@@ -22,7 +22,7 @@ __all__ = ('Button', 'ButtonRing', 'ButtonAnimated')
 class Button(GlWidget):
     pressed = False
 
-    def __init__(self, pos, text, textures, text_color=gltools.colors.BUTTON_TEXT, auto=1, user_proc=None,
+    def __init__(self, pos, text, textures, text_color=colors.BUTTON_TEXT, auto=1, user_proc=None,
                  user_data=None, check_part=((1.0 / 6.0), 0.5)):
         assert type(text_color) is tuple, "Цвет должен состоять из четырёх компонент в кортеже"
         assert len(text_color) == 4, "Цвет должен состоять из четырёх компонент в кортеже"
@@ -68,8 +68,8 @@ class Button(GlWidget):
             self.textures = (textures,)
         for item in self.textures:
             assert glIsTexture(item[0]), "Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
-            assert type(item[1]) is int, "Должна быть ширина, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
-            assert type(item[2]) is int, "Должна быть высота, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert type(item[1]) is int, "Ширина, должно быть целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert type(item[2]) is int, "Высота, должно быть целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
 
         # Наведение мыши
         self.cover = 0
@@ -100,10 +100,10 @@ class Button(GlWidget):
         self.outlines = None
         self.align = align_h_left  # Процедура выравнивания текста
 
-        self.mirror = gltools.MIRROR_NONE
+        self.mirror = MIRROR_NONE
 
         self.texture2 = None
-        self.text_height = fonts.DEFAULT_FONT_SIZE
+        self.text_height = DEFAULT_FONT_SIZE
 
         self.on_mouse_over = self.on_mouse_over_def  # Обработка наведения мыши
         self.put_to_redraw()
@@ -207,7 +207,7 @@ class Button(GlWidget):
         event = args[1]
         width = self.textures[self.state][1]
         height = self.textures[self.state][2]
-        cover = gltools.check_rect(width, height, self.pos, event.x, event.y)
+        cover = check_rect(width, height, self.pos, event.x, event.y)
         # Чтобы лишний раз не добавилось в очередь перерисовки
         if self.cover != cover:
             self.cover = cover
@@ -233,8 +233,8 @@ class Button(GlWidget):
 
         if self.text and (self.texture2 is None):
             # Вычислить размер в пикселях который будет занимать текст
-            xbearing, ybearing, text_width, text_height, xadvance, yadvance = fonts.CairoFont.cairo_context.text_extents(self._text)
-            fascent, fdescent, fheight, fxadvance, fyadvance = fonts.CairoFont.cairo_context.font_extents()
+            xbearing, ybearing, text_width, text_height, xadvance, yadvance = CairoFont.cairo_context.text_extents(self._text)
+            fascent, fdescent, fheight, fxadvance, fyadvance = CairoFont.cairo_context.font_extents()
 
             # Выравнивание
             width_a, x_a = self.align(self.pos, width, xadvance, self.check_part[0])
@@ -243,7 +243,7 @@ class Button(GlWidget):
             # 1) создать изображение текста в буфере
             cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_a, height)
             cc = cairo.Context(cis)
-            cc.select_font_face(fonts.DEFAULT_FONT_FACE)
+            cc.select_font_face(DEFAULT_FONT_FACE)
             cc.set_font_size(self.text_height)
 
             # тень
@@ -255,7 +255,7 @@ class Button(GlWidget):
             cc.show_text(self._text)
 
             # 2) Назначить буфер с текстом в текстуру
-            texture2 = gltools.data_to_texture(self.texture_id, cis.get_data(), width_a, height)
+            texture2 = data_to_texture(self.texture_id, cis.get_data(), width_a, height)
             cis.finish()
 
             y = int(self.pos[1] + (height - fheight + fdescent) * self.check_part[1] + 0.5)
@@ -263,12 +263,12 @@ class Button(GlWidget):
         # Сборка потока команд в display list
         glNewList(self.dl, GL_COMPILE)
         # 3) Нарисовать фон кнопки
-        gltools.draw_texture((texture1, width, height), self.pos, color, self.mirror)
+        draw_texture((texture1, width, height), self.pos, color, self.mirror)
         # 4) Нарисовать текстуру с текстом
         if self._text:
-            gltools.draw_texture(texture2, (x_a, y), self.text_color)
+            draw_texture(texture2, (x_a, y), self.text_color)
         if self.outlines:
-            gltools.draw_lines(self.outlines, self.outline_colors[self.outline_colori])
+            draw_lines(self.outlines, self.outline_colors[self.outline_colori])
         glEndList()
 
 
@@ -277,10 +277,9 @@ class ButtonRing(Button):
     Кнопка в форме кольца
     """
 
-    def __init__(self, gda, pos, textures, r1, r2, state_colors=(gltools.colors.ALPHA0, gltools.colors.RED1),
-                 user_proc=None, user_data=None):
+    def __init__(self, pos, textures, r1, r2, state_colors=(colors.ALPHA0, colors.RED1),
+        user_proc=None, user_data=None):
         """
-        :param gda: Контекст opengl-gtk
         :param pos: Координаты верхнего левого угла на экране в пикселях
         :param textures: Текстуры
         :param r1: Внутренний радиус в пикселях
@@ -289,11 +288,11 @@ class ButtonRing(Button):
         :param user_proc: Пользовательская процедура
         :param user_data: Пользовательские данные
         """
-        super(ButtonRing, self).__init__(gda, pos, None, textures, (255, 255, 255, 255), 0, user_proc, user_data)
+        super(ButtonRing, self).__init__(pos, None, textures, colors.WHITE, 0, user_proc, user_data)
         # Формальная проверка фходных данных
-        assert (type(r1) is int) and (r1 > 0)  # r1 - внутренний радиус
-        assert (type(r2) is int) and (r2 > 0)  # r2 - внешний радиус
-        assert r2 > r1  # Внешний радиус должен быть больше внутреннего
+        assert (type(r1) is int) and (r1 > 0), "r1 - внутренний радиус"
+        assert (type(r2) is int) and (r2 > 0), "r2 - внешний радиус"
+        assert r2 > r1, "Внешний радиус должен быть больше внутреннего"
         self.state_colors = state_colors
         self.auto = 0
         self.r1 = r1
@@ -303,7 +302,7 @@ class ButtonRing(Button):
         event = args[1]
         x = self.pos[0] + (self.textures[0][1] >> 1)
         y = self.pos[1] + (self.textures[0][2] >> 1)
-        cover = gltools.check_ring(self.r1, self.r2, x, y, event.x, event.y)
+        cover = check_ring(self.r1, self.r2, x, y, event.x, event.y)
         # Чтобы лишний раз не добавилось в очередь перерисовки
         if self.cover != cover:
             self.cover = cover
@@ -315,7 +314,7 @@ class ButtonRing(Button):
         r, g, b, a = self.state_colors[self._state]
         color = r, g, b, alpha
         glNewList(self.dl, GL_COMPILE)
-        gltools.draw_texture(self.textures[0], self.pos, color)
+        draw_texture(self.textures[0], self.pos, color)
         glEndList()
 
 
@@ -323,7 +322,7 @@ class ButtonAnimated(Button):
     def __init__(self, gda, pos, textures, outline_colors, user_proc=None, user_data=None):
         self._is_playing = False
         self._timer_id = None
-        super(ButtonAnimated, self).__init__(gda, pos, None, textures, (255, 255, 255, 255), False, user_proc, user_data)
+        super(ButtonAnimated, self).__init__(gda, pos, None, textures, colors.WHITE, False, user_proc, user_data)
         self._on_timer()
         self.outline_colors = outline_colors
         self.outline_colori = 0

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import colors
-import gltools
-
+from . import colors
+from . import gltools
+from . import fonts
 from .glwidget import *
 from .glimports import *
+
+__all__ = ('CairoFrame', )
 
 
 class CairoFrame(GlWidget):
@@ -27,8 +29,8 @@ class CairoFrame(GlWidget):
         self.color_head_bk = b, g, r, a
         self.color_text = b * 4.0, g * 5.0, r * 5.0, a
         self.header_height = 23
-        self.font_name = DEFAULT_FONT_FACE
-        self.font_size = DEFAULT_FONT_SIZE
+        self.font_name = fonts.DEFAULT_FONT_FACE
+        self.font_size = fonts.DEFAULT_FONT_SIZE
         self.line_width = 3
         CairoFrame.frame_count += 1
         self.title = title
@@ -40,7 +42,7 @@ class CairoFrame(GlWidget):
         self._show_text = True
 
     def set_title(self, title):
-        assert type(title) is str, "Должна быть строка"
+        assert type(title) is str, u'Должна быть строка'
         self.title = title
 
     def add_line(self, pos0, pos1):

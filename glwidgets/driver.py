@@ -80,7 +80,7 @@ class DrawDriver(gtk.Window):
     def init(self):
         gda = self.get_child()
         glwidget.init(self)
-        opengl_init(gda)
+        opengl_init(gda.allocation.width, gda.allocation.height)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
 
