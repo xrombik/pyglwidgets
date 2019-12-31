@@ -7,10 +7,7 @@ import inspect
 
 from .glimports import *
 
-DEFAULT_FONT_FACE = 'Liberation Sans'
-DEFAULT_FONT_SIZE = 18
 DEFAULT_RATE_MS = 150
-DEFAULT_DPI = 96
 
 _ehid = None
 
@@ -145,12 +142,8 @@ def clear_cairo_surface(cc):
 
 # noinspection PyAttributeOutsideInit
 class GlWidget(object):
-    image_surface0 = cairo.ImageSurface(cairo.FORMAT_ARGB32, 0, 0)
-    cairo_context = cairo.Context(image_surface0)
-    cairo_context.select_font_face(DEFAULT_FONT_FACE)
-    cairo_context.set_font_size(DEFAULT_FONT_SIZE)
     items_queue = dict()
-    on_timer = None
+    on_redraw = None
 
     __slots__ = ('pos', 'color', 'z', 'dl', 'draw', '_pos', '_color', 'pc')
 
@@ -200,7 +193,7 @@ class GlWidget(object):
         :return: Ничего
         """
         GlWidget.items_queue[id(self)] = self
-        GlWidget.on_timer()
+        GlWidget.on_redraw()
 
     def _draw_list(self):
         glCallList(self.dl)
@@ -248,4 +241,3 @@ class GlWidget(object):
     def disconnect(self): pass
 
     def connect(self): pass
-

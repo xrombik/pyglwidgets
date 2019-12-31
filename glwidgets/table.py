@@ -12,8 +12,8 @@ from . import tools
 from . import GlWidget
 from .glimports import *
 from .glconst import *
-from .glwidget import DEFAULT_FONT_FACE
-from .glwidget import DEFAULT_FONT_SIZE
+from .fonts import DEFAULT_FONT_FACE
+from .fonts import DEFAULT_FONT_SIZE
 from .glwidget import connect_key_handler
 from .driver import safe_connect
 from .driver import safe_disconnect
