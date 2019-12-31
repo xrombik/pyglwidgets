@@ -14,4 +14,4 @@
 - Static and dynamic Unicode text;
 - Pictures with scale and rotation.
 
-<img src="https://github.com/xrombik/pyglwidgets/blob/alpha0/main.png" width="640" height="480">
+<img src="https://github.com/xrombik/pyglwidgets/blob/alpha0/main.png" width="100">
