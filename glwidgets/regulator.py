@@ -86,7 +86,6 @@ class TextRegulator(StaticText):
         self.font.draw_text(self.pos, self.get_text(), self.color)
         glEndList()
 
-
     def key_callback(self, window, event):
         """
         Вызывается при нажатии на клавишы клавиатуры, когда экземпляр в фокусе ввода

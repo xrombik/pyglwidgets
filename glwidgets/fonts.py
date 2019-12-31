@@ -12,6 +12,10 @@ from .glimports import *
 
 __all__ = ('FreeTypeFont', 'CairoFont')
 
+DEFAULT_FONT_FACE = 'Liberation Sans'
+DEFAULT_FONT_SIZE = 18
+DEFAULT_DPI = 96
+
 
 class FreeTypeFont(object):
     """
@@ -38,7 +42,7 @@ class FreeTypeFont(object):
          u'a', u's', u'd', u'f', u'g', u'h', u'j', u'k', u'l', u'z',
          u'x', u'c', u'v', u'b', u'n', u'm', u'[', u']', u'{', u'}')
 
-    def __init__(self, file_name, font_height=glwidget.DEFAULT_FONT_SIZE, dpi=glwidget.DEFAULT_DPI, line_spacing=1.5):
+    def __init__(self, file_name, font_height=DEFAULT_FONT_SIZE, dpi=DEFAULT_DPI, line_spacing=1.5):
         range_dl = 0
         for ordch in map(ord, FreeTypeFont.ALPHABET):
             if range_dl < ordch:
@@ -221,7 +225,12 @@ class FreeTypeFont(object):
 
 class CairoFont(object):
     font_items = dict()
-    def __init__(self, face=glwidget.DEFAULT_FONT_FACE, font_hight=glwidget.DEFAULT_FONT_SIZE, predraw=None):
+    image_surface0 = cairo.ImageSurface(cairo.FORMAT_ARGB32, 0, 0)
+    cairo_context = cairo.Context(image_surface0)
+    cairo_context.select_font_face(DEFAULT_FONT_FACE)
+    cairo_context.set_font_size(DEFAULT_FONT_SIZE)
+
+    def __init__(self, face=DEFAULT_FONT_FACE, font_hight=DEFAULT_FONT_SIZE, predraw=None):
         assert type(face) is str
         assert type(font_hight) is int
         self.cc0 = cairo.Context(gltools.__cis0__)  # Поверхность для вычисления размера текста
@@ -238,7 +247,7 @@ class CairoFont(object):
     def __del__(self):
         glDeleteTextures([self.texture_id])
 
-    def __new__(cls, face=glwidget.DEFAULT_FONT_FACE, face_size=glwidget.DEFAULT_FONT_SIZE, predraw=None):
+    def __new__(cls, face=DEFAULT_FONT_FACE, face_size=DEFAULT_FONT_SIZE, predraw=None):
         assert type(face) is str
         assert type(face_size) is int
         font_key = (face, face_size)

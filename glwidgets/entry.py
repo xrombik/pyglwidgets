@@ -21,8 +21,8 @@ class Entry(glwidget.GlWidget):
     TICK_RATE = 150
     
     def __init__(self, pos, text=' ', rect_size=(150, 17),
-                 font_name=glwidget.DEFAULT_FONT_FACE,
-                 font_size=glwidget.DEFAULT_FONT_SIZE,
+                 font_name=fonts.DEFAULT_FONT_FACE,
+                 font_size=fonts.DEFAULT_FONT_SIZE,
                  text_color=colors.ENTRY_TEXT,
                  bg_color=(255, 127, 127, 255)):
         assert type(pos) is tuple

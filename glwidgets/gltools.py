@@ -26,23 +26,21 @@ def step_flash():
 
 
 _glerros = \
-    {
-        GL_NO_ERROR: "GL_NO_ERROR: No error has been recorded",
-        GL_INVALID_ENUM: "GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument",
-        GL_INVALID_VALUE: "GL_INVALID_VALUE: A numeric argument is out of range",
-        GL_INVALID_OPERATION: "GL_INVALID_OPERATION: The specified operation is not allowed in the current state",
-        # GL_INVALID_FRAMEBUFFER_OPERATION: "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete",
-        GL_OUT_OF_MEMORY: "GL_OUT_OF_MEMORY: There is not enough memory left to execute the command",
-        GL_STACK_UNDERFLOW: "GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow",
-        GL_STACK_OVERFLOW: "GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow"
-    }
+{
+    GL_NO_ERROR: "GL_NO_ERROR: No error has been recorded",
+    GL_INVALID_ENUM: "GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument",
+    GL_INVALID_VALUE: "GL_INVALID_VALUE: A numeric argument is out of range",
+    GL_INVALID_OPERATION: "GL_INVALID_OPERATION: The specified operation is not allowed in the current state",
+    # GL_INVALID_FRAMEBUFFER_OPERATION: "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete",
+    GL_OUT_OF_MEMORY: "GL_OUT_OF_MEMORY: There is not enough memory left to execute the command",
+    GL_STACK_UNDERFLOW: "GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow",
+    GL_STACK_OVERFLOW: "GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow"
+}
 
 # TODO: Добавить матрицу вертикального отражения
 MIRROR_NONE = (0, 1, 1, 1, 1, 0, 0, 0)  # Матрица без отражения
 MIRROR_HORIZ = (1, 1, 0, 1, 0, 0, 1, 0)  # Матрица горизонтального отражения
 
-
-# TODO: Переделать на использование "Vertex array" вместо "Display list"
 
 pi_2 = 2.0 * math.pi
 
@@ -150,7 +148,7 @@ def draw_lines_rotated(rotor_point, points, color=colors.WHITE, width=2, tetha=0
     glTranslatef(rotor_point[0], _parent_height - rotor_point[1], 0)
     glRotatef(tetha, 0, 0, 1)  # rotating
     glBegin(GL_LINE_STRIP)
-    map(lambda p: glVertex2f(*p), points)
+    for p in points: glVertex2f(*p)
     glEnd()
     glPopMatrix()
 
@@ -273,7 +271,8 @@ def draw_table_borders(pos, cws, rh, rn, lw):
     draw_line((pos[0], y), (x, y), colors.TABLE_LINES, lw)
 
 
-def opengl_init(gda):
+def opengl_init(gda, quality=GL_NICEST):
+    assert quality in (GL_FASTEST, GL_NICEST)
     global __cis0__, _parent_height, __cairo_texts__, __cairo_texts_len_max__, _dl_gltextparameterf
     __cis0__ = cairo.ImageSurface(cairo.FORMAT_ARGB32, gda.allocation.width, gda.allocation.height)
     _parent_height = gda.allocation.height
@@ -305,7 +304,7 @@ def opengl_init(gda):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
     glEndList()
 
-    val = GL_NICEST  # =GL_FASTEST
+    val = quality
     glHint(GL_LINE_SMOOTH_HINT, val)
     glHint(GL_POINT_SMOOTH_HINT, val)
     glHint(GL_POLYGON_SMOOTH_HINT, val)
@@ -318,35 +317,35 @@ def opengl_init(gda):
     print(u'Отрисовка: %s' % glGetString(GL_RENDERER))
 
 
-def draw_sector(pointsIn, pointsOut, color):
-    N1 = len(pointsOut)
-    N2 = len(pointsIn)
-    N = N2
-    if (N1 < 2) or (N2 < 2):
+def draw_sector(points_in, points_out, color):
+    n1 = len(points_out)
+    n2 = len(points_in)
+    n = n2
+    if (n1 < 2) or (n2 < 2):
         return
-    if N1 < N2:
-        N = N1
+    if n1 < n2:
+        n = n1
 
     glColor4ub(*color)
     i = 0
-    iN = N - 1
-    while i < iN:
-        i1 = N - i - 1
-        i2 = N - i - 2
+    i_n = n - 1
+    while i < i_n:
+        i1 = n - i - 1
+        i2 = n - i - 2
         glBegin(GL_POLYGON)
-        px, py = pointsOut[i]
+        px, py = points_out[i]
         glVertex2f(px, _parent_height - py)
-        px, py = pointsIn[i1]
+        px, py = points_in[i1]
         glVertex2f(px, _parent_height - py)
-        px, py = pointsIn[i2]
+        px, py = points_in[i2]
         glVertex2f(px, _parent_height - py)
         glEnd()
         glBegin(GL_POLYGON)
-        px, py = pointsIn[i]
+        px, py = points_in[i]
         glVertex2f(px, _parent_height - py)
-        px, py = pointsOut[i1]
+        px, py = points_out[i1]
         glVertex2f(px, _parent_height - py)
-        px, py = pointsOut[i2]
+        px, py = points_out[i2]
         glVertex2f(px, _parent_height - py)
         glEnd()
         i += 1
@@ -363,7 +362,6 @@ def check_glerrors(title):
         break
     if err_cnt:
         raise Exception()
-    return err_cnt
 
 
 def generate_dls(count):
@@ -374,7 +372,6 @@ def generate_dls(count):
 def data_to_texture(texture_id, data, width, height, _db=''):
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, texture_id)
-    # assert glIsTexture(texture_id)  # You cannot include calls to glIsTexture in display lists.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, str(data))
     glCallList(_dl_gltextparameterf)
     glDisable(GL_TEXTURE_2D)

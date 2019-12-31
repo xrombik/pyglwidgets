@@ -10,6 +10,7 @@ import cairo
 
 # Свои модули
 from . import gltools
+from . import fonts
 from .glwidget import *
 from .glimports import *
 from .driver import safe_connect
@@ -102,7 +103,7 @@ class Button(GlWidget):
         self.mirror = gltools.MIRROR_NONE
 
         self.texture2 = None
-        self.text_height = DEFAULT_FONT_SIZE
+        self.text_height = fonts.DEFAULT_FONT_SIZE
 
         self.on_mouse_over = self.on_mouse_over_def  # Обработка наведения мыши
         self.put_to_redraw()
@@ -232,8 +233,8 @@ class Button(GlWidget):
 
         if self.text and (self.texture2 is None):
             # Вычислить размер в пикселях который будет занимать текст
-            xbearing, ybearing, text_width, text_height, xadvance, yadvance = GlWidget.cairo_context.text_extents(self._text)
-            fascent, fdescent, fheight, fxadvance, fyadvance = GlWidget.cairo_context.font_extents()
+            xbearing, ybearing, text_width, text_height, xadvance, yadvance = fonts.CairoFont.cairo_context.text_extents(self._text)
+            fascent, fdescent, fheight, fxadvance, fyadvance = fonts.CairoFont.cairo_context.font_extents()
 
             # Выравнивание
             width_a, x_a = self.align(self.pos, width, xadvance, self.check_part[0])
@@ -242,7 +243,7 @@ class Button(GlWidget):
             # 1) создать изображение текста в буфере
             cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_a, height)
             cc = cairo.Context(cis)
-            cc.select_font_face(DEFAULT_FONT_FACE)
+            cc.select_font_face(fonts.DEFAULT_FONT_FACE)
             cc.set_font_size(self.text_height)
 
             # тень

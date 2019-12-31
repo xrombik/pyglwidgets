@@ -66,7 +66,7 @@ class DrawDriver(gtk.Window):
         self.ehid0 = None
         self.ehid1 = None
         self.dl = 0
-        GlWidget.on_timer = self.on_timer
+        GlWidget.on_redraw = self.on_timer
 
     def set_uninit(self, on_uninit, *args):
         self.connect('unrealize', lambda gda: on_uninit(self, *args))
