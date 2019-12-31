@@ -77,8 +77,9 @@ class SceneCtl(list):
         :return:
         """
         len_scene = len(self)
-        items = filter(lambda item: item not in self, items)
-        map(lambda item: self.append(item), items)
+        for item in items:
+            if item not in self:
+                self.append(item)
         self.scene_changed = len(self) > len_scene
         return self.scene_changed
 
