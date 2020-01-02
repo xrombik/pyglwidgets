@@ -13,7 +13,7 @@ from gltools import check_glerrors
 
 
 __name__ = 'gtkgl driver'
-__all__ = ('DrawDriver', 'safe_connect', 'safe_disconnect')
+__all__ = ('DrawDriver', 'safe_disconnect', 'safe_connect')
 
 
 def safe_disconnect(obj, ehid):
@@ -53,6 +53,7 @@ def draw_end(gda, s):
 
 
 class DrawDriver(gtk.Window):
+
     def __init__(self, title, w, h, argv=None):
         super(DrawDriver, self).__init__()
         display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  # gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
@@ -84,7 +85,7 @@ class DrawDriver(gtk.Window):
 
     def init(self):
         gda = self.get_child()
-        glwidget.init(self)
+        glwidget.key_handler_init(self)
         opengl_init(gda.allocation.width, gda.allocation.height)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)

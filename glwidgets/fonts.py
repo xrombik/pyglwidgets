@@ -232,7 +232,7 @@ class CairoFont(object):
     def __init__(self, face=DEFAULT_FONT_FACE, font_hight=DEFAULT_FONT_SIZE, predraw=None):
         assert type(face) is str
         assert type(font_hight) is int
-        self.cc0 = cairo.Context(gltools._cis0)  # Поверхность для вычисления размера текста
+        self.cc0 = cairo.Context(CairoFont.image_surface0)  # Поверхность для вычисления размера текста
         self.cc0.select_font_face(face)
         self.cc0.set_font_size(font_hight)
         self.face = face  # название начертания букв

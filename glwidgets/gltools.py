@@ -5,13 +5,12 @@
 
 # Чужие модули
 import os
-import cairo
 import gtk
 import gtk.gdkgl
 import math
 
 # Свои модули
-import colors
+from . import colors
 from .glimports import *
 from .glconst import *
 
@@ -41,8 +40,31 @@ _glerros = \
 MIRROR_NONE = (0, 1, 1, 1, 1, 0, 0, 0)  # Матрица без отражения
 MIRROR_HORIZ = (1, 1, 0, 1, 0, 0, 1, 0)  # Матрица горизонтального отражения
 
-
 pi_2 = 2.0 * math.pi
+
+__all__ = (
+    'MIRROR_HORIZ',
+    'MIRROR_NONE',
+    'opengl_init',
+    'check_glerrors',
+    'check_rect',
+    'check_ring',
+    'data_to_texture',
+    'draw_circle',
+    'draw_line',
+    'draw_lines',
+    'draw_lines_rotated',
+    'draw_polygon',
+    'draw_sector',
+    'draw_table2',
+    'draw_table_borders',
+    'draw_texture',
+    'draw_texture_rotate',
+    'draw_texture_scale',
+    'step_flash',
+    'texture_from_file',
+    'texture_from_gtkimage',
+    'textures_from_files')
 
 
 def check_rect(width, height, pos, x1, y1):
@@ -254,12 +276,9 @@ def draw_table_borders(pos, cws, rh, rn, lw):
 
 
 def opengl_init(width, height, quality=GL_NICEST):
+    global _parent_height, _dl_gltextparameterf
     assert quality in (GL_FASTEST, GL_NICEST)
-    global _cis0, _parent_height, _cairo_texts, _cairo_texts_len_max, _dl_gltextparameterf
-    _cis0 = cairo.ImageSurface(cairo.FORMAT_ARGB32, 0, 0)
     _parent_height = height
-    _cairo_texts = dict()
-    _cairo_texts_len_max = 2048
 
     glViewport(0, 0, width, height)
     glOrtho(0, width, 0, height, -1, 1)
@@ -389,7 +408,7 @@ def texture_from_file(file_name):
     return texture
 
 
-def draw_texture(texture, pos, col=(255, 255, 255, 255), mirror=MIRROR_NONE):
+def draw_texture(texture, pos, col=colors.WHITE, mirror=MIRROR_NONE):
     """
     Рисует текстуру
     :param texture: Текстура
@@ -403,7 +422,6 @@ def draw_texture(texture, pos, col=(255, 255, 255, 255), mirror=MIRROR_NONE):
     glPushMatrix()
     glTranslatef(pos[0], _parent_height - pos[1] - texture[2], 0)
     glBindTexture(GL_TEXTURE_2D, texture[0])
-
     glBegin(GL_QUADS)
     glTexCoord2f(mirror[0], mirror[1])
     glVertex2f(0, 0)
@@ -414,12 +432,11 @@ def draw_texture(texture, pos, col=(255, 255, 255, 255), mirror=MIRROR_NONE):
     glTexCoord2f(mirror[6], mirror[7])
     glVertex2f(0, texture[2])
     glEnd()
-
     glPopMatrix()
     glDisable(GL_TEXTURE_2D)
 
 
-def draw_texture_rotate(texture, pos, a=0.0, col=(255, 255, 255, 255), mirror=MIRROR_NONE, scale=(1.0, 1.0, 1.0)):
+def draw_texture_rotate(texture, pos, a=0.0, col=colors.WHITE, mirror=MIRROR_NONE, scale=(1.0, 1.0, 1.0)):
     # type: (tuple, tuple, float, tuple, tuple, tuple) -> None
     glEnable(GL_TEXTURE_2D)
     glColor4ub(*col)
@@ -444,14 +461,13 @@ def draw_texture_rotate(texture, pos, a=0.0, col=(255, 255, 255, 255), mirror=MI
     glDisable(GL_TEXTURE_2D)
 
 
-def draw_texture_scale(texture, pos, scale, col=(255, 255, 255, 255), mirror=MIRROR_NONE):
+def draw_texture_scale(texture, pos, scale, col=colors.WHITE, mirror=MIRROR_NONE):
     glEnable(GL_TEXTURE_2D)
     glColor4ub(*col)
     glPushMatrix()
     glTranslatef(pos[0], _parent_height - pos[1] - texture[2], 0)
     glBindTexture(GL_TEXTURE_2D, texture[0])
     glScalef(scale[0], scale[1], 1.0)
-
     glBegin(GL_QUADS)
     glTexCoord2f(mirror[0], mirror[1])
     glVertex2f(0, 0)
@@ -462,7 +478,6 @@ def draw_texture_scale(texture, pos, scale, col=(255, 255, 255, 255), mirror=MIR
     glTexCoord2f(mirror[6], mirror[7])
     glVertex2f(0, texture[2])
     glEnd()
-
     glPopMatrix()
     glDisable(GL_TEXTURE_2D)
 
@@ -470,5 +485,5 @@ def draw_texture_scale(texture, pos, scale, col=(255, 255, 255, 255), mirror=MIR
 def draw_polygon(points, color):
     glColor4ub(*color)
     glBegin(GL_POLYGON)
-    map(lambda p: glVertex2f(p[0], _parent_height - p[1]), points)
+    for p in points: glVertex2f(p[0], _parent_height - p[1])
     glEnd()

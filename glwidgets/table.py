@@ -14,7 +14,7 @@ from .glimports import *
 from .glconst import *
 from .fonts import DEFAULT_FONT_FACE
 from .fonts import DEFAULT_FONT_SIZE
-from .glwidget import connect_key_handler
+from .glwidget import key_handler_connect
 from .driver import safe_connect
 from .driver import safe_disconnect
 
@@ -31,13 +31,13 @@ class Table(GlWidget):
     @auto_widths.setter
     def auto_widths(self, val):
         self.get_widths = (self.get_widths_const, self.get_widths_auto)[val]
-        self.size = self._update_rect()[2:5]
+        self.size = self.update_rect()[2:5]
         self.put_to_redraw()
         
     @staticmethod
     def _on_2button_press_default(tbl, event):
         assert type(tbl) is Table
-        x0, y0, w, h, ws, rh = tbl._update_rect()
+        x0, y0, w, h, ws, rh = tbl.update_rect()
         if tbl.i_cur_row is None:
             return
         cover = gltools.check_rect(w, h - rh, (tbl.pos[0], tbl.pos[1] + rh), event.x, event.y)
@@ -56,8 +56,7 @@ class Table(GlWidget):
                     tbl.entry.show()
                     tbl.ehid2 = None
                 else:
-                    print(
-                    'glwidgets.py:ошибка: обращение к колонке таблицы %u, но колонок всего %u' % (j, len(tbl._rows[i])))
+                    print('glwidgets.py:ошибка: обращение к колонке таблицы %u, но колонок всего %u' % (j, len(tbl._rows[i])))
             else:
                 print('glwidgets.py:ошибка: обращение к строке таблицы %u, но строк всего %u' % (i, len(tbl._rows)))
 
@@ -202,10 +201,9 @@ class Table(GlWidget):
         rows_len = len(self._rows[0])
         for i, row in enumerate(self._rows[1:]):
             if rows_len != len(row):
-                raise ValueError('Ряд %u имеет отличное количество колонок - %u, вместо %u:\n%s' %
-                                 (i, len(row), rows_len, self._rows))
+                raise ValueError('Ряд %u имеет отличное количество колонок - %u, вместо %u:\n%s' % (i, len(row), rows_len, self._rows))
 
-    def _update_rect(self):
+    def update_rect(self):
         """
         Возвращает размеры таблицы в пикселях
         :return:
@@ -243,7 +241,7 @@ class Table(GlWidget):
         view_end = self.view_begin + self.view_max
         if not (self.view_begin < self.i_cur_row < view_end):
             self.view_begin = self.i_cur_row
-        self.size = self._update_rect()[2:5]
+        self.size = self.update_rect()[2:5]
         self.put_to_redraw()
 
     def set_rows(self, rows, rows_flags=None):
@@ -261,7 +259,7 @@ class Table(GlWidget):
         else:
             self._rows_flags = rows_flags
         self._check_rows()
-        self.size = self._update_rect()[2:5]
+        self.size = self.update_rect()[2:5]
         self.put_to_redraw()
 
     def get_rows(self):
@@ -306,7 +304,7 @@ class Table(GlWidget):
         self._rows.append(row)
         self._rows_flags.append(row_flags)
         self._check_rows()
-        self.size = self._update_rect()[2:5]
+        self.size = self.update_rect()[2:5]
         self.put_to_redraw()
 
     def set_row(self, i_row, row, row_flags=None):
@@ -348,7 +346,7 @@ class Table(GlWidget):
         self._rows[i][j] = copy.deepcopy(self.entry.text)
         self.entry.hide()
         self.put_to_redraw()
-        connect_key_handler(self._on_key_press)
+        key_handler_connect(self._on_key_press)
         if self.on_edit_done is not None:
             self.on_edit_done(self, prev_val)
 
@@ -394,7 +392,7 @@ class Table(GlWidget):
                 self.view_begin += 1
             if self.i_cur_row < 0:
                 self.i_cur_row = 0
-        self.size = self._update_rect()[2:5]
+        self.size = self.update_rect()[2:5]
         if prev_i_cur_row != self.i_cur_row:
             if self.on_sel_change is not None:
                 self.on_sel_change(self)
@@ -414,14 +412,14 @@ class Table(GlWidget):
         if event.type == gtk.gdk.BUTTON_PRESS:
             # Поиск строки, которую кликнули
             self.entry.hide()
-            x, y, w, h, ws, rh = self._update_rect()
+            x, y, w, h, ws, rh = self.update_rect()
             if not gltools.check_rect(w, h, self.pos, event.x, event.y):
                 self.focus = False
                 return False
             if not self.focus:
                 focus_changed = True
                 self.focus = True
-            connect_key_handler(self._on_key_press)
+            key_handler_connect(self._on_key_press)
             dy = event.y - self.pos[1]
             i_cur_row = int(dy // (self.font.get_text_hight() + self.line_width))
             self.i_cur_row = i_cur_row - 1 + self.view_begin

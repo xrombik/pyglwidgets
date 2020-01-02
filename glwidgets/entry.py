@@ -84,10 +84,10 @@ class Entry(glwidget.GlWidget):
 
     def on_button_press(self, _event, *_args):
         if self.cover:
-            glwidget.connect_key_handler(self._on_key_press)
+            glwidget.key_handler_connect(self._on_key_press)
             self.start_tick()
         else:
-            glwidget.disconnect_key_handler()
+            glwidget.key_handler_disconnect()
             self.stop_tick()
         self.cur_pos = self.pos[0] + self.font.get_text_width(self.text[:self.cur_index])
 

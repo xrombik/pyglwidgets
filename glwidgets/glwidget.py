@@ -3,16 +3,16 @@
 
 # Чужие модули
 import cairo
-import inspect
 
 from .glimports import *
 
 DEFAULT_RATE_MS = 150
+TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\\(){}-+=.,:;?!'
 
-_ehid = None
 
 
-def _empty_key_handler_proc(_window, _event, *_key_handler_args):
+
+def key_handler_empty_proc(_window, _event, *_key_handler_args):
     """
     Пустая процедура ввода с клавиатуры
     :param window:
@@ -23,14 +23,24 @@ def _empty_key_handler_proc(_window, _event, *_key_handler_args):
     pass
 
 
-key_handler_proc = _empty_key_handler_proc
+key_handler_proc = key_handler_empty_proc
 key_handler_args = list()
-TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\\(){}-+=.,:;?!'
 
 
-def init(wdgt):
-    global _ehid
-    _ehid = wdgt.connect('key-press-event', key_dispatcher)
+__all__ = (
+    'align_h_center',
+    'align_h_left',
+    'cc_draw_text_shadow',
+    'clear_cairo_surface',
+    'key_handler_connect',
+    'DEFAULT_RATE_MS',
+    'key_handler_disconnect',
+    'key_handler_get',
+    'GlWidget',
+    'key_handler_init',
+    'key_handler_dispatcher',
+    'key_handler_args',
+    'key_handler_proc')
 
 
 def align_h_center(pos, width, xadvance, cpx):
@@ -64,7 +74,12 @@ def align_h_left(pos, width, _xadvance, cpx):
     return width0, x
 
 
-def key_dispatcher(window, event):
+def key_handler_init(wdgt):
+    global key_handler_ehid
+    key_handler_ehid = wdgt.connect('key-press-event', key_handler_dispatcher)
+
+
+def key_handler_dispatcher(window, event):
     if key_handler_args is None:
         key_handler_proc(window, event)
         return False
@@ -72,25 +87,7 @@ def key_dispatcher(window, event):
     return False
 
 
-# Реализация декоратора "@private" для встроенных в класс функций
-# http://blog.sujeet.me/2012/10/python-tinkering-a-decorator-to-implement-private-methods-I.html
-def private(method):
-    class_name = inspect.stack()[1][3]
-
-    def privatized_method(*args, **kwargs):
-        call_frame = inspect.stack()[1][0]
-        # Only methods of same class should be able to call
-        # private methods of the class, and no one else.
-        if call_frame.f_locals.has_key('self'):
-            caller_class_name = call_frame.f_locals['self'].__class__.__name__
-            if caller_class_name == class_name:
-                return method(*args, **kwargs)
-        raise Exception("can't call private method")
-
-    return privatized_method
-
-
-def connect_key_handler(handler_proc, *args):
+def key_handler_connect(handler_proc, *args):
     """
     :param handler_proc: процедура для обработки нажатия клавиши
     :param args: аргументы передаваемые в процедуру handler_proc
@@ -100,13 +97,13 @@ def connect_key_handler(handler_proc, *args):
     key_handler_args = args
 
 
-def disconnect_key_handler():
+def key_handler_disconnect():
     global key_handler_proc, key_handler_args
-    key_handler_proc = _empty_key_handler_proc
+    key_handler_proc = key_handler_empty_proc
     key_handler_args = None
 
 
-def get_key_handler():
+def key_handler_get():
     return key_handler_proc, key_handler_args
 
 
@@ -163,7 +160,7 @@ class GlWidget(object):
         obj = super(GlWidget, cls).__new__(cls)
         obj.dl = glGenLists(1)
         obj.pc = list()
-        """ Отложенные вызовы подключения/отключения """
+        """ Отложенные вызовы подключения и отключения """
         assert glIsList(obj.dl)
         return obj
 

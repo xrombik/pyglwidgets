@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 # Чужие модули
 import glib
 import inspect
 import cairo
 
 # Свои модули
+from . import colors
 from .gltools import *
 from .fonts import *
 from .glwidget import *
@@ -19,27 +19,34 @@ __all__ = ('Button', 'ButtonRing', 'ButtonAnimated')
 
 
 class Button(GlWidget):
-    pressed = False
 
     def __init__(self, pos, text, textures, text_color=colors.BUTTON_TEXT, auto=1, user_proc=None,
-                 user_data=None, check_part=((1.0 / 6.0), 0.5)):
-        assert type(text_color) is tuple, "Цвет должен состоять из четырёх компонент в кортеже"
-        assert len(text_color) == 4, "Цвет должен состоять из четырёх компонент в кортеже"
+                 user_data=None, check_part=((1.0 / 6.0), 0.5), font=None):
+        assert type(text_color) is tuple, 'Цвет должен состоять из четырёх компонент в кортеже'
+        assert len(text_color) == 4, 'Цвет должен состоять из четырёх компонент в кортеже'
         for c in text_color:
-            assert type(c) is int, "Значение цвета должно быть целым"
-            assert 0 <= c <= 255, "Значение цвета должно быть от 0 до 255 включительно"
-        assert len(check_part) == 2, "Параметр выравнивания состоит из двух элементов типа float"
-        assert type(check_part[0]) is float, "Параметр выравнивания состоит из двух элемнтов типа float"
-        assert type(check_part[1]) is float, "Параметр выравнивания состоит из двух элемнтов типа float"
+            assert type(c) is int, 'Значение цвета должно быть целым'
+            assert 0 <= c <= 255, 'Значение цвета должно быть от 0 до 255 включительно'
+        assert len(check_part) == 2, 'Параметр выравнивания состоит из двух элементов типа float'
+        assert type(check_part[0]) is float, 'Параметр выравнивания состоит из двух элемнтов типа float'
+        assert type(check_part[1]) is float, 'Параметр выравнивания состоит из двух элемнтов типа float'
         if user_proc is not None:
-            assert inspect.isfunction(user_proc), "Должна быть функция"
+            assert inspect.isfunction(user_proc), 'Должна быть функция'
         if text is not None:
-            assert type(text) is str, "Должна быть строка"
-        assert type(pos) is tuple
-        assert len(pos) == 2
-        assert type(pos[0]) is int
-        assert type(pos[1]) is int
-        assert type(auto) is int
+            assert type(text) is str, 'Должна быть строка'
+        assert isinstance(pos, (tuple, list))
+        assert len(pos) in (2, 3)
+        for p in pos:
+            assert p >= 0
+            assert isinstance(p, int)
+
+        assert isinstance(auto, int)
+        assert isinstance(font, (CairoFont, type(None)))
+
+        if font is None:
+            self.font = CairoFont()
+        else:
+            self.font = font
 
         self.pos = pos
 
@@ -66,13 +73,13 @@ class Button(GlWidget):
         else:
             self.textures = (textures,)
         for item in self.textures:
-            assert glIsTexture(item[0]), "Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
-            assert type(item[1]) is int, "Ширина, должно быть целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
-            assert type(item[2]) is int, "Высота, должно быть целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))"
+            assert glIsTexture(item[0]), 'Должен быть дейсвительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))'
+            assert type(item[1]) is int, 'Ширина, должно быть целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))'
+            assert type(item[2]) is int, 'Высота, должно быть целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))'
 
         # Наведение мыши
         self.cover = 0
-        self.alphas = (200, 250)  # Прозрачность при наведённой и ненаведённой мыши
+        self.alphas = [200, 250]  # Прозрачность при наведённой и ненаведённой мыши
         self.color = [255, 255, 255, 255]
 
         # События
@@ -227,13 +234,13 @@ class Button(GlWidget):
         width = self.textures[self._state][1]
         height = self.textures[self._state][2]
         # изображение кнопки
-        alpha = self.alphas[self.cover and (not Button.pressed)]
+        alpha = self.alphas[self.cover]
         color = self.color[0], self.color[1], self.color[2], alpha
 
         if self.text and (self.texture2 is None):
             # Вычислить размер в пикселях который будет занимать текст
-            xbearing, ybearing, text_width, text_height, xadvance, yadvance = CairoFont.cairo_context.text_extents(self._text)
-            fascent, fdescent, fheight, fxadvance, fyadvance = CairoFont.cairo_context.font_extents()
+            xbearing, ybearing, text_width, text_height, xadvance, yadvance = self.font.cc0.text_extents(self._text)
+            fascent, fdescent, fheight, fxadvance, fyadvance = self.font.cc0.font_extents()
 
             # Выравнивание
             width_a, x_a = self.align(self.pos, width, xadvance, self.check_part[0])
@@ -289,9 +296,9 @@ class ButtonRing(Button):
         """
         super(ButtonRing, self).__init__(pos, None, textures, colors.WHITE, 0, user_proc, user_data)
         # Формальная проверка фходных данных
-        assert (type(r1) is int) and (r1 > 0), "r1 - внутренний радиус"
-        assert (type(r2) is int) and (r2 > 0), "r2 - внешний радиус"
-        assert r2 > r1, "Внешний радиус должен быть больше внутреннего"
+        assert (type(r1) is int) and (r1 > 0), 'r1 - внутренний радиус'
+        assert (type(r2) is int) and (r2 > 0), 'r2 - внешний радиус'
+        assert r2 > r1, 'Внешний радиус должен быть больше внутреннего'
         self.state_colors = state_colors
         self.auto = 0
         self.r1 = r1

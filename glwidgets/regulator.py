@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-
+import gtk
 from .text import *
 from .gltools import *
 from .glwidget import *
@@ -16,8 +16,7 @@ class TextRegulator(StaticText):
                     u'0': 10.0, u'-': 0.0}
 
     def __init__(self, gda, pos=(0, 0), fmt='%03f', val_min=0, val_max=100, val=50, size=(40, 24),
-                 scale=0.01,
-                 axis=1, font=None, color=(255, 255, 255, 150), user_proc=None, user_data=None):
+                 scale=0.01, axis=1, font=None, color=(255, 255, 255, 150), user_proc=None, user_data=None):
         """
         :param gda: Контекст gtk-opengl
         :param pos: Координаты на экране в пикселях
@@ -114,7 +113,7 @@ class TextRegulator(StaticText):
         pos = event.x, event.y + self.size[1]
         cover = check_rect(self.size[0], self.size[1], self.pos, pos[0], pos[1])
         if cover:
-            connect_key_handler(self.key_callback)
+            key_handler_connect(self.key_callback)
             if self.ehid1 is None:
                 self.ehid1 = self.gda.connect('motion-notify-event', self._motion_notify)
             if self.ehid2 is None:
@@ -124,11 +123,11 @@ class TextRegulator(StaticText):
             r, g, b, a = self.color
             self.color = r, g, b, 250
         else:
-            khp, kha = get_key_handler()
+            khp, kha = key_handler_get()
             if khp == self.key_callback:
-                disconnect_key_handler()
+                key_handler_disconnect()
 
-        khp, kha = get_key_handler()
+        khp, kha = key_handler_get()
         if khp == self.key_callback:
             self.rect_col = colors.BLUE
         else:
