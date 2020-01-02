@@ -46,7 +46,7 @@ def on_init(scm, rcm):
 
 
 def on_uninit(pgm, rcm):
-    # type: (DrawDriver, ProgramCtl, ResourceCtl) -> None
+    # type: (ProgramCtl, ResourceCtl) -> None
     rcm.uninit()
     pgm.uninit()
     check_glerrors('on_uninit():')
