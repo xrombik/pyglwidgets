@@ -8,7 +8,6 @@ import inspect
 import cairo
 
 # Свои модули
-from . import colors
 from .gltools import *
 from .fonts import *
 from .glwidget import *

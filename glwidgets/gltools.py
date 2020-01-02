@@ -255,11 +255,11 @@ def draw_table_borders(pos, cws, rh, rn, lw):
 
 def opengl_init(width, height, quality=GL_NICEST):
     assert quality in (GL_FASTEST, GL_NICEST)
-    global __cis0__, _parent_height, __cairo_texts__, __cairo_texts_len_max__, _dl_gltextparameterf
-    __cis0__ = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+    global _cis0, _parent_height, _cairo_texts, _cairo_texts_len_max, _dl_gltextparameterf
+    _cis0 = cairo.ImageSurface(cairo.FORMAT_ARGB32, 0, 0)
     _parent_height = height
-    __cairo_texts__ = dict()
-    __cairo_texts_len_max__ = 2048
+    _cairo_texts = dict()
+    _cairo_texts_len_max = 2048
 
     glViewport(0, 0, width, height)
     glOrtho(0, width, 0, height, -1, 1)
