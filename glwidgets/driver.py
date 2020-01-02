@@ -3,6 +3,8 @@
 
 import gtk
 import glib
+import inspect
+
 from glwidget import GlWidget
 from glwidgets import glwidget
 from .glimports import *
@@ -69,13 +71,16 @@ class DrawDriver(gtk.Window):
         GlWidget.on_redraw = self.on_timer
 
     def set_uninit(self, on_uninit, *args):
-        self.connect('unrealize', lambda gda: on_uninit(self, *args))
+        assert inspect.isfunction(on_uninit)
+        self.connect('unrealize', self.uninit, on_uninit, *args)
 
-    def uninit(self):
+    @staticmethod
+    def uninit(self, on_uninit, *args):
+        gda = self.get_child()
         self.stop_anim()
-        gda = self.get_child()  # type: gtk.DrawingArea
         self.ehid1 = safe_disconnect(gda, self.ehid1)
         glDeleteLists(self.dl, 1)
+        on_uninit(*args)
 
     def init(self):
         gda = self.get_child()

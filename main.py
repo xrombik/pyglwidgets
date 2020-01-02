@@ -16,14 +16,6 @@ def main(argv):
     pgm.run()
 
 
-def on_uninit(ddr, pgm, rcm):
-    # type: (DrawDriver, ProgramCtl, SceneCtl) -> None
-    rcm.uninit()
-    ddr.uninit()
-    pgm.uninit()
-    check_glerrors('on_uninit():')
-
-
 def on_init(scm, rcm):
     # type: (SceneCtl, ResourceCtl) -> None
 
@@ -51,6 +43,13 @@ def on_init(scm, rcm):
     entry0.on_edit_done = on_entry_edit_done
     
     scm.add_scene_items(btn0, img0, txt0, entry0, tbl0)
+
+
+def on_uninit(pgm, rcm):
+    # type: (DrawDriver, ProgramCtl, ResourceCtl) -> None
+    rcm.uninit()
+    pgm.uninit()
+    check_glerrors('on_uninit():')
 
 
 def on_entry_edit_done(entry0):
