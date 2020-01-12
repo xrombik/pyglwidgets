@@ -43,6 +43,7 @@ class Entry(glwidget.GlWidget):
         self.text = text.encode('utf-8')
         self.ehid0 = None
         self.ehid1 = None
+        self.ehid2 = None
         self.timer_id = None
         self.connect()
         self.cover = False
@@ -84,11 +85,9 @@ class Entry(glwidget.GlWidget):
 
     def on_button_press(self, _event, *_args):
         if self.cover:
-            glwidget.key_handler_connect(self._on_key_press)
-            self.start_tick()
+            self.start_type()
         else:
-            glwidget.key_handler_disconnect()
-            self.stop_tick()
+            self.stop_type()
         self.cur_pos = self.pos[0] + self.font.get_text_width(self.text[:self.cur_index])
 
     def _motion_notify(self, *args):
@@ -166,15 +165,18 @@ class Entry(glwidget.GlWidget):
         self.cover = False
         self.pc.append(('ehid0', safe_disconnect))
         self.pc.append(('ehid1', safe_disconnect))
+        self.pc.append(('ehid2', safe_disconnect))
 
-    def stop_tick(self):
+    def stop_type(self):
+        self.pc.append(('ehid2', safe_disconnect))
         if self.timer_id is not None:
             glib.source_remove(self.timer_id)
             self.timer_id = None
             self.cur_tick = 0
             self.put_to_redraw()
 
-    def start_tick(self):
+    def start_type(self):
+        self.pc.append(('ehid2', safe_connect, 'key-press-event', self._on_key_press))
         if self.timer_id is None:
             self.cur_tick = 1
             self.timer_id = glib.timeout_add(Entry.TICK_RATE, self.on_timer)

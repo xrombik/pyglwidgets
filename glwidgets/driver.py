@@ -22,7 +22,11 @@ def safe_disconnect(obj, ehid):
     if ehid is not None:
         if obj.handler_is_connected(ehid):
             obj.disconnect(ehid)
-            ehid = None
+            return None
+        window = obj.get_parent()  # type: gtk.Window
+        if window.handler_is_connected(ehid):
+            window.disconnect(ehid)
+            return None
     return ehid
 
 
@@ -52,13 +56,34 @@ def draw_end(gda, s):
     gda.gldrawable.gl_end()
 
 
+class DrawingAreaProxy(gtk.DrawingArea):
+    def __init__(self):
+        super(DrawingAreaProxy, self).__init__()
+        self.ehid = None
+
+    def connect(self, event_name, proc, *args, **kwargs):
+        if event_name == 'key-press-event':
+            window = self.get_parent()  # type: gtk.Window
+            return window.connect('key-press-event', proc, *args, **kwargs)
+        return super(DrawingAreaProxy, self).connect(event_name, proc, *args, **kwargs)
+
+    def disconnect(self, ehid):
+        if ehid is None:
+            return
+        if self.ehid == ehid:
+            window = self.get_parent()  # type: gtk.Window
+            window.disconnect(ehid)
+            return
+        return super(DrawingAreaProxy, self).disconnect(ehid)
+
+
 class DrawDriver(gtk.Window):
 
     def __init__(self, title, w, h, argv=None):
         super(DrawDriver, self).__init__()
         display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  # gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
         events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
-        gda = gtk.DrawingArea()
+        gda = DrawingAreaProxy()
         gda.set_double_buffered(False)
         gda.glconfig = gtk.gdkgl.Config(mode=display_mode)
         gda.set_size_request(w, h)

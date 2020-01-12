@@ -38,11 +38,13 @@ def on_init(scm, rcm):
     col1 = (255, 255, 255, 255)
     btn0 = Button((50, 100), 'auto_width', txr_btn, user_proc=btn0_proc, user_data=(img0, col0, col1, txt0, tbl0))
 
-    entry0 = Entry((200, 100), rows[1][0])
+    entry0 = Entry((200, 70), rows[1][0])
     entry0.user_data = tbl0
     entry0.on_edit_done = on_entry_edit_done
-    
-    scm.add_scene_items(btn0, img0, txt0, entry0, tbl0)
+
+    entry1 = Entry((200, 100), 'ввод тут')
+
+    scm.add_scene_items(btn0, img0, txt0, entry0, entry1, tbl0)
 
 
 def on_uninit(pgm, rcm):
