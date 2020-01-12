@@ -5,6 +5,7 @@ import signal
 import time
 import fcntl
 
+
 class MyTestCase(unittest.TestCase):
 
     def test_imports(self):
@@ -12,7 +13,6 @@ class MyTestCase(unittest.TestCase):
         print (u'%s\n%s' % (self, main))
 
     def test_screenshot(self):
-        print (u'%s' % self)
         pid = subprocess.Popen(
             'python main.py &',
             shell=True,
@@ -28,7 +28,7 @@ class MyTestCase(unittest.TestCase):
             if 'traceback' in rc:
                 self.fail()
         except IOError:
-            print("OK")
+            pass
         os.system('./screenshot.sh')
         os.killpg(pid.pid, signal.SIGTERM)
 
