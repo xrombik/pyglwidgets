@@ -10,8 +10,6 @@ DEFAULT_RATE_MS = 150
 TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\\(){}-+=.,:;?!'
 
 
-
-
 def key_handler_empty_proc(_window, _event, *_key_handler_args):
     """
     Пустая процедура ввода с клавиатуры
