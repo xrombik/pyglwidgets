@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import cairo
+
 from . import colors
 from . import gltools
 from . import fonts
