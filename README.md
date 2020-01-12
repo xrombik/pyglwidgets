@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/xrombik/pyglwidgets.svg?branch=alpha0)](https://travis-ci.com/xrombik/pyglwidgets)
+[![Build Status](https://travis-ci.com/xrombik/pyglwidgets.svg?branch=alpha1)](https://travis-ci.com/xrombik/pyglwidgets)
 # pyglwidgets
 ### Main futures:
 - Simple GUI engine with OpenGL;
