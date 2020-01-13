@@ -23,5 +23,6 @@ from .resctl import *
 from .evtctl import *
 from .program import *
 from .driver import *
+from candy import *
 
 pygtk.require('2.0')

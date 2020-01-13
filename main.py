@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 from glwidgets import *
 from datetime import datetime
 
 
 def main(argv):
-    pgm = ProgramCtl()
-    scm = SceneCtl()
-    rcm = ResourceCtl()
-    ddr = DrawDriver('pyglwidgets', 640, 480)
-    ddr.set_init(on_init, scm, rcm)
-    ddr.set_uninit(on_uninit, pgm, rcm)
-    ddr.set_scene(scm)
-    pgm.run()
+    run('pyglwidgets', 640, 480, on_init, on_uninit)
 
 
 def on_init(scm, rcm):
