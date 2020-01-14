@@ -5,17 +5,24 @@ from . import ProgramCtl
 from . import SceneCtl
 from . import ResourceCtl
 from . import DrawDriver
+from . import gltools
 
-__all__ = ('run', )
+__all__ = ('Candy', )
 
 
-def run(title, width, height, init, uninit):
-	pgm = ProgramCtl()
-	scm = SceneCtl()
-	rcm = ResourceCtl()
-	ddr = DrawDriver(title, width, height)
-	ddr.set_init(init, scm, rcm)
-	ddr.set_uninit(uninit, pgm, rcm)
-	ddr.set_scene(scm)
-	pgm.run()
-	
+class Candy(ProgramCtl):
+    def __init__(self, title, width, height, init):
+        super(Candy, self).__init__()
+        scm = SceneCtl()
+        rcm = ResourceCtl()
+        ddr = DrawDriver(title, width, height)
+        ddr.set_init(init, scm, rcm)
+        ddr.set_uninit(self.on_uninit, self, rcm)
+        ddr.set_scene(scm)
+
+    @staticmethod
+    def on_uninit(pgm, rcm):
+        # type: (ProgramCtl, ResourceCtl) -> None
+        rcm.uninit()
+        pgm.uninit()
+        gltools.check_glerrors()

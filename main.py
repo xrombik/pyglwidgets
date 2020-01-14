@@ -7,7 +7,8 @@ from datetime import datetime
 
 
 def main(argv):
-    run('pyglwidgets', 640, 480, on_init, on_uninit)
+    app = Candy('pyglwidgets', 640, 480, on_init)
+    app.run()
 
 
 def on_init(scm, rcm):
@@ -39,13 +40,6 @@ def on_init(scm, rcm):
     entry1 = Entry((200, 100), 'ввод тут')
 
     scm.add_scene_items(btn0, img0, txt0, entry0, entry1, tbl0)
-
-
-def on_uninit(pgm, rcm):
-    # type: (ProgramCtl, ResourceCtl) -> None
-    rcm.uninit()
-    pgm.uninit()
-    check_glerrors('on_uninit():')
 
 
 def on_entry_edit_done(entry0):

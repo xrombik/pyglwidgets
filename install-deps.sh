@@ -10,13 +10,13 @@ sudo apt-get autoremove -f -y
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-for PACK in "${PACKS[@]}"
+for pack in "${PACKS[@]}"
 do
-  echo -n "Check for package availability \"$PACK\" ... "
-  dpkg -s "${PACK}" > /dev/null
-  if [[ $? -ne 0 ]] ; then
-    echo "\"$PACK\" hasn't been found, and will be installed."
-    sudo apt-get install "${PACK}" -y
+  echo -n "Check for package availability \"${pack}\" ... "
+  if ! dpkg -s "${pack}" > /dev/null
+  then
+    echo "\"${pack}\" hasn't been found, and will be installed."
+    sudo apt-get install "${pack}" -y
   else
     echo " found."
   fi

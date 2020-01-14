@@ -354,7 +354,7 @@ def draw_sector(points_in, points_out, color):
         i += 1
 
 
-def check_glerrors(title):
+def check_glerrors(title=''):
     err_cnt = 0
     while True:
         err0 = glGetError()
