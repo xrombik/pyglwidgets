@@ -372,7 +372,7 @@ def generate_dls(count):
     return range(first_dl, first_dl + count)
 
 
-def data_to_texture(texture_id, data, width, height, _db=''):
+def data_to_texture(texture_id, data, width, height):
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, texture_id)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, str(data))
@@ -384,14 +384,16 @@ def data_to_texture(texture_id, data, width, height, _db=''):
 def texture_from_gtkimage(image):
     assert type(image) is gtk.Image
     pb = image.get_pixbuf()
-    image.get_colormap()
+    w = pb.get_width()
+    h = pb.get_height()
+    data = pb.get_pixels()
+    tid = glGenTextures(1)
     glEnable(GL_TEXTURE_2D)
-    texture_id = glGenTextures(1)
-    glBindTexture(GL_TEXTURE_2D, texture_id)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pb.get_width(), pb.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, pb.get_pixels())
+    glBindTexture(GL_TEXTURE_2D, tid)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
     glCallList(_dl_gltextparameterf)
     glDisable(GL_TEXTURE_2D)
-    return texture_id, pb.get_width(), pb.get_height()
+    return tid, w, h
 
 
 def textures_from_files(fmt, count):
@@ -404,8 +406,7 @@ def texture_from_file(file_name):
     if not os.path.exists(file_name):
         raise ValueError('File: \'%s\' - not found.' % file_name)
     image.set_from_file(file_name)
-    texture = texture_from_gtkimage(image)
-    return texture
+    return texture_from_gtkimage(image)
 
 
 def draw_texture(texture, pos, col=colors.WHITE, mirror=MIRROR_NONE):

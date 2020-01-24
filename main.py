@@ -6,24 +6,29 @@ from glwidgets import *
 from datetime import datetime
 
 
-def main(argv):
+def main():
     app = Candy('pyglwidgets', 640, 480, on_init)
     app.run()
 
 
 def on_init(scm, rcm):
     # type: (SceneCtl, ResourceCtl) -> None
+    """
+    :param scm: Scene manager
+    :param rcm: Resource manager
+    :return:
+    """
 
     font = rcm.get_ft_font()
-    txt0 = DynamicText(font, (10, 20), u'Жми кнопку!')
+    txt0 = DynamicText(font, (10, 20), u'Push the button!')
 
     txr_btn = rcm.get_textures('btn%u.png', 2)
     txr_ship = rcm.get_texture('star.png')
 
-    rows = [['Номер', 'Цвет',         'Длина', 'Ширина'],
-            ['1',     'Красный',      '30',    '180'],
-            ['2',     'Синий',        '50',    '100'],
-            ['3',     'Фиолетовый',   '60',    '200']]
+    rows = [['Number', 'Color',  'Lenght'],
+            ['1',      'red',    '30'],
+            ['2',      'blue',   '50'],
+            ['3',      'violet', '60']]
 
     tbl0 = Table((200, 150), rows)
     tbl0.widths[1] = 120
@@ -37,7 +42,7 @@ def on_init(scm, rcm):
     entry0.user_data = tbl0
     entry0.on_edit_done = on_entry_edit_done
 
-    entry1 = Entry((200, 100), 'ввод тут')
+    entry1 = Entry((200, 100), 'type here')
 
     scm.add_scene_items(btn0, img0, txt0, entry0, entry1, tbl0)
 
@@ -58,9 +63,8 @@ def btn0_proc(btn0):
     tbl0 = btn0.user_data[4]  # type: Table
     tbl0.auto_widths = btn0.state
     img0.color = (col1, col0)[btn0.state]
-    txt0.set_text(u'Кнопка нажата в:\n%s' % datetime.now())
+    txt0.set_text(u'Button pressed at:\n%s' % datetime.now())
 
 
 if __name__ == '__main__':
-    import sys
-    main(sys.argv)
+    main()

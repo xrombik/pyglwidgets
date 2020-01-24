@@ -19,7 +19,7 @@ class ProgramCtl(object):
         self._main_loop.quit()
 
     def exception_hook(self, etype, evalue, etb):
-        self.saved_exception_hook(etype, evalue, etb)  # type: function
+        self.saved_exception_hook(etype, evalue, etb)  # type: callable
         print('%s:\n- Завершается из за возникновения исключения:'
             '\n%s\n%s\n%s' % (__file__, etype, evalue, etb))
         quit(1)

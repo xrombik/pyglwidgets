@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Виджеты для OpenGL
 
-# Чужие модули
 import pygtk
 
-# Свои модули
 from .button import *
 from .entry import *
 from .fonts import *

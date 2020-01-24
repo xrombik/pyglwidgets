@@ -10,8 +10,11 @@ from . import gltools
 __all__ = ('Candy', )
 
 
+def _init(*args): pass
+
+
 class Candy(ProgramCtl):
-    def __init__(self, title, width, height, init):
+    def __init__(self, title, width=640, height=480, init=_init):
         super(Candy, self).__init__()
         scm = SceneCtl()
         rcm = ResourceCtl()

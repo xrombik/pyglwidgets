@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Чужие модули
 import glib
 import inspect
 import cairo
 
-# Свои модули
 from . import colors
 from .gltools import *
 from .fonts import *
@@ -22,18 +20,18 @@ class Button(GlWidget):
 
     def __init__(self, pos, text, textures, text_color=colors.BUTTON_TEXT, auto=1, user_proc=None,
                  user_data=None, check_part=((1.0 / 6.0), 0.5), font=None):
-        assert type(text_color) is tuple, 'Цвет должен состоять из четырёх компонент в кортеже'
-        assert len(text_color) == 4, 'Цвет должен состоять из четырёх компонент в кортеже'
+        assert type(text_color) is tuple, 'The color should consist of four components in the \"tuple\" type.'
+        assert len(text_color) == 4, 'The color should be four components in the \"tuple\" type.'
         for c in text_color:
-            assert type(c) is int, 'Значение цвета должно быть целым'
-            assert 0 <= c <= 255, 'Значение цвета должно быть от 0 до 255 включительно'
-        assert len(check_part) == 2, 'Параметр выравнивания состоит из двух элементов типа float'
-        assert type(check_part[0]) is float, 'Параметр выравнивания состоит из двух элемнтов типа float'
-        assert type(check_part[1]) is float, 'Параметр выравнивания состоит из двух элемнтов типа float'
+            assert type(c) is int, 'The value of the color must be \"int\" type.'
+            assert 0 <= c <= 255, 'The value of the color must be between 0 and 255 inclusive.'
+        assert len(check_part) == 2, 'The alignment parameter consists of two elements of the \"float\" type.'
+        assert type(check_part[0]) is float, 'The alignment parameter consists of two elements of the \"float\" type.'
+        assert type(check_part[1]) is float, 'The alignment parameter consists of two elements of the \"float\" type.'
         if user_proc is not None:
-            assert inspect.isfunction(user_proc), 'Должна быть функция'
+            assert inspect.isfunction(user_proc), 'There must be \"callable\" type'
         if text is not None:
-            assert type(text) is str, 'Должна быть строка'
+            assert type(text) is str, 'There must be a \"str\" type'
         assert isinstance(pos, (tuple, list))
         assert len(pos) in (2, 3)
         for p in pos:
@@ -50,22 +48,19 @@ class Button(GlWidget):
 
         self.pos = pos
 
-        # Относительное положение надписи.
-        # check_part[0]: 0.5 - посередине, меньше 0.5 - левее
-        # check_part[1]: 0.5 - посередине, меньше 0.5 - выше
+        # Relative position
+        # check_part[0]: 0.5 in the middle, less than 0.5 to the left
+        # check_part[1]: 0.5 - in the middle, less than 0.5 - above
         self.check_part = check_part
 
-        # Надпись
         if text is not None:
             self._text = text.encode('utf-8')
         else:
             self._text = None
         self.text_color = text_color
 
-        # Display list
         self.texture_id = glGenTextures(1)
 
-        # Состояние кнопки и текстура
         self._state = 0
         self.pressed = False
         if type(textures[0]) is tuple:
