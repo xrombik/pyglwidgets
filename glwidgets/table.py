@@ -231,7 +231,6 @@ class Table(GlWidget):
     
     def get_widths_const(self):
         return self.widths
- 
 
     def show_selected(self):
         """

@@ -28,10 +28,7 @@ class DynamicText(glwidget.GlWidget):
         for col in color:
             assert type(col) is int, "Значение компонента цвета. Должны быть целым"
             assert 0 <= col <= 255, "Диапазон значений компонента цвета"
-        viewport = glGetIntegerv(GL_VIEWPORT)
-
         self.pos = pos
-        self.parent_height = viewport[3]
         self.lines = list()
         self.font = font
         self.color = color
@@ -76,7 +73,7 @@ class DynamicText(glwidget.GlWidget):
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
-        self.font.draw_gluint_lines((self.pos[0], self.pos[1]), self.lines, self.color)
+        self.font.draw_gluint_lines(self.pos, self.lines, self.color)
         glEndList()
 
 
@@ -94,8 +91,6 @@ class StaticText(glwidget.GlWidget):
         assert (font is None) or (type(font) is fonts.CairoFont)
 
         self.pos = pos
-        viewport = glGetIntegerv(GL_VIEWPORT)
-        self.parent_height = viewport[3]
         self.text = text
         self.color = list(color)
         self.user_data = user_data

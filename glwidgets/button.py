@@ -252,14 +252,14 @@ class Button(GlWidget):
 
             # центр
             cc.set_source_rgba(1.0, 1.0, 1.0, 0.8)
-            cc.move_to(1, - ybearing + 1)
+            cc.move_to(1, - ybearing)
             cc.show_text(self._text)
 
             # 2) Назначить буфер с текстом в текстуру
             texture2 = data_to_texture(self.texture_id, cis.get_data(), width_a, height)
             cis.finish()
 
-            y = int(self.pos[1] + (height - fheight + fdescent) * self.check_part[1] + 0.5)
+            y = int(self.pos[1] - fdescent * self.check_part[1] + 0.5)
 
         # Сборка потока команд в display list
         glNewList(self.dl, GL_COMPILE)

@@ -57,19 +57,21 @@ class Entry(glwidget.GlWidget):
         self.line_width = 2
 
     def redraw(self):
-        glNewList(self.dl, GL_COMPILE)
-        # Рамка
         pos = self.pos[0], self.pos[1]
         p0 = pos
         p1 = pos[0] + self.size[0], pos[1]
         p2 = pos[0] + self.size[0], pos[1] + self.size[1]
         p3 = pos[0], pos[1] + self.size[1]
-        gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, self.line_width)
         pts = p1, p0, p3, p2
+
+        glNewList(self.dl, GL_COMPILE)
         # Подкладка
-        gltools.draw_polygon(pts, (0, 0, 0, 240))
+        gltools.draw_polygon(pts, colors.BLACK255)
+
+        # Рамка
+        gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, self.line_width)
         # Введённый текст
-        self.font.draw_text((self.pos[0], self.pos[1] + self.size[1] + 2), self.text)
+        self.font.draw_text((self.pos[0], self.pos[1] - self.line_width), self.text)
         # Курсор
         if self.timer_id:
             gltools.draw_line((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
