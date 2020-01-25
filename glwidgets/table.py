@@ -14,7 +14,6 @@ from .glimports import *
 from .glconst import *
 from .fonts import DEFAULT_FONT_FACE
 from .fonts import DEFAULT_FONT_SIZE
-from .glwidget import key_handler_connect
 from .driver import safe_connect
 from .driver import safe_disconnect
 
@@ -231,7 +230,6 @@ class Table(GlWidget):
     
     def get_widths_const(self):
         return self.widths
- 
 
     def show_selected(self):
         """

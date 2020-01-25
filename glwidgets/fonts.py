@@ -50,15 +50,16 @@ class FreeTypeFont(object):
 
     def __init__(self, file_name, font_height=DEFAULT_FONT_SIZE, dpi=DEFAULT_DPI, line_spacing=1.5):
         range_dl = 0
-        for ordch in map(ord, FreeTypeFont.ALPHABET):
+        i = 0
+        while i < len(FreeTypeFont.ALPHABET):
+            ordch = ord(FreeTypeFont.ALPHABET[i])
             if range_dl < ordch:
                 range_dl = ordch
-
+            i += 1
         self.range = range_dl + 1
         self.size = font_height
 
         viewport = glGetIntegerv(GL_VIEWPORT)
-        self.parent_hight = viewport[3]
 
         self.dl_pushScreenCoordinateMatrix = glGenLists(1)
         glNewList(self.dl_pushScreenCoordinateMatrix, GL_COMPILE)
@@ -66,7 +67,7 @@ class FreeTypeFont(object):
         glMatrixMode(GL_PROJECTION)
         glPushMatrix()
         glLoadIdentity()
-        glOrtho(viewport[0], viewport[2], viewport[1], viewport[3], -1, 1)
+        glOrtho(viewport[0], viewport[2], viewport[3], viewport[1], -1, 1)
         glPopAttrib()
         glEnable(GL_TEXTURE_2D)
         glEndList()
@@ -90,7 +91,6 @@ class FreeTypeFont(object):
         self.ord_map_dict = dict()
         self.text_widths = dict()
 
-        # Генерация display lists и сохранение ширин символов
         for ch in FreeTypeFont.ALPHABET:
             self.chars_widths[ord(ch)] = self._make_dlist(ch)
 
@@ -119,16 +119,18 @@ class FreeTypeFont(object):
 
     def draw_gluint_lines(self, pos, lines, color=colors.WHITE):
         glCallList(self.dl_pushScreenCoordinateMatrix)
+        glEnable(GL_TEXTURE_2D)
         glListBase(self.list_base)
         y = pos[1]
         glColor4ub(*color)
         for line in lines:
             glPushMatrix()
             glLoadIdentity()
-            glTranslatef(pos[0], self.parent_hight - y, 0)
+            glTranslatef(pos[0], y, 0)
             glCallLists(line)
             glPopMatrix()
             y += self.height
+        glDisable(GL_TEXTURE_2D)
         glCallList(self.dl_pop_projection_matrix)
 
     def _str_to_gluint(self, s):
@@ -157,7 +159,7 @@ class FreeTypeFont(object):
             ms = self._str_to_gluint(si)
             glPushMatrix()
             glLoadIdentity()
-            glTranslatef(pos[0], self.parent_hight - y, 0)
+            glTranslatef(pos[0], y, 0)
             glCallLists(ms)
             glPopMatrix()
             y += self.height
@@ -183,20 +185,23 @@ class FreeTypeFont(object):
         width = next_p2(bitmap.width)
         height = next_p2(bitmap.rows)
         expanded_data = bytearray(2 * width * height)
-        for j in range(height):
-            for i in range(width):
+        j = 0
+        while j < height:
+            i = 0
+            while i < width:
                 val = 0
                 if not ((i >= bitmap.width) or (j >= bitmap.rows)):
                     val = bitmap.buffer[i + bitmap.width * j]
                 expanded_data[2 * (i + j * width)] = val
                 expanded_data[2 * (i + j * width) + 1] = val
+                i += 1
+            j += 1
         glBindTexture(GL_TEXTURE_2D, self.textures[ord(ch)])
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, str(expanded_data))
         del expanded_data
 
-        sy = float(glyph.bitmap_top) - float(bitmap.rows)
         x = float(bitmap.width) / float(width)
         y = float(bitmap.rows) / float(height)
 
@@ -205,16 +210,12 @@ class FreeTypeFont(object):
         glBindTexture(GL_TEXTURE_2D, self.textures[ord(ch)])
         glTranslatef(glyph.bitmap_left, 0, 0)
         glPushMatrix()
-        glTranslatef(0, sy, 0)
+        glTranslatef(0, -float(glyph.bitmap_top), 0)
         glBegin(GL_QUADS)
-        glTexCoord2d(0, 0)
-        glVertex2f(0, bitmap.rows)
-        glTexCoord2d(0, y)
-        glVertex2f(0, 0)
-        glTexCoord2d(x, y)
-        glVertex2f(bitmap.width, 0)
-        glTexCoord2d(x, 0)
-        glVertex2f(bitmap.width, bitmap.rows)
+        glTexCoord2d(0, y); glVertex2f(0, bitmap.rows)
+        glTexCoord2d(x, y); glVertex2f(bitmap.width, bitmap.rows)
+        glTexCoord2d(x, 0); glVertex2f(bitmap.width, 0)
+        glTexCoord2d(0, 0); glVertex2f(0, 0)
         glEnd()
         glPopMatrix()
         glTranslatef(self.face.glyph.advance.x >> 6, 0, 0)
@@ -229,33 +230,28 @@ class CairoFont(object):
     cairo_context.select_font_face(DEFAULT_FONT_FACE)
     cairo_context.set_font_size(DEFAULT_FONT_SIZE)
 
-    def __init__(self, face=DEFAULT_FONT_FACE, font_hight=DEFAULT_FONT_SIZE, predraw=None):
+    def __init__(self, face=DEFAULT_FONT_FACE, font_hight=DEFAULT_FONT_SIZE):
         assert type(face) is str
         assert type(font_hight) is int
-        self.cc0 = cairo.Context(CairoFont.image_surface0)  # Поверхность для вычисления размера текста
+        self.cc0 = cairo.Context(CairoFont.image_surface0)
         self.cc0.select_font_face(face)
         self.cc0.set_font_size(font_hight)
-        self.face = face  # название начертания букв
-        self.size = font_hight  # размер букв
+        self.face = face
+        self.size = font_hight
         self.texture_id = glGenTextures(1)
-
-        if predraw is not None:
-            assert inspect.isfunction(predraw)
-            self.predraw = predraw
 
     def __del__(self):
         glDeleteTextures([self.texture_id])
 
-    def __new__(cls, face=DEFAULT_FONT_FACE, face_size=DEFAULT_FONT_SIZE, predraw=None):
+    def __new__(cls, face=DEFAULT_FONT_FACE, face_size=DEFAULT_FONT_SIZE):
         assert type(face) is str
         assert type(face_size) is int
-        font_key = (face, face_size)
+        font_key = '%s %u' % (face, face_size)
         if font_key in CairoFont.font_items:
             return CairoFont.font_items[font_key]
         else:
             font_item = super(CairoFont, cls).__new__(cls)
-            CairoFont.font_items[(face, face_size)] = font_item
-            print(u'fonts.py: шрифт создан \'%s %u\'' % (face, face_size))
+            CairoFont.font_items[font_key] = font_item
             return font_item
 
     def get_text_width(self, text):
@@ -264,16 +260,13 @@ class CairoFont(object):
 
     def get_text_hight(self):
         fascent, fdescent, fheight, fxadvance, fyadvance = self.cc0.font_extents()
-        return int(fheight)
+        return int(fheight + 0.5)
 
     def draw_text(self, pos, text, color=colors.WHITE):
-        # Вычислить размер в пикселях который будет занимать текст
         xbearing, ybearing, width, height0, xadvance, yadvance = self.cc0.text_extents(text)
         fascent, fdescent, fheight, fxadvance, fyadvance = self.cc0.font_extents()
         height = (text.count('\n') + 1) * fheight
-        # Нарисовать текcт в текстуру:
-        # 1) создать изображение текста в буфере
-        cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(xadvance), int(height))
+        cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(xadvance + 0.5), int(height + 0.5))
         cc = cairo.Context(cis)
         cc.select_font_face(self.face)
         cc.set_font_size(self.size)
@@ -284,10 +277,8 @@ class CairoFont(object):
         for t in text.split('\n'):
             cc.move_to(0, y)
             cc.show_text(t)
-            y += fheight  # -ybearing
+            y += fheight
 
-        # 2) Назначить буфер в текстуру
-        texture = gltools.data_to_texture(self.texture_id, cis.get_data(), int(xadvance), int(height))
+        texture = gltools.data_to_texture(self.texture_id, cis.get_data(), int(xadvance + 0.5), int(height + 0.5))
         cis.finish()
-        gltools.draw_texture(texture, (pos[0], pos[1] - fheight), color)
-        return xbearing, fheight, int(xadvance), int(height), xadvance, yadvance
+        gltools.draw_texture(texture, pos, color)

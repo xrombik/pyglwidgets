@@ -91,10 +91,9 @@ class CairoFrame(GlWidget):
         self.cc.stroke()
 
         # Разделительные линии
-        for poss in self.lines:
-            pos0, pos1 = poss
-            self.cc.move_to(pos0[0], pos0[1])
-            self.cc.line_to(pos1[0], pos1[1])
+        for poss0, poss1 in self.lines:
+            self.cc.move_to(*poss0)
+            self.cc.line_to(*poss1)
             self.cc.stroke()
 
         xbearing, ybearing, text_width, text_height, xadvance, yadvance = self.cc.text_extents(self.title)
@@ -122,10 +121,8 @@ class CairoFrame(GlWidget):
                     self.cc.show_text(t)
                     y_pos += fheight
 
-        # Вывод в текстуру
         txtr = gltools.data_to_texture(self.txtr_id, self.cis.get_data(), self.width, self.height)
 
-        # Вывод в opengl
         glNewList(self.dl, GL_COMPILE)
         gltools.draw_texture(txtr, self.pos)
         glEndList()

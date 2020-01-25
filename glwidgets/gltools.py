@@ -16,6 +16,7 @@ from .glconst import *
 
 _flash_phase = 0
 flash_alpha = 100
+_dl_gltextparameterf = 0
 
 
 def step_flash():
@@ -118,7 +119,7 @@ def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
         theta = pi_2 * float(ii) / float(num_segments)  # get the current angle
         x = r * math.cos(theta)  # calculate the x component
         y = r * math.sin(theta)  # calculate the y component
-        glVertex2f(x + cx, _parent_height - (y + cy))  # output vertex
+        glVertex2f(x + cx, y + cy)  # output vertex
     glEnd()
     glDisable(GL_LINE_STIPPLE)
 
@@ -135,8 +136,8 @@ def draw_line(point1, point2, color=colors.WHITE, width=2):
     glLineWidth(width)
     glColor4ub(*color)
     glBegin(GL_LINE_STRIP)
-    glVertex2f(point1[0], _parent_height - point1[1])
-    glVertex2f(point2[0], _parent_height - point2[1])
+    glVertex2f(*point1)
+    glVertex2f(*point2)
     glEnd()
 
 
@@ -144,7 +145,7 @@ def draw_lines(points, color=colors.WHITE, width=2):
     glLineWidth(width)
     glColor4ub(*color)
     glBegin(GL_LINE_STRIP)
-    [glVertex2f(p0, _parent_height - p1) for p0, p1 in points]
+    for p in points: glVertex2f(*p)
     glEnd()
 
 
@@ -152,7 +153,7 @@ def draw_lines_rotated(rotor_point, points, color=colors.WHITE, width=2, tetha=0
     glPushMatrix()
     glLineWidth(width)
     glColor4ub(*color)
-    glTranslatef(rotor_point[0], _parent_height - rotor_point[1], 0)
+    glTranslatef(rotor_point[0], rotor_point[1], 0)
     glRotatef(tetha, 0, 0, 1)  # rotating
     glBegin(GL_LINE_STRIP)
     for p in points: glVertex2f(*p)
@@ -190,7 +191,7 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
         text_width = font.get_text_width(str0)  # Горизонтальное выравнивание по центру ячейки
         dx = (cws_x - text_width) >> 1
         if dx < 0: dx = 0
-        font.draw_text((x + line_width + dx, y + row_height + line_width), str0, col)
+        font.draw_text((x + line_width + dx, y + line_width), str0, col)
         cx += 1
         x += cws_x
 
@@ -212,7 +213,7 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
         for str0 in strs:  # пробег по столбцам
             # TODO: Добавить отсечение слишком длинного текста
             col = color_proc(cx, cy)  # Выбор цвета для ячейки
-            font.draw_text((x + line_width, y + row_height + line_width), str0, col)
+            font.draw_text((x + line_width, y + line_width), str0, col)
             x += cws[i]
             i += 1
             cx += 1
@@ -276,12 +277,11 @@ def draw_table_borders(pos, cws, rh, rn, lw):
 
 
 def opengl_init(width, height, quality=GL_NICEST):
-    global _parent_height, _dl_gltextparameterf
+    global _dl_gltextparameterf
     assert quality in (GL_FASTEST, GL_NICEST)
-    _parent_height = height
 
     glViewport(0, 0, width, height)
-    glOrtho(0, width, 0, height, -1, 1)
+    glOrtho(0, width, height, 0, -1, 1)
     glMatrixMode(GL_MODELVIEW)
     glEnable(GL_CULL_FACE)
     glEnable(GL_BLEND)
@@ -328,7 +328,6 @@ def draw_sector(points_in, points_out, color):
         return
     if n1 < n2:
         n = n1
-
     glColor4ub(*color)
     i = 0
     i_n = n - 1
@@ -336,20 +335,14 @@ def draw_sector(points_in, points_out, color):
         i1 = n - i - 1
         i2 = n - i - 2
         glBegin(GL_POLYGON)
-        px, py = points_out[i]
-        glVertex2f(px, _parent_height - py)
-        px, py = points_in[i1]
-        glVertex2f(px, _parent_height - py)
-        px, py = points_in[i2]
-        glVertex2f(px, _parent_height - py)
+        glVertex2f(*points_out[i])
+        glVertex2f(*points_in[i1])
+        glVertex2f(*points_in[i2])
         glEnd()
         glBegin(GL_POLYGON)
-        px, py = points_in[i]
-        glVertex2f(px, _parent_height - py)
-        px, py = points_out[i1]
-        glVertex2f(px, _parent_height - py)
-        px, py = points_out[i2]
-        glVertex2f(px, _parent_height - py)
+        glVertex2f(*points_in[i])
+        glVertex2f(*points_out[i1])
+        glVertex2f(*points_out[i2])
         glEnd()
         i += 1
 
@@ -421,17 +414,13 @@ def draw_texture(texture, pos, col=colors.WHITE, mirror=MIRROR_NONE):
     glEnable(GL_TEXTURE_2D)
     glColor4ub(*col)
     glPushMatrix()
-    glTranslatef(pos[0], _parent_height - pos[1] - texture[2], 0)
+    glTranslatef(pos[0], pos[1], 0)
     glBindTexture(GL_TEXTURE_2D, texture[0])
     glBegin(GL_QUADS)
-    glTexCoord2f(mirror[0], mirror[1])
-    glVertex2f(0, 0)
-    glTexCoord2f(mirror[2], mirror[3])
-    glVertex2f(texture[1], 0)
-    glTexCoord2f(mirror[4], mirror[5])
-    glVertex2f(texture[1], texture[2])
-    glTexCoord2f(mirror[6], mirror[7])
-    glVertex2f(0, texture[2])
+    glTexCoord2f(mirror[0], mirror[1]); glVertex2f(0, texture[2])
+    glTexCoord2f(mirror[2], mirror[3]); glVertex2f(texture[1], texture[2])
+    glTexCoord2f(mirror[4], mirror[5]); glVertex2f(texture[1], 0)
+    glTexCoord2f(mirror[6], mirror[7]); glVertex2f(0, 0)
     glEnd()
     glPopMatrix()
     glDisable(GL_TEXTURE_2D)
@@ -442,21 +431,17 @@ def draw_texture_rotate(texture, pos, a=0.0, col=colors.WHITE, mirror=MIRROR_NON
     glEnable(GL_TEXTURE_2D)
     glColor4ub(*col)
     glPushMatrix()
-    glTranslatef(pos[0], _parent_height - pos[1], 0)
+    glTranslatef(pos[0], pos[1], 0)
     glRotate(a, 0, 0, -1)
     glBindTexture(GL_TEXTURE_2D, texture[0])
     glScalef(*scale)
     glBegin(GL_QUADS)
     sx = texture[1] // 2
     sy = texture[2] // 2
-    glTexCoord2f(mirror[0], mirror[1])
-    glVertex2f(-sx, -sy)
-    glTexCoord2f(mirror[2], mirror[3])
-    glVertex2f(sx, -sy)
-    glTexCoord2f(mirror[4], mirror[5])
-    glVertex2f(sx, sy)
-    glTexCoord2f(mirror[6], mirror[7])
-    glVertex2f(-sx, sy)
+    glTexCoord2f(mirror[0], mirror[1]); glVertex2f(-sx, sy)
+    glTexCoord2f(mirror[2], mirror[3]); glVertex2f(sx, sy)
+    glTexCoord2f(mirror[4], mirror[5]); glVertex2f(sx, -sy)
+    glTexCoord2f(mirror[6], mirror[7]); glVertex2f(-sx, -sy)
     glEnd()
     glPopMatrix()
     glDisable(GL_TEXTURE_2D)
@@ -466,18 +451,14 @@ def draw_texture_scale(texture, pos, scale, col=colors.WHITE, mirror=MIRROR_NONE
     glEnable(GL_TEXTURE_2D)
     glColor4ub(*col)
     glPushMatrix()
-    glTranslatef(pos[0], _parent_height - pos[1] - texture[2], 0)
+    glTranslatef(pos[0], pos[1], 0)
     glBindTexture(GL_TEXTURE_2D, texture[0])
     glScalef(scale[0], scale[1], 1.0)
     glBegin(GL_QUADS)
-    glTexCoord2f(mirror[0], mirror[1])
-    glVertex2f(0, 0)
-    glTexCoord2f(mirror[2], mirror[3])
-    glVertex2f(texture[1], 0)
-    glTexCoord2f(mirror[4], mirror[5])
-    glVertex2f(texture[1], texture[2])
-    glTexCoord2f(mirror[6], mirror[7])
-    glVertex2f(0, texture[2])
+    glTexCoord2f(mirror[0], mirror[1]); glVertex2f(0, texture[2])
+    glTexCoord2f(mirror[2], mirror[3]); glVertex2f(texture[1], texture[2])
+    glTexCoord2f(mirror[4], mirror[5]); glVertex2f(texture[1], 0)
+    glTexCoord2f(mirror[6], mirror[7]); glVertex2f(0, 0)
     glEnd()
     glPopMatrix()
     glDisable(GL_TEXTURE_2D)
@@ -486,5 +467,5 @@ def draw_texture_scale(texture, pos, scale, col=colors.WHITE, mirror=MIRROR_NONE
 def draw_polygon(points, color):
     glColor4ub(*color)
     glBegin(GL_POLYGON)
-    for p in points: glVertex2f(p[0], _parent_height - p[1])
+    for p in points: glVertex2f(*p)
     glEnd()

@@ -228,44 +228,34 @@ class Button(GlWidget):
         texture1 = self.textures[self._state][0]
         width = self.textures[self._state][1]
         height = self.textures[self._state][2]
-        # изображение кнопки
         alpha = self.alphas[self.cover]
         color = self.color[0], self.color[1], self.color[2], alpha
 
         if self.text and (self.texture2 is None):
-            # Вычислить размер в пикселях который будет занимать текст
             xbearing, ybearing, text_width, text_height, xadvance, yadvance = self.font.cc0.text_extents(self._text)
             fascent, fdescent, fheight, fxadvance, fyadvance = self.font.cc0.font_extents()
-
-            # Выравнивание
             width_a, x_a = self.align(self.pos, width, xadvance, self.check_part[0])
-
-            # Нарисовать текcт в текстуру:
-            # 1) создать изображение текста в буфере
             cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_a, height)
+
             cc = cairo.Context(cis)
             cc.select_font_face(DEFAULT_FONT_FACE)
-            cc.set_font_size(self.text_height)
+            cc.set_font_size(DEFAULT_FONT_SIZE)
 
-            # тень
-            cc_draw_text_shadow(cc, self._text, ybearing)
+            cc.move_to(0, fheight)
+            cc.text_path(self._text)
+            cc.set_source_rgba(0.0, 0.0, 0.0, 1.0)
+            cc.set_line_width(1.0)
+            cc.stroke_preserve()
+            cc.set_source_rgba(1.0, 1.0, 1.0, 1.0)
+            cc.fill_preserve()
 
-            # центр
-            cc.set_source_rgba(1.0, 1.0, 1.0, 0.8)
-            cc.move_to(1, - ybearing + 1)
-            cc.show_text(self._text)
-
-            # 2) Назначить буфер с текстом в текстуру
             texture2 = data_to_texture(self.texture_id, cis.get_data(), width_a, height)
             cis.finish()
 
-            y = int(self.pos[1] + (height - fheight + fdescent) * self.check_part[1] + 0.5)
+            y = int(self.pos[1] + fheight * self.check_part[1])
 
-        # Сборка потока команд в display list
         glNewList(self.dl, GL_COMPILE)
-        # 3) Нарисовать фон кнопки
         draw_texture((texture1, width, height), self.pos, color, self.mirror)
-        # 4) Нарисовать текстуру с текстом
         if self._text:
             draw_texture(texture2, (x_a, y), self.text_color)
         if self.outlines:

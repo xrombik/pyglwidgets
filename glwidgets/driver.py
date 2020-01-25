@@ -57,8 +57,8 @@ def draw_end(gda, s):
 
 
 class DrawingAreaProxy(gtk.DrawingArea):
-    def __init__(self):
-        super(DrawingAreaProxy, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(DrawingAreaProxy, self).__init__(*args, **kwargs)
         self.ehid = None
 
     def connect(self, event_name, proc, *args, **kwargs):
@@ -79,7 +79,7 @@ class DrawingAreaProxy(gtk.DrawingArea):
 
 class DrawDriver(gtk.Window):
 
-    def __init__(self, title, w, h, argv=None):
+    def __init__(self, title, w, h):
         super(DrawDriver, self).__init__()
         display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  # gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
         events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
@@ -110,7 +110,6 @@ class DrawDriver(gtk.Window):
 
     def init(self):
         gda = self.get_child()
-        glwidget.key_handler_init(self)
         opengl_init(gda.allocation.width, gda.allocation.height)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)
