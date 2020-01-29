@@ -13,7 +13,6 @@ TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хоб
 __all__ = (
     'align_h_center',
     'align_h_left',
-    'cc_draw_text_shadow',
     'clear_cairo_surface',
     'DEFAULT_RATE_MS',
     'GlWidget')
@@ -48,26 +47,6 @@ def align_h_left(pos, width, _xadvance, cpx):
     width0 = int(width - width * cpx)
     x = int(pos[0] + width * cpx)
     return width0, x
-
-
-def cc_draw_text_shadow(cc, text, ybearing):
-    shadow_col = (0.0, 0.0, 0.0, 1.0)
-    # тень справо
-    cc.set_source_rgba(*shadow_col)
-    cc.move_to(2, -ybearing + 1)
-    cc.show_text(text)
-    # тень внизу
-    cc.set_source_rgba(*shadow_col)
-    cc.move_to(1, -ybearing + 2)
-    cc.show_text(text)
-    # тень слево
-    cc.set_source_rgba(*shadow_col)
-    cc.move_to(0, -ybearing + 1)
-    cc.show_text(text)
-    # тень сверху
-    cc.set_source_rgba(*shadow_col)
-    cc.move_to(1, -ybearing)
-    cc.show_text(text)
 
 
 def clear_cairo_surface(cc):
@@ -167,8 +146,8 @@ class GlWidget(object):
     def __del__(self):
         self.disconnect()
         self_id = id(self)
-        if self_id in GlWidget.items_queue:
-            del GlWidget.items_queue[self_id]
+        try: del GlWidget.items_queue[self_id]
+        except KeyError: pass
         glDeleteLists(self.dl, 1)
 
     def _draw_none(self): pass

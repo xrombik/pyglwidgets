@@ -218,14 +218,17 @@ class Table(GlWidget):
         cx = len(self._rows[0])
         cy = len(self._rows)
         widths = list()
-        for j in range(cx):
+        j = 0
+        while j < cx:
             w = 0
-            for i in range(cy):
+            i = 0
+            while i < cy:
                 s = self._rows[i][j]
                 w0 = self.font.get_text_width(s)
-                if w0 > w:
-                    w = w0
+                if w0 > w: w = w0
+                i += 1
             widths.append(w + self.line_width * 2)
+            j += 1
         return widths
     
     def get_widths_const(self):

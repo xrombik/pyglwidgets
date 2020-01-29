@@ -6,11 +6,9 @@ import glib
 import inspect
 
 from glwidget import GlWidget
-from glwidgets import glwidget
 from .glimports import *
 from gltools import opengl_init
 from gltools import check_glerrors
-
 
 __name__ = 'gtkgl driver'
 __all__ = ('DrawDriver', 'safe_disconnect', 'safe_connect')

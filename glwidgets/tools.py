@@ -92,8 +92,10 @@ def get_mask32(width, shift=0):
     assert 0 <= shift <= 32
     assert 0 <= width <= 32
     mask = 0
-    for i in range(width):
+    i = 0
+    while i < width:
         mask |= 1 << i
+        i += 1
     return mask << shift
 
 

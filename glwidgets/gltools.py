@@ -7,7 +7,7 @@
 import os
 import gtk
 import gtk.gdkgl
-import math
+from math import pi, cos, sin, hypot
 
 # Свои модули
 from . import colors
@@ -31,7 +31,7 @@ _glerros = \
     GL_INVALID_ENUM: "GL_INVALID_ENUM: An unacceptable value is specified for an enumerated argument",
     GL_INVALID_VALUE: "GL_INVALID_VALUE: A numeric argument is out of range",
     GL_INVALID_OPERATION: "GL_INVALID_OPERATION: The specified operation is not allowed in the current state",
-    # GL_INVALID_FRAMEBUFFER_OPERATION: "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete",
+    GL_INVALID_FRAMEBUFFER_OPERATION: "GL_INVALID_FRAMEBUFFER_OPERATION: The framebuffer object is not complete",
     GL_OUT_OF_MEMORY: "GL_OUT_OF_MEMORY: There is not enough memory left to execute the command",
     GL_STACK_UNDERFLOW: "GL_STACK_UNDERFLOW: An attempt has been made to perform an operation that would cause an internal stack to underflow",
     GL_STACK_OVERFLOW: "GL_STACK_OVERFLOW: An attempt has been made to perform an operation that would cause an internal stack to overflow"
@@ -41,7 +41,7 @@ _glerros = \
 MIRROR_NONE = (0, 1, 1, 1, 1, 0, 0, 0)  # Матрица без отражения
 MIRROR_HORIZ = (1, 1, 0, 1, 0, 0, 1, 0)  # Матрица горизонтального отражения
 
-pi_2 = 2.0 * math.pi
+pi_2 = 2.0 * pi
 
 __all__ = (
     'MIRROR_HORIZ',
@@ -96,7 +96,7 @@ def check_ring(r1, r2, x, y, ex, ey):
     :return: True - если попадает, False - если не попадает
     """
     assert r1 < r2, "Внутренний радиус r1:%u должен быть меньше внешнего r2:%u" % (r1, r2)
-    return r1 < math.hypot(x - ex, y - ey) < r2
+    return r1 < hypot(x - ex, y - ey) < r2
 
 
 def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
@@ -115,11 +115,14 @@ def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
     glEnable(GL_LINE_STIPPLE)
     glLineStipple(1, 0x01)
     glBegin(GL_LINE_LOOP)
-    for ii in range(num_segments):
-        theta = pi_2 * float(ii) / float(num_segments)  # get the current angle
-        x = r * math.cos(theta)  # calculate the x component
-        y = r * math.sin(theta)  # calculate the y component
+    ii = 0
+    fns = pi_2 / float(num_segments)
+    while ii < num_segments:
+        theta = float(ii) * fns  # get the current angle
+        x = r * cos(theta)  # calculate the x component
+        y = r * sin(theta)  # calculate the y component
         glVertex2f(x + cx, y + cy)  # output vertex
+        ii += 1
     glEnd()
     glDisable(GL_LINE_STIPPLE)
 
@@ -303,8 +306,6 @@ def opengl_init(width, height, quality=GL_NICEST):
     glNewList(_dl_gltextparameterf, GL_COMPILE)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
     glEndList()
 
     val = quality
