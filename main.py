@@ -48,9 +48,10 @@ def on_init(scm, rcm):
 
 
 def on_entry_edit_done(entry0):
-    tbl0 = entry0.user_data
-    rows = tbl0.get_rows()
-    rows[1][0] = entry0.text
+    # type: (Entry) -> None
+    tbl0 = entry0.user_data  # type: Table
+    rows = tbl0.get_rows()  # type: list
+    rows[1][0] = entry0.text  # type: str
     tbl0.set_rows(rows)
     
 

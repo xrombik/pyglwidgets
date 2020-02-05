@@ -93,7 +93,7 @@ class TextRegulator(StaticText):
         :return: Ничего
         """
         char = unichr(gtk.gdk.keyval_to_unicode(event.keyval))
-        if TextRegulator.KEY_TO_VALUE.has_key(char):
+        if char in TextRegulator.KEY_TO_VALUE:
             mul_val = TextRegulator.KEY_TO_VALUE[char]
             val = self.val
             self.val = self.min + (float(self.max - self.min) / float(len(TextRegulator.KEY_TO_VALUE) - 1)) * mul_val

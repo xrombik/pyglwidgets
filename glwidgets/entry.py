@@ -5,6 +5,7 @@ import gtk
 import glib
 import copy
 
+from . import kbkeys
 from . import glwidget
 from . import fonts
 from . import gltools
@@ -24,7 +25,7 @@ class Entry(glwidget.GlWidget):
                  font_name=fonts.DEFAULT_FONT_FACE,
                  font_size=fonts.DEFAULT_FONT_SIZE,
                  text_color=colors.ENTRY_TEXT,
-                 bg_color=(255, 127, 127, 255)):
+                 bg_color=colors.GRAY):
         assert type(pos) is tuple
         assert len(pos) == 2
         assert type(rect_size) is tuple
@@ -74,7 +75,7 @@ class Entry(glwidget.GlWidget):
         self.font.draw_text((self.pos[0], self.pos[1] - self.line_width), self.text)
         # Курсор
         if self.timer_id:
-            gltools.draw_line((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
+            gltools.draw_lines(((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1])), self.cur_col)
         glEndList()
 
     def on_timer(self, *_args):
@@ -111,7 +112,7 @@ class Entry(glwidget.GlWidget):
             self.text = ''
             for c in text_l:
                 self.text += c
-        if char_name == 'Delete':
+        if char_name == kbkeys.DELETE:
             if len(self.text.decode('utf-8')):
                 text_l = list(self.text.decode('utf-8'))
                 if self.cur_index < len(text_l):
@@ -119,14 +120,14 @@ class Entry(glwidget.GlWidget):
                 self.text = ''
                 for c in text_l:
                     self.text += c
-        elif (char_name == 'Return') or (char_name == 'KP_Enter'):
+        elif (char_name == kbkeys.RETURN) or (char_name == kbkeys.KPENTER):
             if self.on_edit_done is not None:
                 self.on_edit_done(self)
-        elif char_name == 'Left':
+        elif char_name == kbkeys.LEFT:
             cur_shift = -1
-        elif char_name == 'Right':
+        elif char_name == kbkeys.RIGHT:
             cur_shift = 1
-        elif char_name == 'BackSpace':
+        elif char_name == kbkeys.BACKSPACE:
             if len(self.text.decode('utf-8')):
                 text_l = list(self.text.decode('utf-8'))
                 if self.cur_index > 0:
