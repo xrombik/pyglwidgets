@@ -7,11 +7,9 @@ from ctypes import cast
 
 
 class EventCtl(object):
-
-    def __init__(self, argv, depth_max=2):
-        self._depth_max = depth_max
-        self._events = dict()
-        self._event_ncall = 0
+    _depth_max = 5
+    _events = dict()
+    _event_ncall = 0
 
     def connect(self, name, proc, *args):
         assert type(name) is str, 'Должна быть строка'
@@ -30,7 +28,7 @@ class EventCtl(object):
             s = 'Должна быть функция или метод'
             raise ValueError(s)
 
-        if name not in self._events.keys():
+        if name not in self._events:
             self._events[name] = list()
         ecb_id = (proc, args)
         if ecb_id in self._events[name]:
@@ -42,14 +40,14 @@ class EventCtl(object):
 
     def emmit(self, name):
         """
-        Вызывает событие event_name
+        Вызывает событие name
         :param name:
         :return:
         """
-        assert self._event_ncall > self._depth_max, 'длина цепочки сообщений: %u' % self._event_ncall
+        assert self._event_ncall < self._depth_max, 'длина цепочки сообщений: %u' % self._event_ncall
         self._event_ncall += 1
         rc = False
-        if name in self._events.keys():
+        if name in self._events:
             for proc, args in self._events[name]:
                 rc = True
                 self._event_ncall = 0

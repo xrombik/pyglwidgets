@@ -5,7 +5,8 @@ import gtk
 import glib
 import inspect
 
-from glwidget import GlWidget
+from . import nevents
+from evtctl import EventCtl
 from .glimports import *
 from gltools import opengl_init
 from gltools import check_glerrors
@@ -28,11 +29,11 @@ def safe_disconnect(obj, ehid):
     return ehid
 
 
-def safe_connect(obj, ehid, name, proc, *args):
+def safe_connect(obj, ehid, event_name, proc, *args):
     assert isinstance(obj, gtk.DrawingArea)
     assert isinstance(ehid, (long, int, type(None)))
     if ehid is None:
-        ehid = obj.connect(name, proc, *args)
+        ehid = obj.connect(event_name, proc, *args)
     return ehid
 
 
@@ -92,7 +93,7 @@ class DrawDriver(gtk.Window):
         self.ehid0 = None
         self.ehid1 = None
         self.dl = 0
-        GlWidget.on_redraw = self.on_timer
+        EventCtl().connect(nevents.EVENT_REDRAW, self.on_timer)
 
     def set_uninit(self, on_uninit, *args):
         assert inspect.isfunction(on_uninit)
@@ -105,12 +106,6 @@ class DrawDriver(gtk.Window):
         self.ehid1 = safe_disconnect(gda, self.ehid1)
         glDeleteLists(self.dl, 1)
         on_uninit(*args)
-
-    def init(self):
-        gda = self.get_child()
-        opengl_init(gda.allocation.width, gda.allocation.height)
-        self.dl = glGenLists(1)
-        assert glIsList(self.dl)
 
     def __del__(self):
         self.uninit()
@@ -125,30 +120,20 @@ class DrawDriver(gtk.Window):
             glib.source_remove(self.ehid0)
             self.ehid0 = None
 
-    def on_draw(self, gda, event, scm, redraw_queue):
+    @staticmethod
+    def on_draw(gda, event, scm):
         # type: (...) -> None
         if event.type != gtk.gdk.EXPOSE:
             return
         draw_begin(gda)
-        for item in scm:
-            item.dopc(gda)
-        if scm.scene_changed:
-            glNewList(self.dl, GL_COMPILE)
-            for item in scm:
-                item.draw()
-            glEndList()
-            scm.scene_changed = False
-
-        redraw_queue()
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glCallList(self.dl)
-        scm.process_draw_callbacks()
+        EventCtl().emmit(nevents.EVENT_DRAW)
+        for item in scm: item.dopc(gda)
         draw_end(gda, 'on_draw()')
 
     def set_scene(self, scm):
         gda = self.get_child()
         self.ehid1 = safe_disconnect(gda, self.ehid1)
-        self.ehid1 = gda.connect('expose-event', self.on_draw, scm, GlWidget.redraw_queue)
+        self.ehid1 = gda.connect('expose-event', self.on_draw, scm)
         self.show_all()
 
     def set_init(self, on_init, *args):
@@ -160,13 +145,17 @@ class DrawDriver(gtk.Window):
         gda.gldrawable = gda.window.set_gl_capability(gda.glconfig)
         gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
         draw_begin(gda)
-        self.init()
+        gda = self.get_child()
+        opengl_init(gda.allocation.width, gda.allocation.height)
+        self.dl = glGenLists(1)
+        assert glIsList(self.dl)
+        EventCtl().emmit(nevents.EVENT_INIT)
         on_init(*args)
         draw_end(gda, 'on_init()')
 
     def on_timer(self):
         # type: (DrawDriver) -> bool
-        gda = self.get_child()
+        gda = self.get_child()  # time: gtk.DrawingArea
         rect = gtk.gdk.Rectangle(0, 0, gda.allocation.width, gda.allocation.height)
         gda.window.invalidate_rect(rect, True)
         return True

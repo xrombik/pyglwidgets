@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from .glimports import *
+from . import nevents
+from .evtctl import EventCtl
 from datetime import datetime
 import inspect
 
 
 class SceneCtl(list):
+
     def __init__(self, argv=None):
         super(SceneCtl, self).__init__()
         self.mode = None
@@ -15,9 +19,25 @@ class SceneCtl(list):
         self.mode_change_callbacks = list()
         self.draw_callbacks = list()
         self.time_now = datetime.now()
-        self._events = dict()
-        self._event_ncall = 0
         self.scene_changed = True
+        self.dl = 0
+        EventCtl().connect(nevents.EVENT_INIT, self.on_init)
+        EventCtl().connect(nevents.EVENT_DRAW, self.on_draw)
+
+    def on_init(self):
+        self.dl = glGenLists(1)
+        assert glIsList(self.dl)
+
+    def on_draw(self):
+        if self.scene_changed:
+            glNewList(self.dl, GL_COMPILE)
+            for item in self:
+                item.draw(item.dl)
+            glEndList()
+            self.scene_changed = False
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glCallList(self.dl)
+        self.process_draw_callbacks()
 
     @property
     def tick(self):
@@ -50,7 +70,6 @@ class SceneCtl(list):
         Прячет все элементы из списка items. Показывает элементы из
         словаря mode_items ключ которых равен mode. Ипользуется для
         изменения отображения элементов в заданных режимах программы.
-        :param items: Список элементов для прятанья
         :param mode: Режим программы. Используется как ключ в словаре mode_items.
         :param mode_items: Словарь элементов для показа. Формат одной записи
         словаря {режим: (элемент0, элемент1, ...)}
@@ -150,14 +169,14 @@ class SceneCtl(list):
         return l0 > len(self.draw_callbacks)
 
     def process_draw_callbacks(self):
-        for item in self.draw_callbacks:
-            item[0](self, *item[1])
+        for proc, args in self.draw_callbacks:
+            proc(self, *args)
         return len(self.draw_callbacks)
 
     def set_mode(self, mode):
         if self.mode != mode:
-            for callback in self.mode_change_callbacks:
-                callback[0](self, mode, *callback[1])
+            for proc, args in self.mode_change_callbacks:
+                proc(self, mode, *args)
             self._prev_mode = self.mode
             self.mode = mode
 

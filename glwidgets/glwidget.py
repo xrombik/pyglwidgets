@@ -4,6 +4,8 @@
 # Чужие модули
 import cairo
 
+from . import nevents
+from evtctl import EventCtl
 from .glimports import *
 
 DEFAULT_RATE_MS = 150
@@ -58,22 +60,21 @@ def clear_cairo_surface(cc):
     cc.restore()
 
 
+def redraw_queue(items_queue):
+    # type: (dict) -> None
+    items = items_queue.values()
+    for item in items: item.redraw()
+    items_queue.clear()
+
+
 # noinspection PyAttributeOutsideInit
 class GlWidget(object):
     items_queue = dict()
     on_redraw = None
-
-    __slots__ = ('pos', 'color', 'z', 'dl', 'draw', '_pos', '_color', 'pc')
-
-    @staticmethod
-    def redraw_queue():
-        items = GlWidget.items_queue.values()
-        for item in items:
-            item.redraw()
-        GlWidget.items_queue.clear()
+    EventCtl().connect(nevents.EVENT_DRAW, redraw_queue, items_queue)
 
     def __new__(cls, *args, **kwargs):
-        cls.draw = cls._draw_list
+        cls.draw = glCallList
         cls.z = 0
         """ Глубина на которой оторбражается элемент. Чем больше, тем ближе к наблюдателю """
         cls._color = [255, 255, 255, 255]
@@ -110,14 +111,14 @@ class GlWidget(object):
         Заносит текущий экземпляр в очередь на перерисовку
         :return: Ничего
         """
-        GlWidget.items_queue[id(self)] = self
-        GlWidget.on_redraw()
-
-    def _draw_list(self):
-        glCallList(self.dl)
+        items_queue = GlWidget.items_queue
+        l1 = len(items_queue)
+        items_queue[id(self)] = self
+        if l1 < len(items_queue):
+            EventCtl().emmit(nevents.EVENT_REDRAW)
 
     def hide(self):
-        if self.draw == self._draw_list:
+        if self.draw == glCallList:
             self.disconnect()
             self.draw = self._draw_none
 
@@ -125,7 +126,7 @@ class GlWidget(object):
     def show(self):
         if self.draw == self._draw_none:
             self.connect()
-            self.draw = self._draw_list
+            self.draw = glCallList
 
     def dopc(self, gda):
         """
@@ -150,7 +151,8 @@ class GlWidget(object):
         except KeyError: pass
         glDeleteLists(self.dl, 1)
 
-    def _draw_none(self): pass
+    @staticmethod
+    def _draw_none(dl): pass
 
     def disconnect(self): pass
 
