@@ -235,8 +235,8 @@ class Button(GlWidget):
             xbearing, ybearing, text_width, text_height, xadvance, yadvance = self.font.cc0.text_extents(self._text)
             fascent, fdescent, fheight, fxadvance, fyadvance = self.font.cc0.font_extents()
             width_a, x_a = self.align(self.pos, width, xadvance, self.check_part[0])
-            cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_a, height)
 
+            cis = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_a, height)
             cc = cairo.Context(cis)
             cc.select_font_face(DEFAULT_FONT_FACE)
             cc.set_font_size(DEFAULT_FONT_SIZE)

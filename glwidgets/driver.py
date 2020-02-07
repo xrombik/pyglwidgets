@@ -120,14 +120,20 @@ class DrawDriver(gtk.Window):
             glib.source_remove(self.ehid0)
             self.ehid0 = None
 
-    @staticmethod
-    def on_draw(gda, event, scm):
+    def on_draw(self, gda, event, scm):
         # type: (...) -> None
         if event.type != gtk.gdk.EXPOSE:
             return
         draw_begin(gda)
         EventCtl().emmit(nevents.EVENT_DRAW)
         for item in scm: item.dopc(gda)
+        if scm.scene_changed:
+            glNewList(self.dl, GL_COMPILE)
+            for item in scm: item.draw(item.dl)
+            glEndList()
+            scm.scene_changed = False
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glCallList(self.dl)
         draw_end(gda, 'on_draw()')
 
     def set_scene(self, scm):
@@ -145,7 +151,6 @@ class DrawDriver(gtk.Window):
         gda.gldrawable = gda.window.set_gl_capability(gda.glconfig)
         gda.glcontext = gtk.gdkgl.Context(gda.gldrawable)
         draw_begin(gda)
-        gda = self.get_child()
         opengl_init(gda.allocation.width, gda.allocation.height)
         self.dl = glGenLists(1)
         assert glIsList(self.dl)

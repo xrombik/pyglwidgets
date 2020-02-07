@@ -70,7 +70,6 @@ def redraw_queue(items_queue):
 # noinspection PyAttributeOutsideInit
 class GlWidget(object):
     items_queue = dict()
-    on_redraw = None
     EventCtl().connect(nevents.EVENT_DRAW, redraw_queue, items_queue)
 
     def __new__(cls, *args, **kwargs):
