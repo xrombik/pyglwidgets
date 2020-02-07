@@ -6,6 +6,9 @@ from inspect import ismethod
 from ctypes import cast
 
 
+__all__ = ('EventCtl',)
+
+
 class EventCtl(object):
     _depth_max = 5
     _events = dict()

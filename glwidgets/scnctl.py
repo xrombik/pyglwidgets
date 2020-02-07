@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .glimports import *
-from . import nevents
-from .evtctl import EventCtl
 from datetime import datetime
-import inspect
 
 
 class SceneCtl(list):
@@ -19,29 +15,13 @@ class SceneCtl(list):
         self.mode_change_callbacks = list()
         self.draw_callbacks = list()
         self.time_now = datetime.now()
-        self.scene_changed = True
+        self.scene_changed = False
         self.dl = 0
-        EventCtl().connect(nevents.EVENT_INIT, self.on_init)
-        EventCtl().connect(nevents.EVENT_DRAW, self.on_draw)
-
-    def on_init(self):
-        self.dl = glGenLists(1)
-        assert glIsList(self.dl)
-
-    def on_draw(self):
-        if self.scene_changed:
-            glNewList(self.dl, GL_COMPILE)
-            for item in self:
-                item.draw(item.dl)
-            glEndList()
-            self.scene_changed = False
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glCallList(self.dl)
-        self.process_draw_callbacks()
 
     @property
     def tick(self):
-        return (self.time_now.second << 10) | (self.time_now.microsecond // 1024) % 65535
+        time_now = self.time_now
+        return (time_now.second * 1000) + (time_now.microsecond // 1000)
 
     def check(self):
         """
@@ -114,64 +94,6 @@ class SceneCtl(list):
                 self.remove(item)
         self.scene_changed = len(self) < len_scene
         return self.scene_changed
-
-    def add_mode_change_callback(self, callback, *args):
-        """
-        Добавляет пользовательский обработчик смены режима программы
-        :param callback: Процедура которая будет вызвана при смене режима
-        :param args: Аргументы передаваемые в процедуру
-        :return: Идентификатор обработчика
-        """
-        assert inspect.isfunction(callback)
-        if (len(args) != (callback.func_code.co_argcount - 2)) and ((callback.func_code.co_flags & 0x04) == 0):
-            print(u'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u (два всегда есть)'
-                % (callback.func_code.co_filename, callback.func_code.co_name, len(args), callback.func_code.co_argcount))
-            raise ValueError
-        mcc_id = callback, args
-        if mcc_id not in self.mode_change_callbacks:
-            self.mode_change_callbacks.append(mcc_id)
-        return mcc_id
-
-    def del_mode_change_callback(self, mcc_id):
-        """
-        Удаляет пользовательский обработчик смены режима программы
-        :param mcc_id: Идентификатор обработчика возвращаемый P16GuiData.add_mode_change_callback
-        :return:
-        """
-        len_dc = len(self.draw_callbacks)
-        if mcc_id in self.mode_change_callbacks:
-            self.mode_change_callbacks.remove(mcc_id)
-        return len_dc > len(self.mode_change_callbacks)
-
-    def add_draw_callback(self, callback, *args):
-        """
-        Добавляет пользовательский обработчик перерисовки
-        :param callback: Процедура которая будет вызвана для перерисовки
-        :param args: Аргументы передаваемые в процедуру
-        :return: Идентификатор в обработчика в списке
-        """
-        assert inspect.isfunction(callback)  # callback - должно быть функцией
-        cb_id = callback, args
-        if cb_id not in self.draw_callbacks:
-            self.draw_callbacks.append(cb_id)
-        return cb_id
-
-    def del_draw_callback(self, cb_id):
-        """
-        Удаляет пользовательскую процедуру рисования.
-        :param cb_id: Идентификатор пользовательской процедуры рисования,
-        возвращаемый P16GuiData.add_draw_callback
-        :return:
-        """
-        l0 = len(self.draw_callbacks)
-        if cb_id in self.draw_callbacks:
-            self.draw_callbacks.remove(cb_id)
-        return l0 > len(self.draw_callbacks)
-
-    def process_draw_callbacks(self):
-        for proc, args in self.draw_callbacks:
-            proc(self, *args)
-        return len(self.draw_callbacks)
 
     def set_mode(self, mode):
         if self.mode != mode:
