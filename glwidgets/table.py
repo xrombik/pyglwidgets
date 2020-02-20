@@ -179,6 +179,7 @@ class Table(GlWidget):
         self.entry.font = self.font
         self.entry.on_edit_done = self._on_edit_done
         self.on_edit_done = None
+        self.ehid_kp = None
         # Обработчик кнопки Delete. Должен возвращать False если нужно продолжить обработку
         # события встроенным методами класса. Встроенный метод класса удаляет выбранную строку.
         self.on_delete = None
@@ -347,7 +348,7 @@ class Table(GlWidget):
         self._rows[i][j] = copy.deepcopy(self.entry.text)
         self.entry.hide()
         self.put_to_redraw()
-        key_handler_connect(self._on_key_press)
+        self.pc.append(('ehid_kp', safe_connect, 'key-press-event', self._on_key_press))
         if self.on_edit_done is not None:
             self.on_edit_done(self, prev_val)
 
@@ -420,7 +421,7 @@ class Table(GlWidget):
             if not self.focus:
                 focus_changed = True
                 self.focus = True
-            key_handler_connect(self._on_key_press)
+            self.pc.append(('ehid_kp', safe_connect, 'key-press-event', self._on_key_press))
             dy = event.y - self.pos[1]
             i_cur_row = int(dy // (self.font.get_text_hight() + self.line_width))
             self.i_cur_row = i_cur_row - 1 + self.view_begin
@@ -436,8 +437,7 @@ class Table(GlWidget):
                         sel_changed = True
                 # TODO: Надо как то разобраться, что бы работало без необходимости перебирать все ряды
                 row_flags = self._rows_flags[self.i_cur_row + 1]
-                self._rows_flags[self.i_cur_row + 1] = tools.set_bits(row_flags, Table.ROW_FLAG_SELECTED,
-                                                                      Table.ROW_FLAG_SELECTED)
+                self._rows_flags[self.i_cur_row + 1] = tools.set_bits(row_flags, Table.ROW_FLAG_SELECTED, Table.ROW_FLAG_SELECTED)
                 if row_flags != self._rows_flags[self.i_cur_row + 1]:
                     sel_changed = True
             # Отметить ещё один выделенный ряд
@@ -514,3 +514,4 @@ class Table(GlWidget):
         self.focus = False
         self.pc.append(('ehid2', safe_disconnect))
         self.entry.hide()
+        self.pc.append('ehid_kp', safe_disconnect)
