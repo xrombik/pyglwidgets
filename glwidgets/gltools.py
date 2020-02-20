@@ -173,6 +173,8 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
     :param lines: Строки
     :param font: Шрифт
     :param color_proc: Процедура цвета ячейки
+    :param bg_color_proc
+    :param rows_flags
     :param i_cur: Положение курсора
     :param line_width: Толщина линий
     :param focus: Флаг. True - таблица в фокусе ввода,

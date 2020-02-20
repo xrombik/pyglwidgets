@@ -5,7 +5,8 @@ import inspect
 import gtk
 from .text import *
 from .gltools import *
-from .glwidget import *
+from .driver import safe_connect
+from .driver import safe_disconnect
 
 
 class TextRegulator(StaticText):
@@ -15,10 +16,9 @@ class TextRegulator(StaticText):
     KEY_TO_VALUE = {u'1': 1.0, u'2': 2.0, u'3': 3.0, u'4': 4.0, u'5': 5.0, u'6': 6.0, u'7': 7.0, u'8': 8.0, u'9': 9.0,
                     u'0': 10.0, u'-': 0.0}
 
-    def __init__(self, gda, pos=(0, 0), fmt='%03f', val_min=0, val_max=100, val=50, size=(40, 24),
+    def __init__(self, pos=(0, 0), fmt='%03f', val_min=0, val_max=100, val=50, size=(40, 24),
                  scale=0.01, axis=1, font=None, color=(255, 255, 255, 150), user_proc=None, user_data=None):
         """
-        :param gda: Контекст gtk-opengl
         :param pos: Координаты на экране в пикселях
         :param fmt: Текстовой фрмат отображения, например 'Масштаб %s км'
         :param val_min: Начальное значение регулятора
@@ -37,7 +37,6 @@ class TextRegulator(StaticText):
         for c in color:
             assert type(c) is int  # Значение цвета должно быть целым
             assert 0 <= c <= 255  # Значение цвета должно быть от 0 до 255 включительно
-        assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert len(pos) == 2
         assert type(pos[0]) is int
@@ -54,7 +53,6 @@ class TextRegulator(StaticText):
             assert (inspect.isfunction(user_proc))  # Должна быть функцией
 
         super(TextRegulator, self).__init__(pos, fmt, font, color)
-        self.gda = gda
         self.format = fmt
         self.min = val_min
         self.max = val_max
@@ -62,9 +60,11 @@ class TextRegulator(StaticText):
         self.val = val
         self.axis = axis
         self.prev = pos[axis]
-        self.ehid0 = self.gda.connect('button-press-event', self._button_press)
+        self.pc.append(('ehid0', safe_connect, 'button-press-event', self._button_press))
         self.text = self.get_text()
         self.size = size
+        self.ehid_kp = None
+        self.ehid0 = None
         self.ehid1 = None
         self.ehid2 = None
         self.user_proc = user_proc
@@ -85,7 +85,7 @@ class TextRegulator(StaticText):
         self.font.draw_text(self.pos, self.get_text(), self.color)
         glEndList()
 
-    def key_callback(self, window, event):
+    def key_press_callback(self, window, event):
         """
         Вызывается при нажатии на клавишы клавиатуры, когда экземпляр в фокусе ввода
         :param window: Дескриптор окна программы
@@ -110,28 +110,17 @@ class TextRegulator(StaticText):
         event = args[1]
         if event.button != 1:  # 1 - левая кнопка мыши, 2 - средняя, 3 - правая.
             return
-        pos = event.x, event.y + self.size[1]
-        cover = check_rect(self.size[0], self.size[1], self.pos, pos[0], pos[1])
+        cover = check_rect(self.size[0], self.size[1], self.pos, event.x, event.y)
         if cover:
-            key_handler_connect(self.key_callback)
-            if self.ehid1 is None:
-                self.ehid1 = self.gda.connect('motion-notify-event', self._motion_notify)
-            if self.ehid2 is None:
-                self.ehid2 = self.gda.connect('button-release-event', self._button_release)
-            self.prev = pos[self.axis]
+            self.pc.append(('ehid_kp', safe_connect, 'key-press-event', self.key_press_callback))
+            self.pc.append(('ehid1', safe_connect, 'motion-notify-event', self._motion_notify))
+            self.pc.append(('ehid2', safe_connect, 'button-release-event', self._button_release))
+            self.prev = (event.x, event.y)[self.axis]
             self.text = self.get_text()
             r, g, b, a = self.color
             self.color = r, g, b, 250
         else:
-            khp, kha = key_handler_get()
-            if khp == self.key_callback:
-                key_handler_disconnect()
-
-        khp, kha = key_handler_get()
-        if khp == self.key_callback:
-            self.rect_col = colors.BLUE
-        else:
-            self.rect_col = 10, 10, 10, 10
+            self.pc.append(('ehid_kp', safe_disconnect))
 
     def _button_release(self, *args):
         """
@@ -143,15 +132,13 @@ class TextRegulator(StaticText):
         if event.button != 1:  # 1 - левая кнопка мыши, 2 - средняя, 3 - правая.
             return
         if self.ehid1 is not None:
-            self.gda.disconnect(self.ehid1)
-            self.ehid1 = None
+            self.pc.append(('ehid1', safe_disconnect))
             self.prev = self.pos[self.axis]
             self.text = self.get_text()
             r, g, b, a = self.color
             self.color = r, g, b, 160
         if self.ehid2 is not None:
-            self.gda.disconnect(self.ehid2)
-            self.ehid2 = None
+            self.pc.append(('ehid2', safe_disconnect))
 
     def _motion_notify(self, *args):
         """
@@ -170,6 +157,7 @@ class TextRegulator(StaticText):
             self.text = cur_text
             if self.user_proc:
                 self.user_proc(self)
+            self.put_to_redraw()
         return False
 
     def get_text(self):
