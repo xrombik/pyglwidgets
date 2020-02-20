@@ -42,9 +42,9 @@ def on_init(scm, rcm):
     entry0.user_data = tbl0
     entry0.on_edit_done = on_entry_edit_done
 
-    entry1 = Entry((200, 100), 'type here')
+    txt_reg = TextRegulator((200, 110))
 
-    scm.add_scene_items(btn0, img0, txt0, entry0, entry1, tbl0)
+    scm.add_scene_items(btn0, img0, txt0, entry0, txt_reg, tbl0)
 
 
 def on_entry_edit_done(entry0):
