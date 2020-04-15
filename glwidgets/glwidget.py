@@ -120,12 +120,14 @@ class GlWidget(object):
         if self.draw == glCallList:
             self.disconnect()
             self.draw = self._draw_none
+            self.put_to_redraw()
 
     # noinspection PyAttributeOutsideInit
     def show(self):
         if self.draw == self._draw_none:
             self.connect()
             self.draw = glCallList
+            self.put_to_redraw()
 
     def dopc(self, gda):
         """

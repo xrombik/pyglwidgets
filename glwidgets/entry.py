@@ -33,11 +33,11 @@ class Entry(glwidget.GlWidget):
         assert type(font_name) is str
         assert type(font_size) is int
         assert len(text_color) == 4
-        assert type(bg_color) is tuple
+        assert isinstance(bg_color, (tuple, list))
         assert len(bg_color) == 4
 
         self.text_color = list(text_color)
-        self.bg_color = bg_color
+        self.bg_color = list(bg_color)
         self.font = fonts.CairoFont(font_name, font_size)
         self.pos = pos
         self.size = rect_size
@@ -58,24 +58,25 @@ class Entry(glwidget.GlWidget):
         self.line_width = 2
 
     def redraw(self):
-        pos = self.pos[0], self.pos[1]
-        p0 = pos
-        p1 = pos[0] + self.size[0], pos[1]
-        p2 = pos[0] + self.size[0], pos[1] + self.size[1]
-        p3 = pos[0], pos[1] + self.size[1]
-        pts = p1, p0, p3, p2
+        print ('->entry:redraw(%s)' % self)
+        x = self.pos[0]
+        y = self.pos[1]
+        p1 = x + self.size[0], y
+        p2 = x + self.size[0], y + self.size[1]
+        p3 = x, y + self.size[1]
+        pts = p1, self.pos, p3, p2
 
         glNewList(self.dl, GL_COMPILE)
         # Подкладка
         gltools.draw_polygon(pts, colors.BLACK255)
 
         # Рамка
-        gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, self.line_width)
+        gltools.draw_lines((self.pos, p1, p2, p3, self.pos), self.bg_color, self.line_width)
         # Введённый текст
-        self.font.draw_text((self.pos[0], self.pos[1] - self.line_width), self.text)
+        self.font.draw_text((x, y - self.line_width), self.text)
         # Курсор
         if self.timer_id:
-            gltools.draw_lines(((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1])), self.cur_col)
+            gltools.draw_lines(((self.cur_pos, y + self.size[1]), (self.cur_pos, y)), self.cur_col)
         glEndList()
 
     def on_timer(self, *_args):

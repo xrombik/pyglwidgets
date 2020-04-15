@@ -45,15 +45,16 @@ class Table(GlWidget):
             if i < len(tbl._rows):
                 if j < len(tbl._rows[i]):
                     tbl.entry.text = copy.deepcopy(tbl._rows[i][j])
-                    ep_x = tbl.pos[0]
-                    for w in tbl.size[2][0:tbl.i_cur_column]:
-                        ep_x += w
+                    ep_x = sum(tbl.size[2][0:tbl.i_cur_column], tbl.pos[0])
                     l_height = tbl.font.get_text_hight()
-                    tbl.entry.pos = ep_x + tbl.line_width, tbl.pos[1] + (tbl.i_cur_row + 1 - tbl.view_begin) * \
-                                    (l_height + tbl.line_width) + tbl.line_width * 2
-                    tbl.entry.size = tbl.size[2][tbl.i_cur_column] - tbl.line_width * 2, l_height - tbl.line_width * 2
+                    tbl.entry.pos =                           \
+                        ep_x + tbl.line_width,                \
+                        tbl.pos[1]                            \
+                      + (tbl.i_cur_row + 1 - tbl.view_begin)  \
+                      * (l_height + tbl.line_width)           \
+                      + tbl.line_width
+                    tbl.entry.size = tbl.size[2][tbl.i_cur_column] - tbl.line_width * 2, l_height - tbl.line_width
                     tbl.entry.show()
-                    tbl.ehid2 = None
                 else:
                     print('glwidgets.py:ошибка: обращение к колонке таблицы %u, но колонок всего %u' % (j, len(tbl._rows[i])))
             else:
@@ -151,7 +152,6 @@ class Table(GlWidget):
         assert len(rows[0]) > 0
 
         self.ehid1 = None
-        self.ehid2 = None
         self.size = None
         self.i_cur_row_prev = None
         self._rows = list()
@@ -192,6 +192,7 @@ class Table(GlWidget):
         self.focus = False
         self.color_proc = Table.color_proc_horiz  # Процедура определяющая цвет текста для ячейки
         self.bg_color_proc = self.default_bg_color_proc  # Процедура определяющая цвет фона для ячейки
+        self.connect()
         self.put_to_redraw()
 
     def _check_rows(self):
@@ -208,9 +209,8 @@ class Table(GlWidget):
         Возвращает размеры таблицы в пикселях
         :return:
         """
-        width, height = 0, 0
         ws = self.get_widths()
-        width += self.line_width
+        width = sum(ws, self.line_width)
         row_height = self.font.get_text_hight()
         height = (row_height + self.line_width) * (len(self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max]) + 1)
         return self.pos[0], self.pos[1], width, height, ws, row_height
@@ -413,10 +413,10 @@ class Table(GlWidget):
         # noinspection PyProtectedMember
         if event.type == gtk.gdk.BUTTON_PRESS:
             # Поиск строки, которую кликнули
-            self.entry.hide()
             x, y, w, h, ws, rh = self.update_rect()
             if not gltools.check_rect(w, h, self.pos, event.x, event.y):
                 self.focus = False
+                self.entry.hide()
                 return False
             if not self.focus:
                 focus_changed = True
@@ -512,6 +512,5 @@ class Table(GlWidget):
     def disconnect(self):
         self.pc.append(('ehid1', safe_disconnect))
         self.focus = False
-        self.pc.append(('ehid2', safe_disconnect))
         self.entry.hide()
         self.pc.append('ehid_kp', safe_disconnect)
