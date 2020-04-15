@@ -7,7 +7,6 @@ import gtk
 from . import gltools
 from . import colors
 from . import fonts
-from . import entry
 from . import tools
 from . import GlWidget
 from .glimports import *
@@ -20,6 +19,7 @@ from .driver import safe_disconnect
 
 class Table(GlWidget):
     ROW_FLAG_NONE = 0
+    """ Флаг ряда таблицы. Ни один флаг не установлен """
     ROW_FLAG_SELECTED = 1
     """ Флаг ряда таблицы. Если установлен, то ряд помечен как выбранный """
 
@@ -71,16 +71,6 @@ class Table(GlWidget):
         :return: Ширина колонки
         """
         return font.get_text_width(s)
-
-    @staticmethod
-    def edit_proc_default(_cx, _cy):
-        """
-        Используется для проверки разрешения на редактирование ячейки
-        :param _cx: Индекс колонки
-        :param _cy: Индекс строки
-        :return: True - если редактирование в ячейке разрешено, False - если редактирование запрещено
-        """
-        return True
 
     @staticmethod
     def color_proc_horiz(_cx, cy):
@@ -173,12 +163,6 @@ class Table(GlWidget):
         self.widths = [100] * len(rows[0])
         self.set_rows(rows)
         self.i_cur_column = 0
-        self.edit_proc = Table.edit_proc_default  # Процедура проверяющая резрешение редактирования ячейки
-        self.entry = entry.Entry(self.pos, '', (100, 20))  # Поле ввода. Используется для редактирования ячеек
-        self.entry.hide()
-        self.entry.font = self.font
-        self.entry.on_edit_done = self._on_edit_done
-        self.on_edit_done = None
         self.ehid_kp = None
         # Обработчик кнопки Delete. Должен возвращать False если нужно продолжить обработку
         # события встроенным методами класса. Встроенный метод класса удаляет выбранную строку.
@@ -186,7 +170,6 @@ class Table(GlWidget):
         self.user_data = None
         self.on_sel_change = None
         """ Обработчик события изменения выбора текущей строки """
-        self.on_2button_press = self._on_2button_press_default
         self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows)
         """	Флаги рядов таблицы """
         self.focus = False
@@ -333,24 +316,7 @@ class Table(GlWidget):
                     self.i_cur_row = len(self._rows) - 1
             else:
                 self.i_cur_row = 0
-            if self.on_edit_done is not None:
-                self.on_edit_done(self, None)
             self.put_to_redraw()
-
-    def _on_edit_done(self, _entry):
-        """
-        Вызывается после завершения редактирования ячейки таблицы
-        :param _entry:
-        :return:
-        """
-        i, j = self.i_cur_row + 1, self.i_cur_column
-        prev_val = copy.deepcopy(self._rows[i][j])
-        self._rows[i][j] = copy.deepcopy(self.entry.text)
-        self.entry.hide()
-        self.put_to_redraw()
-        self.pc.append(('ehid_kp', safe_connect, 'key-press-event', self._on_key_press))
-        if self.on_edit_done is not None:
-            self.on_edit_done(self, prev_val)
 
     def _on_key_press(self, _widget, event, *_args):
         """
@@ -373,8 +339,6 @@ class Table(GlWidget):
                                 self.i_cur_row = len(self._rows) - 1
                         else:
                             self.i_cur_row = 0
-                        if self.on_edit_done is not None:
-                            self.on_edit_done(self, None)
                         self.put_to_redraw()
         elif char_name == 'Up':
             if not (type(self.i_cur_row) is int):
@@ -416,7 +380,6 @@ class Table(GlWidget):
             x, y, w, h, ws, rh = self.update_rect()
             if not gltools.check_rect(w, h, self.pos, event.x, event.y):
                 self.focus = False
-                self.entry.hide()
                 return False
             if not self.focus:
                 focus_changed = True
@@ -465,8 +428,6 @@ class Table(GlWidget):
                     self.i_cur_column = i_column
                     break
                 x0 += ws[i_column]
-        elif event.type == gtk.gdk._2BUTTON_PRESS:
-            self.on_2button_press(self, event)
         # Вызвать обработчик перемещения курсора
         if (prev_i_cur_row != self.i_cur_row) or ((self.i_cur_row is not None) and focus_changed) or sel_changed:
             if self.on_sel_change is not None:
@@ -512,5 +473,4 @@ class Table(GlWidget):
     def disconnect(self):
         self.pc.append(('ehid1', safe_disconnect))
         self.focus = False
-        self.entry.hide()
         self.pc.append('ehid_kp', safe_disconnect)
