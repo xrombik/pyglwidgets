@@ -6,7 +6,7 @@
 # Чужие модули
 import os
 import gtk
-#import gtk.gdkgl
+import gtk.gdkgl
 from math import pi, cos, sin, hypot
 
 # Свои модули
