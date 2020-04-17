@@ -4,11 +4,10 @@ python:
 before_install:
   - sudo apt-get install python-gtk2
   - sudo apt-get install libgtkglext1
-  - sudo apt-get install python-opengl
+  #- sudo apt-get install python-opengl
   - sudo apt-get install python-gtkglext1
   - sudo apt-get install python-pip
   - sudo apt-get install imagemagick
-  - sudo apt-get install python-gobject-2-dev
   - sudo apt-get install libgtk2.0-dev
 install:
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
@@ -17,7 +16,9 @@ install:
   - pip install setuptools
   - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py
   - pip install --install-option="--prefix=${VIRT_ROOT}" typing
+  - pip install --install-option="--prefix=${VIRT_ROOT}" pygobject
   - pip install --install-option="--prefix=${VIRT_ROOT}" pycairo
+  - pip install --install-option="--prefix=${VIRT_ROOT}" PyOpenGL
   # PyCairo
   #- wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
   #- tar xf py2cairo-1.10.0.tar.bz2
