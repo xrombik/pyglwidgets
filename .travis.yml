@@ -15,6 +15,8 @@ install:
   - pip install freetype-py
   - pip install typing
   # PyGtk
+  - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
+  - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - wget http://ftp.gnome.org/pub/GNOME/sources/pygtk/2.24/pygtk-2.24.0.tar.bz2
   - tar xf pygtk-2.24.0.tar.bz2
   - cd pygtk-2.24.0
