@@ -9,11 +9,11 @@ def main():
     app.run()
 
 
-def on_init(scm, rcm):
+def on_init(scm, _rcm):
     # type: (SceneCtl, ResourceCtl) -> None
     """
     :param scm: Scene manager
-    :param rcm: Resource manager
+    :param _rcm: Resource manager
     :return:
     """
     rows = [['Number', 'Color',  'Lenght'],

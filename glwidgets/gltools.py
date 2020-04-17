@@ -409,7 +409,7 @@ def draw_texture(texture, pos, col=colors.WHITE, mirror=MIRROR_NONE):
     """
     Рисует текстуру
     :param texture: Текстура
-    :param pos: Коррдинаты на экране
+    :param pos: Координаты на экране
     :param col: Окрашивающий цвет
     :param mirror: Матрица отражения. Смотри MIRROR_*
     :return:

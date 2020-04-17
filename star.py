@@ -5,7 +5,6 @@ from glwidgets import *
 UPDATE_RATE = 30
 WINDOW_WIDTH = 320
 WINDOW_HEGHT = 160
-ROTATE_SPEED = 1.0 / 30.0
 
 
 def main():
@@ -29,8 +28,9 @@ def on_init(scm, rcm):
 
 
 def on_timer(pic_star0, pic_star1):
-    pic_star0.ang += UPDATE_RATE * ROTATE_SPEED
-    pic_star1.ang -= UPDATE_RATE * ROTATE_SPEED
+    # type: (PictureRotate, PictureRotate) -> bool
+    pic_star0.ang += 1
+    pic_star1.ang -= 1
     return True
 
 

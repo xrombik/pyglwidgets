@@ -50,7 +50,7 @@ class Picture(glwidget.GlWidget):
 
 class PictureRotate(Picture):
     def __init__(self, pos, texture, ang=0, color=colors.WHITE):
-        super(PictureRotate, self).__init__(pos, texture, scale=[1.0, 1.0, 1.0], color=color)
+        super(PictureRotate, self).__init__(pos, texture, scale=(1.0, 1.0, 1.0), color=color)
         self._ang = ang
         self.ang_shift = 0.0
 
@@ -73,11 +73,22 @@ class PictureRotate(Picture):
 class PictureState(Picture):
     def __init__(self, pos, textures, state=0, color=colors.WHITE, user_data=None):
         super(PictureState, self).__init__(pos, textures, color=color)
-        self.state = state
+        assert len(self.texture) > self.state
+        self._state = state
         self.user_data = user_data
 
-    def redraw(self):
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, val):
         assert len(self.texture) > self.state
+        if self._state == val: return
+        self._state = val
+        self.put_to_redraw()
+
+    def redraw(self):
         glNewList(self.dl, GL_COMPILE)
         draw_texture(self.texture[self.state], self.pos, self.color)
         glEndList()
