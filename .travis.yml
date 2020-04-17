@@ -13,4 +13,4 @@ install:
   - pip install freetype-py
   - pip install typing
 script:
-  - python -B test.py
+  - python2 -B test.py
