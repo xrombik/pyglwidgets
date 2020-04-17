@@ -17,13 +17,13 @@ install:
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
     # PyCairo
-  - wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
-  - tar xf py2cairo-1.10.0.tar.bz2
-  - cd py2cairo-1.10.0
-  - ./configure --prefix=$VIRT_ROOT
-  - ./build
-  - ./install
-  - cd ..
+  #- wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
+  #- tar xf py2cairo-1.10.0.tar.bz2
+  #- cd py2cairo-1.10.0
+  #- ./waf configure --prefix=${VIRT_ROOT}
+  #- ./waf build
+  #- ./waf install
+  #- cd ..
   # PyGobject
   - wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
   - tar xf pygobject-2.28.6.tar.bz2
