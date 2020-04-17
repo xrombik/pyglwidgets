@@ -51,13 +51,23 @@ class Picture(glwidget.GlWidget):
 class PictureRotate(Picture):
     def __init__(self, pos, texture, ang=0, color=colors.WHITE):
         super(PictureRotate, self).__init__(pos, texture, scale=[1.0, 1.0, 1.0], color=color)
-        self.ang = ang
+        self._ang = ang
         self.ang_shift = 0.0
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
         draw_texture_rotate(self.texture, self.pos, self.ang + self.ang_shift, self.color, self.mirror, self.scale)
         glEndList()
+
+    @property
+    def ang(self):
+        return self._ang
+
+    @ang.setter
+    def ang(self, val):
+        if self._ang == val: return
+        self._ang = val
+        self.put_to_redraw()
 
 
 class PictureState(Picture):
