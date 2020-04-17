@@ -20,7 +20,7 @@ install:
   - wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
   - tar xf py2cairo-1.10.0.tar.bz2
   - cd py2cairo-1.10.0
-  - configure --prefix=$VIRT_ROOT
+  - ./configure --prefix=$VIRT_ROOT
   - build
   - install
   - cd ..
