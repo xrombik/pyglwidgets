@@ -29,7 +29,7 @@ class MyTestCase(unittest.TestCase):
                 self.fail()
         except IOError:
             pass
-        os.system('./screenshot.sh')
+        os.system('./screenshot.sh playground.png')
         os.killpg(pid.pid, signal.SIGTERM)
 
 

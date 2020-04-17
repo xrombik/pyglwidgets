@@ -1,3 +1,3 @@
 #!/bin/bash
 
-xwd -name "pyglwidgets" | convert xwd:- main.png
+xwd -name "pyglwidgets" | convert xwd:- "$1"
