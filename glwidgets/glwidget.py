@@ -61,15 +61,14 @@ def clear_cairo_surface(cc):
 
 
 def redraw_queue(items_queue):
-    # type: (dict) -> None
-    items = items_queue.values()
-    for item in items: item.redraw()
+    # type: (set) -> None
+    for item in items_queue: item.redraw()
     items_queue.clear()
 
 
 # noinspection PyAttributeOutsideInit
 class GlWidget(object):
-    items_queue = dict()
+    items_queue = set()
     EventCtl().connect(nevents.EVENT_DRAW, redraw_queue, items_queue)
 
     def __new__(cls, *args, **kwargs):
@@ -112,7 +111,7 @@ class GlWidget(object):
         """
         items_queue = GlWidget.items_queue
         l1 = len(items_queue)
-        items_queue[id(self)] = self
+        items_queue.add(self)
         if l1 < len(items_queue):
             EventCtl().emmit(nevents.EVENT_REDRAW)
 
@@ -147,8 +146,7 @@ class GlWidget(object):
 
     def __del__(self):
         self.disconnect()
-        self_id = id(self)
-        try: del GlWidget.items_queue[self_id]
+        try: GlWidget.items_queue.remove(self)
         except KeyError: pass
         glDeleteLists(self.dl, 1)
 

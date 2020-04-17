@@ -58,7 +58,6 @@ class Entry(glwidget.GlWidget):
         self.line_width = 2
 
     def redraw(self):
-        print ('->entry:redraw(%s)' % self)
         x = self.pos[0]
         y = self.pos[1]
         p1 = x + self.size[0], y
