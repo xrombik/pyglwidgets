@@ -9,12 +9,12 @@ import fcntl
 class MyTestCase(unittest.TestCase):
 
     def test_imports(self):
-        import main
-        print (u'%s\n%s' % (self, main))
+        import playground
+        print (u'%s\n%s' % (self, playground))
 
     def test_screenshot(self):
         pid = subprocess.Popen(
-            'python main.py &',
+            'python playground.py &',
             shell=True,
             preexec_fn=os.setsid,
             stdout=subprocess.PIPE,

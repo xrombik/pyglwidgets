@@ -103,4 +103,3 @@ class StaticText(glwidget.GlWidget):
         glNewList(self.dl, GL_COMPILE)
         self.font.draw_text(self.pos, self.text, self.color)
         glEndList()
-
