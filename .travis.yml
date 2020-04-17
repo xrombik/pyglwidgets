@@ -17,7 +17,6 @@ install:
   - pip install setuptools
   - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py
   - pip install --install-option="--prefix=${VIRT_ROOT}" typing
-  - pip install --install-option="--prefix=${VIRT_ROOT}" pygtk
   - pip install --install-option="--prefix=${VIRT_ROOT}" pycairo
   # PyCairo
   #- wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
