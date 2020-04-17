@@ -33,5 +33,6 @@ def on_timer(pic_star0, pic_star1):
     pic_star1.ang -= UPDATE_RATE * ROTATE_SPEED
     return True
 
+
 if __name__ == '__main__':
     main()
