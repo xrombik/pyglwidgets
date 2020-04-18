@@ -52,6 +52,8 @@ install:
   - make install > /dev/null
   - cd ..
 script:
+  - top -n 1
+  - pkill Xvfb
   - xvfb-run glxinfo
   - xvfb-run python -B test.py || true
   - xvfb-run ./screenshot.sh playground.png || true
