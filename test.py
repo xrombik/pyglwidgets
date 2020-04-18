@@ -10,7 +10,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_imports(self):
         import playground
-        print (u'%s\n%s' % (self, playground))
+        print (u'\"%s\"\n\"%s\"' % (self, playground))
 
     def test_screenshot(self):
         pid = subprocess.Popen(
@@ -22,15 +22,14 @@ class MyTestCase(unittest.TestCase):
         fd = pid.stdout.fileno()
         flags = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-        time.sleep(2)
+        time.sleep(5)
         try:
             rc = pid.stdout.read()
             if 'traceback' in rc:
                 print(u"%s" % rc)
-                # self.fail()
+                self.fail()
         except IOError:
             pass
-        os.system('./screenshot.sh playground.png')
         os.killpg(pid.pid, signal.SIGTERM)
 
 
