@@ -17,7 +17,7 @@ before_install:
   - sudo apt-get install libgtkglext1-dev
   - sudo apt-get install mesa-utils
   - sudo apt-get install openimageio-tools
-  #- sudo apt-get libgbm1
+  #- sudo apt-get install libgbm1
   - sudo apt-get install libgl1-mesa-dri
   - sudo chmod +x ./screenshot.sh
 install:
