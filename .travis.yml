@@ -1,4 +1,5 @@
 language: python
+cache: pip
 python:
   - "2.7"
 dist: xenial
@@ -12,25 +13,24 @@ before_install:
   - sudo apt-get install libgtk2.0-dev
   - sudo apt-get install libgirepository1.0-dev
   - sudo apt-get install libgtkglext1-dev
-  - sudo apt-get install xvfb
   - sudo apt-get install mesa-utils
-  - sudo apt-get install libgl1-mesa-glx
   - sudo apt-get install openimageio-tools
 install:
   - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - pip install --upgrade pip
-  - pip install setuptools
-  - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py
-  - pip install --install-option="--prefix=${VIRT_ROOT}" typing
-  - pip install --install-option="--prefix=${VIRT_ROOT}" pycairo
-  - pip install --install-option="--prefix=${VIRT_ROOT}" PyOpenGL
+  - pip install setuptools --no-python-version-warning
+  - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py --no-python-version-warning
+  - pip install --install-option="--prefix=${VIRT_ROOT}" typing --no-python-version-warning
+  - pip install --install-option="--prefix=${VIRT_ROOT}" pycairo --no-python-version-warning
+  - pip install --install-option="--prefix=${VIRT_ROOT}" PyOpenGL --no-python-version-warning
+  # PyGobject
   - wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
   - tar xf pygobject-2.28.6.tar.bz2
   - cd pygobject-2.28.6
   - ./configure --prefix=$VIRT_ROOT --disable-introspection
-  - make
+  - make --silent
   - make install > /dev/null
   - cd ..
   # PyGtk
@@ -38,7 +38,7 @@ install:
   - tar xf pygtk-2.24.0.tar.bz2
   - cd pygtk-2.24.0
   - ./configure --prefix=$VIRT_ROOT
-  - make
+  - make --silent
   - make install > /dev/null
   - cd ..
   # gtkglext
@@ -46,7 +46,7 @@ install:
   - tar -xzf python-gtkglext1_1.1.0.orig.tar.gz
   - cd python-gtkglext1-1.1.0
   - ./configure --prefix=${VIRT_ROOT}
-  - make
+  - make --silent
   - make install > /dev/null
   - cd ..
 env:
