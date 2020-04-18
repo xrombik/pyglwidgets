@@ -55,4 +55,4 @@ install:
   - cd ..
 script:
   - xvfb-run -a python -B test.py
-  - ./screenshot.sh playground.png
+  - ./screenshot.sh playground.png || true
