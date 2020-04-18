@@ -19,7 +19,6 @@ before_install:
   - sudo apt-get install openimageio-tools
   - sudo chmod +x ./screenshot.sh
 install:
-  - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - pip install --upgrade pip
@@ -53,5 +52,6 @@ install:
   - make install > /dev/null
   - cd ..
 script:
-  - xvfb-run -a python -B test.py || true
-  - ./screenshot.sh playground.png || true
+  - xvfb-run glxinfo
+  - xvfb-run python -B test.py || true
+  - xvfb-run ./screenshot.sh playground.png || true
