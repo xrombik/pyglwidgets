@@ -14,6 +14,7 @@ before_install:
   - sudo apt-get install libgtkglext1-dev
   - sudo apt-get install xvfb
 install:
+  - export GALLIUM_DRIVER=\"softpipe\""
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - pip install --upgrade pip
