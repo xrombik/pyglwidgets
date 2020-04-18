@@ -26,6 +26,7 @@ class MyTestCase(unittest.TestCase):
         try:
             rc = pid.stdout.read()
             if 'traceback' in rc:
+                print(u"%s" % rc)
                 self.fail()
         except IOError:
             pass
