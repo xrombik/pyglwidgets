@@ -17,8 +17,9 @@ before_install:
   - sudo apt-get install libgtkglext1-dev
   - sudo apt-get install mesa-utils
   - sudo apt-get install openimageio-tools
-  - sudo chmod +x ./screenshot.sh
+  - sudo apt-get install x11-apps
 install:
+  - sudo chmod +x ./screenshot.sh
   - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
@@ -52,7 +53,6 @@ install:
   - make --silent
   - make install > /dev/null
   - cd ..
-  - chown +x screenshot.sh
 script:
   - xvfb-run -a python -B test.py
   - ./screenshot.sh playground.png
