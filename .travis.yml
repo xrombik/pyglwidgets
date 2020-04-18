@@ -1,3 +1,5 @@
+notifications:
+  email: false
 language: python
 cache: pip
 python:
@@ -49,8 +51,7 @@ install:
   - make --silent
   - make install > /dev/null
   - cd ..
-env:
-  - TEST_SUITE="xvfb-run -a python -B test.py"
-  - TEST_SUITE="screenshot.sh playground.png"
-script: ./${TEST_SUITE}
-
+  - chown +x screenshot.sh
+script:
+  - xvfb-run -a python -B test.py
+  - ./screenshot.sh playground.png
