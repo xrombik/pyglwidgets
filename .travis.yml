@@ -1,6 +1,7 @@
 notifications:
   email: false
 language: python
+cache: pip
 python:
   - "2.7"
 dist: xenial
@@ -14,34 +15,23 @@ before_install:
   - sudo apt-get install libgtk2.0-dev
   - sudo apt-get install libgirepository1.0-dev
   - sudo apt-get install libgtkglext1-dev
-  - sudo apt-get install xvfb
   - sudo apt-get install mesa-utils
-  - sudo apt-get install libgl1-mesa-glx
 install:
   - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
-  - pip install --upgrade pip
-  - pip install setuptools
-  - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py
-  - pip install --install-option="--prefix=${VIRT_ROOT}" typing
-  #- pip install --install-option="--prefix=${VIRT_ROOT}" pygobject
-  - pip install --install-option="--prefix=${VIRT_ROOT}" pycairo
-  - pip install --install-option="--prefix=${VIRT_ROOT}" PyOpenGL
-  # PyCairo
-  #- wget http://www.cairographics.org/releases/py2cairo-1.10.0.tar.bz2
-  #- tar xf py2cairo-1.10.0.tar.bz2
-  #- cd py2cairo-1.10.0
-  #- ./waf configure --prefix=${VIRT_ROOT}
-  #- ./waf build
-  #- ./waf install
-  #- cd ..
+  - pip install --no-python-version-warning --upgrade pip 
+  - pip install --no-python-version-warning setuptools
+  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" freetype-py
+  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" typing
+  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" pycairo
+  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" PyOpenGL
   # PyGobject
   - wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
   - tar xf pygobject-2.28.6.tar.bz2
   - cd pygobject-2.28.6
   - ./configure --prefix=$VIRT_ROOT --disable-introspection
-  - make
+  - make --silent
   - make install > /dev/null
   - cd ..
   # PyGtk
@@ -49,7 +39,7 @@ install:
   - tar xf pygtk-2.24.0.tar.bz2
   - cd pygtk-2.24.0
   - ./configure --prefix=$VIRT_ROOT
-  - make
+  - make --silent
   - make install > /dev/null
   - cd ..
   # gtkglext
@@ -57,7 +47,7 @@ install:
   - tar -xzf python-gtkglext1_1.1.0.orig.tar.gz
   - cd python-gtkglext1-1.1.0
   - ./configure --prefix=${VIRT_ROOT}
-  - make
+  - make --silent
   - make install > /dev/null
   - cd ..
 script:
