@@ -20,12 +20,12 @@ install:
   - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
-  - pip install --no-python-version-warning --upgrade pip 
-  - pip install --no-python-version-warning setuptools
-  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" freetype-py
-  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" typing
-  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" pycairo
-  - pip install --no-python-version-warning --install-option="--prefix=${VIRT_ROOT}" PyOpenGL
+  - pip install --upgrade pip --no-python-version-warning
+  - pip install setuptools --no-python-version-warning
+  - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py --no-python-version-warning 
+  - pip install --install-option="--prefix=${VIRT_ROOT}" typing --no-python-version-warning 
+  - pip install --install-option="--prefix=${VIRT_ROOT}" pycairo --no-python-version-warning
+  - pip install --install-option="--prefix=${VIRT_ROOT}" PyOpenGL --no-python-version-warning
   # PyGobject
   - wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
   - tar xf pygobject-2.28.6.tar.bz2
