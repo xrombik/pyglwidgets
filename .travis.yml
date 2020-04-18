@@ -53,7 +53,7 @@ install:
   - cd ..
 script:
   - top -n 1
-  - pkill Xvfb
+  - sudo pkill Xvfb
   - xvfb-run glxinfo
   - xvfb-run python -B test.py || true
   - xvfb-run ./screenshot.sh playground.png || true
