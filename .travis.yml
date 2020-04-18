@@ -52,7 +52,7 @@ install:
   - make --silent
   - make install > /dev/null
   - cd ..
-  - chown +x screenshot.sh
+  - chmod +x screenshot.sh
 script:
   - xvfb-run -a python -B test.py
   - ./screenshot.sh playground.png
