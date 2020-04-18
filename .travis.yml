@@ -20,7 +20,7 @@ install:
   - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
-  - pip install --upgrade pip --no-python-version-warning
+  - pip install --upgrade pip
   - pip install setuptools --no-python-version-warning
   - pip install --install-option="--prefix=${VIRT_ROOT}" freetype-py --no-python-version-warning 
   - pip install --install-option="--prefix=${VIRT_ROOT}" typing --no-python-version-warning 
