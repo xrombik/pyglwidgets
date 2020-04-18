@@ -47,7 +47,7 @@ install:
   # gtkglext
   - wget http://archive.ubuntu.com/ubuntu/pool/universe/p/python-gtkglext1/python-gtkglext1_1.1.0.orig.tar.gz
   - tar -xzf python-gtkglext1_1.1.0.orig.tar.gz
-  - cd python-gtkglext1_1.1.0
+  - cd python-gtkglext1-1.1.0
   - ./configure --prefix=${VIRT_ROOT}
   - make
   - make install > /dev/null
