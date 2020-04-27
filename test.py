@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
             rc = pid.stdout.read()
             if 'traceback' in rc:
                 print(u"%s" % rc)
-                # self.fail()
+                self.fail()
         except IOError:
             pass
         os.killpg(pid.pid, signal.SIGTERM)

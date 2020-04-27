@@ -7,19 +7,21 @@ python:
 dist: xenial
 services:
   - xvfb
-before_install:
-  - sudo apt-get install python-gtk2
-  - sudo apt-get install libgtkglext1
-  - sudo apt-get install python-pip
-  - sudo apt-get install imagemagick
-  - sudo apt-get install libgtk2.0-dev
-  - sudo apt-get install libgirepository1.0-dev
-  - sudo apt-get install libgtkglext1-dev
-  - sudo apt-get install mesa-utils
-  - sudo apt-get install openimageio-tools
-  - sudo chmod +x ./screenshot.sh
+addons:
+  apt:
+    packages:
+      - python-gtk2
+      - libgtkglext1
+      - python-pip
+      - imagemagick
+      - libgtk2.0-dev
+      - libgirepository1.0-dev
+      - libgtkglext1-dev
+      - mesa-utils
+      - openimageio-tools
+      - libgl1-mesa-dri
+      - x11-apps
 install:
-  - export GALLIUM_DRIVER=softpipe
   - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
   - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
   - pip install --upgrade pip
@@ -52,6 +54,9 @@ install:
   - make /dev/null
   - make install > /dev/null
   - cd ..
+before_script:
+  - sudo chmod +x ./screenshot.sh
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render;
+  - sleep 3
 script:
-  - xvfb-run -a python -B test.py || true
-  - ./screenshot.sh playground.png || true
+  - ./screenshot.sh playground.png
