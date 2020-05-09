@@ -2,4 +2,4 @@
 
 timeout 7 python -B playground.py &
 sleep 5
-xwd -name "pyglwidgets" | convert xwd:- "$1"
+xwd -name "pyglwidgets demo" | convert xwd:- "$1"

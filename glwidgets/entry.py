@@ -5,15 +5,18 @@ import gtk
 import glib
 import copy
 
+from glwidgets import nevents
 from . import kbkeys
 from . import glwidget
 from . import fonts
 from . import gltools
 from . import colors
 from . import tools
+from . nevents import *
 from .glimports import *
 from .driver import safe_connect
 from .driver import safe_disconnect
+from .driver import map_keyval
 
 __all__ = ('Entry', )
 
@@ -37,6 +40,7 @@ class Entry(glwidget.GlWidget):
         assert len(bg_color) == 4
 
         self.text_color = list(text_color)
+        self.alphas = (self.text_color[3] - self.text_color[3] / 5, self.text_color[3])
         self.bg_color = list(bg_color)
         self.font = fonts.CairoFont(font_name, font_size)
         self.pos = pos
@@ -72,7 +76,7 @@ class Entry(glwidget.GlWidget):
         # Рамка
         gltools.draw_lines((self.pos, p1, p2, p3, self.pos), self.bg_color, self.line_width)
         # Введённый текст
-        self.font.draw_text((x, y - self.line_width), self.text)
+        self.font.draw_text((x, y - self.line_width), self.text, self.text_color)
         # Курсор
         if self.timer_id:
             gltools.draw_lines(((self.cur_pos, y + self.size[1]), (self.cur_pos, y)), self.cur_col)
@@ -87,13 +91,15 @@ class Entry(glwidget.GlWidget):
         return True
 
     def on_button_press(self, _event, *_args):
-        (self.stop_type, self.start_type)[self.cover]()
+        self.start_type() if self.cover else self.stop_type()
         self.cur_pos = self.pos[0] + self.font.get_text_width(self.text[:self.cur_index])
 
-    def _motion_notify(self, *args):
-        event = args[1]
-        self.cover = gltools.check_rect(self.size[0], self.size[1], self.pos, event.x, event.y)
-        self.text_color[3] = 100 + 100 * self.cover
+    def _motion_notify(self, gda, event):
+        cover = gltools.check_rect(self.size[0], self.size[1], self.pos, event.x, event.y)
+        if self.cover != cover:
+            self.text_color[3] = self.alphas[cover]
+            self.cover = cover
+            self.put_to_redraw()
         return False
 
     def _on_key_press(self, _window, event):
@@ -101,9 +107,7 @@ class Entry(glwidget.GlWidget):
         save_text = copy.deepcopy(self.text)
         save_cur_index = self.cur_index
         save_cur_pos = self.cur_pos
-        # Преобразовать данные события в распознаваемые константы
-        char_code = gtk.gdk.keyval_to_unicode(event.keyval)
-        char_name = gtk.gdk.keyval_name(event.keyval)
+        char_code, char_name = map_keyval(event.keyval)
         cur_shift = 0
         if char_code != 0:
             text_l = list(self.text.decode('utf-8'))
@@ -176,7 +180,7 @@ class Entry(glwidget.GlWidget):
             self.put_to_redraw()
 
     def start_type(self):
-        self.pc.append(('ehid2', safe_connect, 'key-press-event', self._on_key_press))
+        self.pc.append(('ehid2', safe_connect, nevents.EVENT_KEY_PRESS, self._on_key_press))
         if self.timer_id is None:
             self.cur_tick = 1
             self.timer_id = glib.timeout_add(Entry.TICK_RATE, self.on_timer)

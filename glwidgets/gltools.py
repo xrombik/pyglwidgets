@@ -118,10 +118,10 @@ def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
     ii = 0
     fns = pi_2 / float(num_segments)
     while ii < num_segments:
-        theta = float(ii) * fns  # get the current angle
-        x = r * cos(theta)  # calculate the x component
-        y = r * sin(theta)  # calculate the y component
-        glVertex2f(x + cx, y + cy)  # output vertex
+        theta = float(ii) * fns
+        x = r * cos(theta)
+        y = r * sin(theta)
+        glVertex2f(x + cx, y + cy)
         ii += 1
     glEnd()
     glDisable(GL_LINE_STIPPLE)
@@ -189,14 +189,16 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
     x0, y0 = pos
     x, y = x0, y0
     cx, cy = 0, 0
+    font_draw_text = font.draw_text
+    font_get_text_width = font.get_text_width
 
     # текст заголовков колонок
     for str0, cws_x in zip(head, cws):
         col = color_proc(cx, cy)  # Выбор цвета для ячейки
-        text_width = font.get_text_width(str0)  # Горизонтальное выравнивание по центру ячейки
+        text_width = font_get_text_width(str0)  # Горизонтальное выравнивание по центру ячейки
         dx = (cws_x - text_width) >> 1
         if dx < 0: dx = 0
-        font.draw_text((x + line_width + dx, y + line_width), str0, col)
+        font_draw_text((x + line_width + dx, y + line_width), str0, col)
         cx += 1
         x += cws_x
 
@@ -218,7 +220,7 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
         for str0 in strs:  # пробег по столбцам
             # TODO: Добавить отсечение слишком длинного текста
             col = color_proc(cx, cy)  # Выбор цвета для ячейки
-            font.draw_text((x + line_width, y + line_width), str0, col)
+            font_draw_text((x + line_width, y + line_width), str0, col)
             x += cws[i]
             i += 1
             cx += 1

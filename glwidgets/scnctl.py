@@ -11,12 +11,10 @@ class SceneCtl(list):
         self.mode = None
         self._prev_mode = None
         self.fps = 25
-        self.modules = list()
-        self.mode_change_callbacks = list()
-        self.draw_callbacks = list()
         self.time_now = datetime.now()
         self.scene_changed = False
         self.dl = 0
+        self.stack = list()
 
     @property
     def tick(self):
@@ -95,12 +93,11 @@ class SceneCtl(list):
         self.scene_changed = len(self) < len_scene
         return self.scene_changed
 
-    def set_mode(self, mode):
-        if self.mode != mode:
-            for proc, args in self.mode_change_callbacks:
-                proc(self, mode, *args)
-            self._prev_mode = self.mode
-            self.mode = mode
+    def goto_scene(self, items):
+        self.stack.insert(0, list(self))
+        self[:] = items[:]
+        self.scene_changed = True
 
-    def set_prev_mode(self):
-        self.set_mode(self._prev_mode)
+    def goto_back(self):
+        self[:] = self.stack.pop(0)[:]
+        self.scene_changed = True

@@ -83,21 +83,18 @@ class StaticText(glwidget.GlWidget):
     """
 
     def __init__(self, pos, text='', font=None, user_data=None, color=colors.WHITE):
-        assert type(pos) is tuple
+        assert isinstance(pos, tuple)
         assert len(pos) == 2
-        assert type(pos[0]) is int
-        assert type(pos[1]) is int
-        assert (type(text) is str) or (type(text) is unicode)
-        assert (font is None) or (type(font) is fonts.CairoFont)
+        assert isinstance(pos[0], int)
+        assert isinstance(pos[1], int)
+        assert isinstance(text, (str, unicode))
+        assert isinstance(font, (fonts.CairoFont, fonts.FreeTypeFont, type(None)))
 
         self.pos = pos
-        self.text = text
+        self.text = text if isinstance(text, unicode) else unicode(text)
         self.color = list(color)
         self.user_data = user_data
-        if font is None:
-            self.font = fonts.CairoFont()
-        else:
-            self.font = font
+        self.font = fonts.CairoFont() if font is None else font
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)

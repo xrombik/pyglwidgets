@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 def main():
-    app = Candy('pyglwidgets', 640, 480, on_init)
+    app = Candy('pyglwidgets demo', 640, 480, on_init)
     app.run()
 
 
@@ -31,7 +31,7 @@ def on_init(scm, rcm):
             ['3',      'violet', '60']]
 
     tbl0 = Table((200, 150), rows)
-    tbl0.widths[1] = 120
+    tbl0._widths[1] = 120
 
     img0 = Picture((20, 200), txr_ship)
     col0 = (255, 0, 0, 255)

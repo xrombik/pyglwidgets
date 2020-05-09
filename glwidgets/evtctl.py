@@ -15,8 +15,6 @@ class EventCtl(object):
     _event_ncall = 0
 
     def connect(self, name, proc, *args):
-        assert type(name) is str, 'Должна быть строка'
-
         if isfunction(proc):
             if (len(args) != proc.func_code.co_argcount) and ((proc.func_code.co_flags & 0x04) == 0):
                 s = 'Неверное количество аргументов для функции \'%s.%s\': передают %u, принимают %u' % \

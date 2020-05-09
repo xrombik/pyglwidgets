@@ -9,12 +9,15 @@ from . import colors
 from . import fonts
 from . import tools
 from . import GlWidget
+from . import nevents
 from .glimports import *
 from .glconst import *
 from .fonts import DEFAULT_FONT_FACE
 from .fonts import DEFAULT_FONT_SIZE
 from .driver import safe_connect
 from .driver import safe_disconnect
+
+# TODO: Добавить возможность сортировки по нажатию на заголовок кнопкой мыши
 
 
 class Table(GlWidget):
@@ -25,42 +28,14 @@ class Table(GlWidget):
 
     @property
     def auto_widths(self):
-        return self.get_widths == self.get_widths_auto
+        return self.get_widths == self._get_widths_auto
 
     @auto_widths.setter
     def auto_widths(self, val):
-        self.get_widths = (self.get_widths_const, self.get_widths_auto)[val]
+        self.get_widths = self._get_widths_auto if val else self._get_widths_const
         self.size = self.update_rect()[2:5]
         self.put_to_redraw()
         
-    @staticmethod
-    def _on_2button_press_default(tbl, event):
-        assert type(tbl) is Table
-        x0, y0, w, h, ws, rh = tbl.update_rect()
-        if tbl.i_cur_row is None:
-            return
-        cover = gltools.check_rect(w, h - rh, (tbl.pos[0], tbl.pos[1] + rh), event.x, event.y)
-        if tbl.edit_proc(tbl.i_cur_column, tbl.i_cur_row) and cover:
-            i, j = tbl.i_cur_row + 1, tbl.i_cur_column
-            if i < len(tbl._rows):
-                if j < len(tbl._rows[i]):
-                    tbl.entry.text = copy.deepcopy(tbl._rows[i][j])
-                    ep_x = sum(tbl.size[2][0:tbl.i_cur_column], tbl.pos[0])
-                    l_height = tbl.font.get_text_hight()
-                    tbl.entry.pos =                           \
-                        ep_x + tbl.line_width,                \
-                        tbl.pos[1]                            \
-                      + (tbl.i_cur_row + 1 - tbl.view_begin)  \
-                      * (l_height + tbl.line_width)           \
-                      + tbl.line_width
-                    tbl.entry.size = tbl.size[2][tbl.i_cur_column] - tbl.line_width * 2, l_height - tbl.line_width
-                    tbl.entry.show()
-                else:
-                    print('glwidgets.py:ошибка: обращение к колонке таблицы %u, но колонок всего %u' % (j, len(tbl._rows[i])))
-            else:
-                print('glwidgets.py:ошибка: обращение к строке таблицы %u, но строк всего %u' % (i, len(tbl._rows)))
-
-    # TODO: Добавить возможность сортировки по нажатию на заголовок кнопкой мыши
     @staticmethod
     def column_auto_width_proc(font, s, _cx):
         """
@@ -106,12 +81,12 @@ class Table(GlWidget):
         :param i_cur_row: Выделенный ряд
         :param i_row: Индекс ряда для перерисовки
         :param rows_flags: Флаги рядов
-        :param focus: Флаг таблица в фокусе
+        :param focus: Флаг, если утановлен в True - таблица в фокусе.
         :return: Цвет фона ряда с индексом i_row
         """
         if (i_cur_row == i_row) and (rows_flags[i_row] & Table.ROW_FLAG_SELECTED):
             # Цвет фона в неактивном и активном режимах, в том числе выделенного ряда
-            return (colors.TABLE_SEL_INACTIVE, colors.TABLE_SEL_ACTIVE)[focus]
+            return colors.TABLE_SEL_ACTIVE if focus else colors.TABLE_SEL_INACTIVE
         elif rows_flags[i_row] & Table.ROW_FLAG_SELECTED:
             return colors.TABLE_SEL_INACTIVE
         elif (i_cur_row == i_row) and focus:
@@ -138,9 +113,8 @@ class Table(GlWidget):
     def __init__(self, pos, rows, view_max=5, font_name=DEFAULT_FONT_FACE,
                  font_size=DEFAULT_FONT_SIZE, column_width_proc=None):
         assert type(rows) is list
-        assert len(rows) > 0
-        assert len(rows[0]) > 0
-
+        self._column_width = 100
+        self.ehid_ext = None
         self.ehid1 = None
         self.size = None
         self.i_cur_row_prev = None
@@ -155,12 +129,8 @@ class Table(GlWidget):
         self.view_max = view_max  # Максимальное количество отображаемых строк
         self.view_begin = 0
         self.font = fonts.CairoFont(font_name, font_size)
-        if column_width_proc is None:
-            self.column_width_proc = Table.column_auto_width_proc  # Процедура определяющая ширину колонки
-        else:
-            self.column_width_proc = column_width_proc
-        self.get_widths = self.get_widths_const
-        self.widths = [100] * len(rows[0])
+        self.column_width_proc = Table.column_auto_width_proc if column_width_proc is None else column_width_proc
+        self.get_widths = self._get_widths_const
         self.set_rows(rows)
         self.i_cur_column = 0
         self.ehid_kp = None
@@ -172,33 +142,64 @@ class Table(GlWidget):
         """ Обработчик события изменения выбора текущей строки """
         self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows)
         """	Флаги рядов таблицы """
-        self.focus = False
+        self._focus = False
         self.color_proc = Table.color_proc_horiz  # Процедура определяющая цвет текста для ячейки
         self.bg_color_proc = self.default_bg_color_proc  # Процедура определяющая цвет фона для ячейки
         self.connect()
+        self.put_to_redraw()
+
+    @property
+    def focus(self):
+        return self._focus
+
+    @focus.setter
+    def focus(self, val):
+        # type: (bool) -> None
+        assert isinstance(val, bool)
+        if self._focus == val: return
+        self._focus = val
+        if val:
+            self.pc.append(('ehid1', safe_connect, nevents.EVENT_BTN_PRESS, self._on_mbutton_press))
+            self.pc.append(('ehid_kp', safe_connect, nevents.EVENT_KEY_PRESS, self._on_key_press))
+        else:
+            self.pc.append(('ehid1', safe_disconnect))
+            self.pc.append(('ehid_kp', safe_disconnect))
+        self.put_to_redraw()
+
+    @property
+    def widths(self):
+        return self.get_widths()
+
+    @widths.setter
+    def widths(self, val):
+        if self._widths == val: return
+        if self.auto_widths: return
+        self._widths = val
+        self.size = self.update_rect()[2:5]
         self.put_to_redraw()
 
     def _check_rows(self):
         """
         Проверка количества колонок в каждом ряду
         """
-        rows_len = len(self._rows[0])
-        for i, row in enumerate(self._rows[1:]):
-            if rows_len != len(row):
-                raise ValueError('Ряд %u имеет отличное количество колонок - %u, вместо %u:\n%s' % (i, len(row), rows_len, self._rows))
+        if len(self._rows):
+            rows_len = len(self._rows[0])
+            for i, row in enumerate(self._rows[1:]):
+                if rows_len != len(row):
+                    raise ValueError('Ряд %u имеет отличное количество колонок - %u, вместо %u:\n%s' % (i, len(row), rows_len, self._rows))
 
     def update_rect(self):
         """
         Возвращает размеры таблицы в пикселях
         :return:
         """
-        ws = self.get_widths()
-        width = sum(ws, self.line_width)
+        self._widths = self.get_widths()
+        width = sum(self._widths, self.line_width)
         row_height = self.font.get_text_hight()
         height = (row_height + self.line_width) * (len(self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max]) + 1)
-        return self.pos[0], self.pos[1], width, height, ws, row_height
+        return self.pos[0], self.pos[1], width, height, self._widths, row_height
 
-    def get_widths_auto(self):
+    def _get_widths_auto(self):
         cx = len(self._rows[0])
         cy = len(self._rows)
         widths = list()
@@ -215,8 +216,8 @@ class Table(GlWidget):
             j += 1
         return widths
     
-    def get_widths_const(self):
-        return self.widths
+    def _get_widths_const(self):
+        return self._widths
 
     def show_selected(self):
         """
@@ -239,11 +240,9 @@ class Table(GlWidget):
         """
         assert isinstance(rows, (list, tuple))
         self._rows = rows
-        if rows_flags is None:
-            self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows)
-        else:
-            self._rows_flags = rows_flags
         self._check_rows()
+        self._rows_flags = [Table.ROW_FLAG_NONE] * len(self._rows) if rows_flags is None else rows_flags
+        self._widths = [self._column_width] * len(rows[0]) if len(rows) else list()
         self.size = self.update_rect()[2:5]
         self.put_to_redraw()
 
@@ -318,7 +317,7 @@ class Table(GlWidget):
                 self.i_cur_row = 0
             self.put_to_redraw()
 
-    def _on_key_press(self, _widget, event, *_args):
+    def _on_key_press(self, _widget, event):
         """
         Вызывается при нажатии на кнопку клавиатуры
         :param widget:
@@ -342,7 +341,7 @@ class Table(GlWidget):
                         self.put_to_redraw()
         elif char_name == 'Up':
             if not (type(self.i_cur_row) is int):
-                return
+                return False
             self.i_cur_row -= 1
             if self.i_cur_row < 0:
                 self.i_cur_row = 0
@@ -350,7 +349,7 @@ class Table(GlWidget):
                 self.view_begin -= 1
         elif char_name == 'Down':
             if not (type(self.i_cur_row) is int):
-                return
+                return False
             self.i_cur_row += 1
             if (self.i_cur_row + 2) > len(self._rows):
                 self.i_cur_row = len(self._rows) - 2
@@ -362,16 +361,19 @@ class Table(GlWidget):
         if prev_i_cur_row != self.i_cur_row:
             if self.on_sel_change is not None:
                 self.on_sel_change(self)
-        return True
+            self.put_to_redraw()
+        return False
 
-    def _on_mbutton_press(self, *args):
+    def _on_mbutton_press(self, gda, event):
+        # type: (gtk.DrawingArea, gtk.gdk.Event, object) -> bool
         """
         Вызывается при нажатии кнопки мыши
         :param args:
         :return:
         """
+        if len(self._rows) == 0:
+            return False
         prev_i_cur_row = self.i_cur_row
-        event = args[1]  # type: gtk.gdk.Event
         focus_changed = False
         sel_changed = False
         # noinspection PyProtectedMember
@@ -381,7 +383,7 @@ class Table(GlWidget):
             if not gltools.check_rect(w, h, self.pos, event.x, event.y):
                 self.focus = False
                 return False
-            if not self.focus:
+            if not self._focus:
                 focus_changed = True
                 self.focus = True
             self.pc.append(('ehid_kp', safe_connect, 'key-press-event', self._on_key_press))
@@ -437,40 +439,50 @@ class Table(GlWidget):
 
     def redraw(self):
         glNewList(self.dl, GL_COMPILE)
-        # Таблица
-        i_cur_row = None
-        if self.i_cur_row is not None:
-            i_cur_row = self.i_cur_row - self.view_begin
-        gltools.draw_table2(self.pos,
-                            self._rows[0],
-                            self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max],
-                            self.font,
-                            self.color_proc,
-                            self.bg_color_proc,
-                            self._rows_flags[self.view_begin + 1: self.view_begin + 1 + self.view_max],
-                            self.size[2],  # Ширины колонок
-                            i_cur_row,
-                            self.line_width,
-                            focus=self.focus)
+        self.size = self.update_rect()[2:5]
+        if len(self._rows):
+            i_cur_row = None
+            if self.i_cur_row is not None:
+                i_cur_row = self.i_cur_row - self.view_begin
+            gltools.draw_table2(
+                self.pos,
+                self._rows[0],
+                self._rows[self.view_begin + 1: self.view_begin + 1 + self.view_max],
+                self.font,
+                self.color_proc,
+                self.bg_color_proc,
+                self._rows_flags[self.view_begin + 1: self.view_begin + 1 + self.view_max],
+                self.size[2],  # Ширины колонок
+                i_cur_row,
+                self.line_width,
+                focus=self._focus)
 
-        # Индикаторы не отображаемых строк таблицы:
-        x0 = self.pos[0] + self.line_width - 1  # левая координата x
-        y0 = self.pos[1] + self.font.get_text_hight() + self.line_width * 2  # верхняя координата y
-        x1 = self.pos[0] - self.line_width + self.size[0] - 1  # правая координата x
-        y1 = self.pos[1] + self.size[1] - self.line_width * 2  # нижняя координата y
-        # :верхних строк
-        if (self.view_begin + 1) > 1:
-            gltools.draw_line((x0, y0), (x1, y0), colors.GREEN, self.line_width)
-        # :нижних строк
-        if (self.view_begin + 1 + self.view_max) < len(self._rows):
-            gltools.draw_line((x0, y1), (x1, y1), colors.GREEN, self.line_width)
+            # Индикаторы не отображаемых строк таблицы:
+            x0 = self.pos[0] + self.line_width - 1  # левая координата x
+            y0 = self.pos[1] + self.font.get_text_hight() + self.line_width * 2  # верхняя координата y
+            x1 = self.pos[0] - self.line_width + self.size[0] - 1  # правая координата x
+            y1 = self.pos[1] + self.size[1] - self.line_width * 2  # нижняя координата y
+            # :верхних строк
+            if (self.view_begin + 1) > 1:
+                gltools.draw_line((x0, y0), (x1, y0), colors.GREEN, self.line_width)
+            # :нижних строк
+            if (self.view_begin + 1 + self.view_max) < len(self._rows):
+                gltools.draw_line((x0, y1), (x1, y1), colors.GREEN, self.line_width)
         glEndList()
 
-    def connect(self):
-        if self.ehid1 is None:
-            self.pc.append(('ehid1', safe_connect, 'button-press-event', self._on_mbutton_press))
+    def connect(self, *args):
+        if len(args) == 0:
+            self.pc.append(('ehid1', safe_connect, nevents.EVENT_BTN_PRESS, self._on_mbutton_press))
+        elif len(args) == 2:
+            assert callable(args[1])
+            event_name = args[0]
+            event_proc = args[1]
+            self.pc.append(('ehid_ext', safe_connect, event_name, event_proc))
 
-    def disconnect(self):
+    def disconnect(self, *args):
+        if self._focus:
+            self._focus = False
+            self.put_to_redraw()
         self.pc.append(('ehid1', safe_disconnect))
-        self.focus = False
-        self.pc.append('ehid_kp', safe_disconnect)
+        self.pc.append(('ehid_kp', safe_disconnect))
+        self.pc.append(('ehid_exp', safe_disconnect))

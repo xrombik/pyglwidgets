@@ -4,6 +4,7 @@
 import gtk
 import glib
 import inspect
+import typing
 
 from . import nevents
 from evtctl import EventCtl
@@ -13,6 +14,16 @@ from gltools import check_glerrors
 
 __name__ = 'gtkgl driver'
 __all__ = ('DrawDriver', 'safe_disconnect', 'safe_connect')
+
+
+def map_keyval(keyval):
+    # type: (int) -> typing.Tuple[int, str]
+    """
+    Преобразовывает данные события в распознаваемые константы
+    :param keyval:
+    :return:
+    """
+    return gtk.gdk.keyval_to_unicode(keyval), gtk.gdk.keyval_name(keyval)
 
 
 def safe_disconnect(obj, ehid):
