@@ -7,6 +7,7 @@ import cairo
 from . import nevents
 from evtctl import EventCtl
 from .glimports import *
+from .deferred import *
 
 DEFAULT_RATE_MS = 150
 TEST_STR0 = u'Южно-эфиопский грач увёл мышь за хобот на съезд ящериц\nBrown fox jumps ower the lazy dog\n0987654321\\(){}-+=.,:;?!'
@@ -67,7 +68,7 @@ def redraw_queue(items_queue):
 
 
 # noinspection PyAttributeOutsideInit
-class GlWidget(object):
+class GlWidget(Deffered):
     items_queue = set()
     EventCtl().connect(nevents.EVENT_DRAW, redraw_queue, items_queue)
 
@@ -127,22 +128,6 @@ class GlWidget(object):
             self.connect()
             self.draw = glCallList
             self.put_to_redraw()
-
-    def dopc(self, gda):
-        """
-        Отработка отложенных вызовов в момент когда есть gda (gtk.DrawingArea)
-        :param gda:
-        :return:
-        """
-        # TODO: in python3 it should be: "for key, proc, *args in self.pc:"
-        for val in self.pc:
-            key = val[0]
-            dct = self.__dict__
-            if len(val) > 2:
-                dct[key] = val[1](gda, dct[key], *(val[2:]))
-            else:
-                dct[key] = val[1](gda, dct[key])
-        del self.pc[:]
 
     def __del__(self):
         self.disconnect()

@@ -13,6 +13,7 @@ def main():
 def on_init(scm, rcm, app):
     # type: (SceneCtl, ResourceCtl, Candy) -> None
     """
+    :param app: Program runner
     :param scm: Scene manager
     :param rcm: Resource manager
     :return:
@@ -36,8 +37,10 @@ def on_init(scm, rcm, app):
         ['2020-04-01',  '1000'],
         ['2020-05-01',  '2000']]
 
+    tbl_navi_stack = list()
     rows_menu = list()
     tbl_navi = Table((200, 150), rows_menu)
+    tbl_navi.user_data = tbl_navi_stack
     tbl_navi.widths = [200]
     tbl_navi.i_cur_row = 0
     tbl_navi.bg_color_proc = bg_color_proc
@@ -64,13 +67,26 @@ def on_init(scm, rcm, app):
         (['EXIT'],           scene_exit)]
 
     rows_menu[:] = map(lambda data_row: data_row[0], rows_menu_data)[:]
-    tbl_navi_stack = list()
+
     ect = EventCtl()
     tbl_navi.connect(nevents.EVENT_KEY_PRESS, lambda *args: on_key_press(args[1].keyval, ect))
     scm.goto_scene(scene_main[0])
     ect.connect(EVENT_EXIT, app.uninit)
-    ect.connect('Escape', on_key_escape, scm, tbl_navi, tbl_navi_stack, app)
-    ect.connect('Return', on_key_return, tbl_navi, rows_menu_data, scm, tbl_navi_stack, ect)
+    ect.connect('Escape', on_key_escape, tbl_navi, app)
+    ect.connect('Escape', scm.goto_back)
+    ect.connect('Return', on_key_return, tbl_navi, rows_menu_data, scm, ect)
+    ect.connect('Left', on_key_move, pic_player, 0, -10)
+    ect.connect('Right', on_key_move, pic_player, 0, 10)
+    ect.connect(nevents.EVENT_REDRAW, on_draw)
+
+def on_draw(*args):
+    print args
+
+
+def on_key_move(pic_player, i, val):
+    # type: (PictureRotate, int, int) -> None
+    pic_player.pos[i] += val
+    pic_player.put_to_redraw()
 
 
 def on_key_press(keyval, ect):
@@ -78,8 +94,8 @@ def on_key_press(keyval, ect):
     ect.emmit(char_name)
 
 
-def on_key_escape(scm, tbl_navi, tbl_navi_stack, app):
-    scm.goto_back()
+def on_key_escape(tbl_navi, app):
+    tbl_navi_stack = tbl_navi.user_data
     if len(tbl_navi_stack):
         rows, widths = tbl_navi_stack.pop()
         tbl_navi.set_rows(rows)
@@ -88,9 +104,10 @@ def on_key_escape(scm, tbl_navi, tbl_navi_stack, app):
         app.uninit()
 
 
-def on_key_return(tbl_navi, rows_menu_data, scm, tbl_navi_stack, ect):
+def on_key_return(tbl_navi, rows_menu_data, scm, ect):
     rows = tbl_navi.get_rows()
     widths = tbl_navi.widths
+    tbl_navi_stack = tbl_navi.user_data
     tbl_navi_stack.insert(0, (rows, widths))
     i_row = tbl_navi.i_cur_row + 1
     menu_item = rows_menu_data[i_row]

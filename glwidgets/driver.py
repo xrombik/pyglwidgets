@@ -171,7 +171,7 @@ class DrawDriver(gtk.Window):
 
     def on_timer(self):
         # type: (DrawDriver) -> bool
-        gda = self.get_child()  # time: gtk.DrawingArea
+        gda = self.get_child()  # type: gtk.DrawingArea
         rect = gtk.gdk.Rectangle(0, 0, gda.allocation.width, gda.allocation.height)
         gda.window.invalidate_rect(rect, True)
         return True

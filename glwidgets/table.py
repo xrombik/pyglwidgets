@@ -231,7 +231,7 @@ class Table(GlWidget):
         self.put_to_redraw()
 
     def set_rows(self, rows, rows_flags=None):
-        # type: (Table, list) -> None
+        # type: (list, bool) -> None
         """
         Устанавливает новые ряды таблицы
         :param rows: Ряды таблицы
@@ -485,4 +485,4 @@ class Table(GlWidget):
             self.put_to_redraw()
         self.pc.append(('ehid1', safe_disconnect))
         self.pc.append(('ehid_kp', safe_disconnect))
-        self.pc.append(('ehid_exp', safe_disconnect))
+        self.pc.append(('ehid_ext', safe_disconnect))
