@@ -77,11 +77,6 @@ def on_init(scm, rcm, app):
     ect.connect('Return', on_key_return, tbl_navi, rows_menu_data, scm, ect)
     ect.connect('Left', on_key_move, pic_player, 0, -10)
     ect.connect('Right', on_key_move, pic_player, 0, 10)
-    ect.connect(nevents.EVENT_REDRAW, on_draw)
-
-
-def on_draw(*args):
-    print args
 
 
 def on_key_move(pic_player, i, val):
@@ -111,8 +106,7 @@ def on_key_return(tbl_navi, rows_menu_data, scm, ect):
     tbl_navi_stack = tbl_navi.user_data
     tbl_navi_stack.insert(0, (rows, widths))
     i_row = tbl_navi.i_cur_row + 1
-    menu_item = rows_menu_data[i_row]
-    scene, rows, event_name = menu_item[1]
+    scene, rows, event_name = rows_menu_data[i_row][1]
     scm.goto_scene(scene)
     tbl_navi.set_rows(rows)
     ect.emmit(event_name)
@@ -126,4 +120,4 @@ def bg_color_proc(i_cur_row, i_row, _rows_flags, focus):
 
 
 if __name__ == '__main__':
-     main()
+    main()
