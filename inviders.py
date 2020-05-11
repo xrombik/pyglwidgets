@@ -77,11 +77,6 @@ def on_init(scm, rcm, app):
     ect.connect('Return', on_key_return, tbl_navi, rows_menu_data, scm, ect)
     ect.connect('Left', on_key_move, pic_player, 0, -10)
     ect.connect('Right', on_key_move, pic_player, 0, 10)
-    ect.connect(nevents.EVENT_REDRAW, on_draw)
-
-
-def on_draw(*args):
-    print args
 
 
 def on_key_move(pic_player, i, val):
