@@ -79,6 +79,7 @@ def on_init(scm, rcm, app):
     ect.connect('Right', on_key_move, pic_player, 0, 10)
     ect.connect(nevents.EVENT_REDRAW, on_draw)
 
+
 def on_draw(*args):
     print args
 
