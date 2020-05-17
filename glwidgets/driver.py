@@ -87,11 +87,38 @@ class DrawingAreaProxy(gtk.DrawingArea):
         return super(DrawingAreaProxy, self).disconnect(ehid)
 
 
+class Timer(object):
+    def __init__(self, rate, proc, *args):
+        assert callable(proc)
+        assert isinstance(rate, int)
+        self._proc = proc
+        self._args = args
+        self._rate = rate
+        self._ehid = None
+
+    def __del__(self):
+        self.stop()
+
+    @property
+    def is_running(self):
+        return self._ehid is not None
+
+    def start(self):
+        if self._ehid is not None:
+            glib.source_remove(self._ehid)
+        self._ehid = glib.timeout_add(self._rate, self._proc, self, *self._args)
+
+    def stop(self):
+        if self._ehid is not None:
+            glib.source_remove(self._ehid)
+            self._ehid = None
+
+
 class DrawDriver(gtk.Window):
 
     def __init__(self, title, w, h):
         super(DrawDriver, self).__init__()
-        display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE  # gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE
+        display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_MULTISAMPLE | gtk.gdkgl.MODE_DEPTH  # gtk.gdkgl.MODE_DOUBLE
         events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
         gda = DrawingAreaProxy()
         gda.set_double_buffered(False)
