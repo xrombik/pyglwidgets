@@ -11,7 +11,7 @@ def main():
     app.run()
 
 
-def on_init(scm, rcm):
+def on_init(scm, rcm, _app):
     # type: (SceneCtl, ResourceCtl) -> None
     """
     :param scm: Scene manager
