@@ -28,11 +28,11 @@
 
 - Run examples:
 
-Bunch of GUI items:
-```./playground.py```
-
-Just table only:
-```./table.py```
-
-Funny red stars:
-```./star.py```
+    Bunch of GUI items:
+    ```./playground.py```
+    
+    Just table only:
+    ```./table.py```
+    
+    Funny red stars:
+    ```./star.py```
