@@ -21,3 +21,8 @@ do
     echo " found."
   fi
 done
+
+pip install freetype-py
+pip install typing
+pip install pycairo
+pip install PyOpenGL
