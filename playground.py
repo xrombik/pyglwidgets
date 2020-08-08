@@ -12,10 +12,11 @@ def main():
 
 
 def on_init(scm, rcm, _app):
-    # type: (SceneCtl, ResourceCtl) -> None
+    # type: (SceneCtl, ResourceCtl, Candy) -> None
     """
     :param scm: Scene manager
     :param rcm: Resource manager
+    :param _app: Program starter
     :return:
     """
 
