@@ -9,8 +9,8 @@ def main():
     app.run()
 
 
-def on_init(scm, _rcm):
-    # type: (SceneCtl, ResourceCtl) -> None
+def on_init(scm, _rcm, _app):
+    # type: (SceneCtl, ResourceCtl, ProgramCtl) -> None
     """
     :param scm: Scene manager
     :param _rcm: Resource manager
