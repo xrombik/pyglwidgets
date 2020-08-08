@@ -15,3 +15,24 @@
 - Pictures with scale and rotation.
 
 <img src="https://github.com/xrombik/pyglwidgets/blob/alpha1/playground.png" width="320">
+
+### Quick start
+- Clone this repo with command:
+```git clone https://github.com/xrombik/pyglwidgets```
+
+- Go to the cloned repo directory:
+```cd pyglwidgets```
+
+- Run script that installs all dependencies (checked on `Debian 10` or `Ubuntu 18` based distros):
+```./install-deps.sh```
+
+- Run examples:
+
+Bunch of GUI items:
+```./playground.py```
+
+Just table only:
+```./table.py```
+
+Funny red stars:
+```./star.py```
