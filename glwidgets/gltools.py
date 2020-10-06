@@ -312,11 +312,10 @@ def opengl_init(width, height, quality=GL_NICEST):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glEndList()
 
-    val = quality
-    glHint(GL_LINE_SMOOTH_HINT, val)
-    glHint(GL_POINT_SMOOTH_HINT, val)
-    glHint(GL_POLYGON_SMOOTH_HINT, val)
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, val)
+    glHint(GL_LINE_SMOOTH_HINT, quality)
+    glHint(GL_POINT_SMOOTH_HINT, quality)
+    glHint(GL_POLYGON_SMOOTH_HINT, quality)
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, quality)
 
     print(u'Версия привязки python OpenGL: %s' % str(OpenGL.__version__))
     print(u'Производитель: %s' % glGetString(GL_VENDOR))
@@ -472,5 +471,6 @@ def draw_texture_scale(texture, pos, scale, col=colors.WHITE, mirror=MIRROR_NONE
 def draw_polygon(points, color):
     glColor4ub(*color)
     glBegin(GL_POLYGON)
-    for p in points: glVertex2f(*p)
+    for p in points:
+        glVertex2f(*p)
     glEnd()
