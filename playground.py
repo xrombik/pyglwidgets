@@ -54,7 +54,7 @@ def on_entry_edit_done(entry0):
     rows = tbl0.get_rows()  # type: list
     rows[1][0] = entry0.text  # type: str
     tbl0.set_rows(rows)
-    
+
 
 def btn0_proc(btn0):
     # type: (Button) -> None

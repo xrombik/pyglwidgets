@@ -23,7 +23,8 @@ def on_init(scm, rcm, _app):
     pos = WINDOW_WIDTH / 2, WINDOW_HEGHT / 2
     pic_star0 = PictureRotate(pos, txr_pic)
     pic_star1 = PictureRotate(pos, txr_pic)
-    scm.add_scene_items(pic_star0, pic_star1)
+    sdr_a = Shader()
+    scm.add_scene_items(pic_star0, pic_star1, sdr_a)
     glib.timeout_add(UPDATE_RATE, on_timer, pic_star0, pic_star1)
 
 

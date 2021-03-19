@@ -38,8 +38,8 @@ _glerros = \
 }
 
 # TODO: Добавить матрицу вертикального отражения
-MIRROR_NONE = (0, 1, 1, 1, 1, 0, 0, 0)  # Матрица без отражения
-MIRROR_HORIZ = (1, 1, 0, 1, 0, 0, 1, 0)  # Матрица горизонтального отражения
+MIRROR_NONE = 0, 1, 1, 1, 1, 0, 0, 0   # Матрица без отражения
+MIRROR_HORIZ = 1, 1, 0, 1, 0, 0, 1, 0  # Матрица горизонтального отражения
 
 pi_2 = 2.0 * pi
 
@@ -65,51 +65,80 @@ __all__ = (
     'step_flash',
     'texture_from_file',
     'texture_from_gtkimage',
-    'textures_from_files')
+    'textures_from_files',
+    'load_shader',
+    'attach_shader')
+
+
+def load_shader(shader_type, source):
+    shader = glCreateShader(shader_type)
+    assert glIsShader(shader)
+    glShaderSource(shader, source)
+    glCompileShader(shader)
+    if glGetShaderiv(shader, GL_COMPILE_STATUS, None):
+        return shader
+    e = glGetShaderInfoLog(shader)
+    glDeleteShader(shader)
+    raise Exception(e)
+
+
+def attach_shader(program, source, shader_type):
+    # type (str, int) -> None
+    assert glIsProgram(program)
+    assert type(source) in (str, unicode)
+    assert shader_type in (GL_VERTEX_SHADER, GL_FRAGMENT_SHADER)
+    shader = load_shader(shader_type, source)
+    glAttachShader(program, shader)
+    check_glerrors('attach_shader', False)
+    glLinkProgram(program)
+    if not glGetProgramiv(program, GL_LINK_STATUS, None):
+        raise Exception('Link status: \"%s\"' % glGetProgramInfoLog(program))
+    glDetachShader(program, shader)
+    glDeleteShader(shader)
 
 
 def check_rect(width, height, pos, x1, y1):
     # type: (int, int, tuple[int, int], int, int) -> bool
-    """
-    Проверяет попадает ли точка в прямоугольник
+    """ Проверяет попадает ли точка в прямоугольник
+
     :param width: Ширина прямоугольника
     :param height: Высота прямоугольника
     :param pos: Левый верхний угол прямоугольника
     :param x1: X-координата точки на экране
     :param y1: Y-координата точки на экране
-    :return: True - если попадает, False - если не попадает
-    """
+    :return: True - если попадает, False - если не попадает """
+
     if pos[0] < x1 < (pos[0] + width):
         return pos[1] < y1 < (pos[1] + height)
     return False
 
 
 def check_ring(r1, r2, x, y, ex, ey):
-    """
-    Проверяет попадает ли точка в кольцо
+    """ Проверяет попадает ли точка в кольцо
+
     :param r1: Внутренний радиус
     :param r2: Внешний радиус
     :param x: Центр кольца по оси X
     :param y: Центр кольца
     :param ex: Проверяемая точка
     :param ey: Проверяемая точка
-    :return: True - если попадает, False - если не попадает
-    """
+    :return: True - если попадает, False - если не попадает """
+
     assert r1 < r2, "Внутренний радиус r1:%u должен быть меньше внешнего r2:%u" % (r1, r2)
     return r1 < hypot(x - ex, y - ey) < r2
 
 
 def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
-    """
-    Рисует окружность
+    """ Рисует окружность
+
     :param cx: Центр по оси X
     :param cy: Центр по оси Y
     :param r: Радиус окружности
     :param color: Цвет линии окружности
     :param width: Ширина линии окружности
     :param num_segments: Количество сегментов
-    :return:
-    """
+    :return: """
+
     glLineWidth(width)
     glColor4ub(*color)
     glEnable(GL_LINE_STIPPLE)
@@ -128,14 +157,14 @@ def draw_circle(cx, cy, r, color=colors.WHITE, width=2, num_segments=100):
 
 
 def draw_line(point1, point2, color=colors.WHITE, width=2):
-    """
-    Рисует линию между двумя точками
+    """ Рисует линию между двумя точками
+
     :return: Ничего
     :param width: Толщина линий
     :param color: Цвет линий
     :param point1: Точка начала линии
-    :param point2: Точка конца линии
-    """
+    :param point2: Точка конца линии """
+
     glLineWidth(width)
     glColor4ub(*color)
     glBegin(GL_LINE_STRIP)
@@ -165,8 +194,8 @@ def draw_lines_rotated(rotor_point, points, color=colors.WHITE, width=2, tetha=0
 
 
 def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, cws, i_cur=None, line_width=2, focus=True):
-    """
-    Рисует таблицу с горизонтальным заголовком
+    """ Рисует таблицу с горизонтальным заголовком
+
     :param cws: Ширины колонок
     :param pos: Координаты вехнего левого угла
     :param head: Заголовок
@@ -177,10 +206,9 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
     :param rows_flags
     :param i_cur: Положение курсора
     :param line_width: Толщина линий
-    :param focus: Флаг. True - таблица в фокусе ввода,
-    False - таблица вне фокуса ввода. Меняет цвет кусора
-    :return: Ничего
-    """
+    :param focus: Флаг. True - таблица в фокусе ввода, False - таблица вне фокуса ввода. Меняет цвет кусора
+    :return: Ничего """
+
     assert type(focus) is bool
     assert len(cws) == len(head)
 
@@ -250,15 +278,15 @@ def draw_table2(pos, head, lines, font, color_proc, bg_color_proc, rows_flags, c
 
 
 def draw_table_borders(pos, cws, rh, rn, lw):
-    """
-    Рисует границы таблицы
+    """ Рисует границы таблицы
+
     :param pos: Координаты верхнего левого угла
     :param cws: Ширины колонок
     :param rh: Высота строки
     :param rn: Количество строк
     :param lw: Толщина линий
-    :return:
-    """
+    :return: """
+
     # вертикальные границы
     x = pos[0]
     y = pos[1] + rh * rn + lw * 3
@@ -300,6 +328,8 @@ def opengl_init(width, height, quality=GL_NICEST):
     glEnable(GL_DITHER)
     glEnable(GL_POLYGON_SMOOTH)
     glEnable(GL_POINT_SMOOTH)
+    glEnable(GL_PROGRAM_POINT_SIZE)
+
     glShadeModel(GL_SMOOTH)
 
     glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -351,7 +381,7 @@ def draw_sector(points_in, points_out, color):
         i += 1
 
 
-def check_glerrors(title=''):
+def check_glerrors(title='', raise_exception=True):
     err_cnt = 0
     while True:
         err0 = glGetError()
@@ -360,7 +390,7 @@ def check_glerrors(title=''):
             err_cnt += 1
             continue
         break
-    if err_cnt:
+    if err_cnt and raise_exception:
         raise Exception()
 
 

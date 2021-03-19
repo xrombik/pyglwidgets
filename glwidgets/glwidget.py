@@ -106,10 +106,10 @@ class GlWidget(Deffered):
         self.put_to_redraw()
 
     def put_to_redraw(self):
-        """
-        Заносит текущий экземпляр в очередь на перерисовку
-        :return: Ничего
-        """
+        """ Заносит текущий экземпляр в очередь на перерисовку
+
+        :return: Ничего """
+
         items_queue = GlWidget.items_queue
         l1 = len(items_queue)
         items_queue.add(self)
@@ -131,8 +131,10 @@ class GlWidget(Deffered):
 
     def __del__(self):
         self.disconnect()
-        try: GlWidget.items_queue.remove(self)
-        except KeyError: pass
+        try:
+            GlWidget.items_queue.remove(self)
+        except KeyError:
+            pass
         glDeleteLists(self.dl, 1)
 
     @staticmethod

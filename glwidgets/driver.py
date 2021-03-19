@@ -146,6 +146,7 @@ class DrawDriver(gtk.Window):
         on_uninit(*args)
 
     def __del__(self):
+        self.stop_anim()
         self.uninit()
 
     def start_anim(self, rate):
